@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <title>Demo PASTA Search</title>
+   <meta charset="utf-8" />
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
+      crossorigin="anonymous">
+   <link href="search.css" rel="stylesheet" type="text/css">
+   <link href="auto-complete.css" rel="stylesheet" type="text/css">
+   <script src="cors.js"></script>
+   <script src="pagination.js"></script>
+   <script src="auto-complete.min.js"></script>
+   <script src="ucsv-1.2.0.min.js"></script>
+   <script src="pasta_lookup.js"></script>
+   <script src="pasta.js"></script>
+</head>
+
+<body>
+   <p>Enter a search term like "water" (enclose compound terms in quotes e.g. "water temperature"), or click <strong>Advanced</strong> for more options.
+      Datasets will be summarized on the page with external links to more details at the
+      original data archive. If you do not enter any search terms, all datasets will be
+      returned, which is the default behavior when first loading the page.</p>
+   <form id="dataSearchForm" name="dataSearchForm">
+      <input type="hidden" id="sort" name="sort" value="score">
+      <input class="search-input" name="q" placeholder="Enter search term" type="text">
+      <input type="submit" value="Search">
+      <div style="margin-top: 10px">
+         <input aria-expanded="false" aria-controls="advancedInputs" class="collapse-toggle" name="expanded" type="checkbox"
+            value="true" id="advancedToggle" role="button">
+         <label class="lbl-toggle" tabindex="0" for="advancedToggle">
+            Advanced
+         </label>
+      </div>
+
+      <div class="collapsible" id="advancedInputs">
+         <div class="input-block">
+            <i class="fas fa-leaf"></i><label class="group-label" for="coreArea">LTER Core Area</label><br>
+            <select class="search-input" name="coreArea" id="coreArea">
+               <option value="any">Any</option>
+               <option value="primary production">Primary Production</option>
+               <option value="organic matter">Organic Matter</option>
+               <option value="disturbance">Disturbance</option>
+               <option value="inorganic nutrients">Inorganic Nutrients</option>
+               <option value="populations">Populations</option>
+            </select>
+         </div>
+         <div class="input-block">
+            <i class="fas fa-user"></i><label class="group-label" for="creator">Creator</label>
+            <input class="search-input" name="creator" id="creator" placeholder="Name" type="text" title="The name of the creator or originator of a dataset">
+         </div>
+         <div class="input-block">
+            <i class="fas fa-calendar-alt"></i><span class="group-label">Year</span><br>
+            <div class="yeardiv">
+               <label for="min_year">Start</label><br>
+               <input class="yearbox" id="min_year" name="s" value="1900" type="number">
+            </div>
+            <div class="yeardiv">
+               <label for="max_year">End</label><br>
+               <input class="yearbox" id="max_year" name="e" value="2018" type="number">
+            </div>
+            <div class="yeardiv">
+               <input id="data_year" name="datayear" value="y" type="checkbox" title="Only show results with data collected within the year range">
+               <label class="form-check-label" for="data_year"> Data coverage </label><br>
+               <input id="publish_year" name="pubyear" value="y" type="checkbox" title="Only show results that were published within the year range">
+               <label class="form-check-label" for="publish_year"> Publish year </label>
+            </div>
+         </div>
+         <div class="input-block">
+            <i class="fas fa-sitemap"></i><label class="group-label" for="taxon">Taxon</label>
+            <input class="search-input" name="taxon" id="taxon" placeholder="Class name, family name, etc." type="text"
+               title="Taxonomic name provided by the data submitter">
+         </div>
+         <div class="input-block">
+            <i class="fas fa-globe"></i><label class="group-label" for="geo">Location</label>
+            <input class="search-input" name="geo" id="geo" placeholder="Geographic region" type="text" title="The geographic region or site, as described by the submitter">
+         </div>
+         <input type="submit" value="Search">
+         <input type="button" onclick="clearParams()" value="Clear Advanced Parameters">
+      </div>
+   </form>
+
+   <div class="loading" id="loading-div">
+      <i class="fas fa-spinner fa-pulse fa-3x fa-fw"></i>
+      <span class="sr-only">Loading...</span>
+   </div>
+   <!-- <p>Search URL will be written below:</p> -->
+   <!-- <p id="searchUrl"></p> -->
+   <!-- <p>Search results will be written below:</p> -->
+   <div class="resultCount" id="resultCount"></div>
+   <!-- <div id="csvDownload"></div> -->
+   <div class="pagination" id="paginationTop"></div>
+   <div style="display:none" id="sortDiv">
+      <label for="visibleSort">Sort by</label>
+      <select name="sort" id="visibleSort">
+         <option value="score">Relevance</option>
+         <option value="pubdate">Most recently published</option>
+         <option value="enddate">Most recent data</option>
+         <option value="titles">Title (a-z)</option>
+         <option value="responsibleParties">Creator (a-z)</option>
+      </select>
+   </div>
+   <div id="searchResults"></div>
+   <div class="pagination" id="paginationBot"></div>
+</body>
+
+</html>

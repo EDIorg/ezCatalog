@@ -1,0 +1,55 @@
+# Builds a users catalog based on the filter query provided in config.txt
+
+name: Build catalog
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      # Uses Node.js to run the harvester
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+      - name: Install Node.js requirements
+        run: |
+          npm install xml2js
+          npm install node-fetch
+      # Uses Python to construct the query and parameterize JavaScripts
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      # Inserts the users GitHub name into the HTML snippet displayed on the root level README
+      - name: Update README
+        run: |
+          sed -i 's/clnsmth/${{ github.repository_owner }}/g' README.md
+      # Builds the filter query from config.txt and inserts it into public/pasta.js and harvester/pasta_harvester.mjs
+      - name: Construct query and add to JavaScript
+        run: |
+          python main.py
+      # Runs harvester/pasta_harvester.mjs
+      - name: Run harvester
+        run: |
+          node ./harvester/pasta_harvester.mjs
+      # Commits the changes to the repository
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ./public/pasta.js
+          git add ./harvester/pasta_harvester.mjs
+          git add ./public/pasta_lookup.js README.md
+          git diff-index --quiet HEAD || git commit -m "Configure ezCatalog"
+      # Pushes the changes to the repository
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
+          
