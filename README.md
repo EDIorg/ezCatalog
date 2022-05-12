@@ -47,6 +47,10 @@ The success of search queries depends upon the metadata provided when submitting
 
 Please contact support@edirepository.org for help setting up your catalog or resolving issues.
 
+## Scope
+   
+ezCatalog is a basic data catalog. If interested in developing a more feature rich catalog, we recommend checking out the video on [Using the PASTA+ Search API to Create a Local Data Catalog](https://www.youtube.com/watch?v=LwCI9TKi-Pg&t=361s).
+   
 ## Acknowledgments
 
 CSV export uses uselesscode's JS CSV serializer (MIT Licensed):
