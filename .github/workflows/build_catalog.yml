@@ -28,7 +28,7 @@ jobs:
       # Inserts the users GitHub name into the HTML snippet displayed on the root level README
       - name: Update README
         run: |
-          sed -i 's/clnsmth/${{ github.repository_owner }}/g' README.md
+          sed -i 's/EDIorg/${{ github.repository_owner }}/g' README.md
       # Builds the filter query from config.txt and inserts it into public/pasta.js and harvester/pasta_harvester.mjs
       - name: Construct query and add to JavaScript
         run: |
