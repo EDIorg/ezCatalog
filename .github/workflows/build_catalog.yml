@@ -4,7 +4,7 @@ name: Build catalog
 
 on:
   push:
-    branches: [ master ]
+    branches: main
   workflow_dispatch:
 
 jobs:
@@ -48,8 +48,8 @@ jobs:
           git diff-index --quiet HEAD || git commit -m "Configure ezCatalog"
       # Pushes the changes to the repository
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@main
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: master
+          branch: main
           
