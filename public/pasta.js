@@ -365,13 +365,13 @@ function clearParams() {
    var areas = document.getElementById("coreArea");
    areas[0].selected = true;
    document.forms.dataSearchForm.creator.value = "";
-   document.forms.dataSearchForm.identifier.value = "";
+//    document.forms.dataSearchForm.identifier.value = "";
    document.forms.dataSearchForm.taxon.value = "";
    document.forms.dataSearchForm.geo.value = "";
    document.forms.dataSearchForm.data_year.checked = false;
    document.forms.dataSearchForm.publish_year.checked = false;
    document.forms.dataSearchForm.min_year.value = "1900";
-   document.forms.dataSearchForm.max_year.value = "2018";
+   document.forms.dataSearchForm.max_year.value = "2022";
 }
 
 // Selects the desired value in the Select control. If value is not in the
