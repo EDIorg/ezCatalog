@@ -1,2 +1,2 @@
-filter = '&fq=keyword:"Archbold Biological Station"'
+filter = '&fq=scope:knb-lter-arc'
 limit = 20
