@@ -29,6 +29,7 @@ jobs:
       - name: Update README
         run: |
           sed -i 's/EDIorg/${{ github.repository_owner }}/g' README.md
+          sed -i 's/ezCatalog\/public/${{github.event.repository.name }}\/public/g' READ.md
       # Builds the filter query from config.txt and inserts it into public/pasta.js and harvester/pasta_harvester.mjs
       - name: Construct query and add to JavaScript
         run: |
