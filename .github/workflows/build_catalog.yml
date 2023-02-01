@@ -12,17 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       # Uses Node.js to run the harvester
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
       - name: Install Node.js requirements
         run: |
           npm install xml2js
           npm install node-fetch
       # Uses Python to construct the query and parameterize JavaScripts
       - name: Setup Python 3.8
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: "3.8"
       # Inserts the users GitHub name into the HTML snippet displayed on the root level README
