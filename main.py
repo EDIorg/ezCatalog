@@ -13,6 +13,7 @@ Adds EDI Data Repository query filter, defined in config.txt, to pasta.js and pa
 
 
 import re
+import os
 
 
 def configure_catalog(path):
@@ -44,8 +45,21 @@ def configure_catalog(path):
         f.seek(0)
         f.write(txt)
         f.truncate()
-    return 0
 
+    with open('README.md', 'r+') as f:
+        txt = f.read()
+        [owner, repository] = os.getenv('GITHUB_REPOSITORY').split('/')
+        # Replace the old demo page with the new one
+        new_demo_page = f"https://{owner}.github.io/{repository}/public/demo.html"
+        txt = re.sub(f"https://EDIorg.github.io/ezCatalog/public/demo.html", new_demo_page, txt)
+        # Replace the old build_catalog.yml URL with the new one
+        new_url = f"https://github.com/{owner}/{repository}/blob/master/.github/workflows/build_catalog.yml"
+        txt = re.sub(f"https://github.com/EDIorg/ezCatalog/blob/master/.github/workflows/build_catalog.yml", new_url, txt)
+        f.seek(0)
+        f.write(txt)
+        f.truncate()
+
+    return 0
 
 # def is_packageid(x):
 #     """

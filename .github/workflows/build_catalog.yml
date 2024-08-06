@@ -25,10 +25,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.8"
-      # Inserts the users GitHub name into the HTML snippet displayed on the root level README
-      - name: Update README
-        run: |
-          sed -i 's/EDIorg/${{ github.repository_owner }}/g' README.md
       # Builds the filter query from config.txt and inserts it into public/pasta.js and harvester/pasta_harvester.mjs
       - name: Construct query and add to JavaScript
         run: |
