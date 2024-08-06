@@ -28,8 +28,6 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
 
 To see an example of how to embed the catalog in a web page `<iframe>`, view the page source code of the [Jornada Basin LTER Data Catalog](https://lter.jornada.nmsu.edu/data-catalog/) or experiment using the W3Schools [HTML Tryit editor](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_intro).
 
-_Note: If you decide to rename your fork of ezCatalog, you will need to update both the iframe code snippet and live demo hyperlink with the new repository name._
-
 ## Features
 
 ### Autocomplete
