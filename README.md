@@ -13,7 +13,7 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
 ## Usage for Your Site
 
 1. Fork this GitHub repository.
-2. Once the repository is forked, go to **Actions** and enable GitHub Actions for your repository. This is security requirement imposed by GitHub on forked repositories that include GitHub Action workflows.
+2. Once the repository is forked, go to **Actions** and enable GitHub Actions for your repository. This is a security requirement imposed by GitHub on forked repositories that include GitHub Action workflows.
 3. Initialize GitHub Pages for your fork. Go to **Settings > Pages** and select **Source** to be "Deploy from a branch" and **Branch** to be `/root` of the main branch.
 4. Construct a filter query to identify your data in the EDI Repository and to be listed in your catalog using one of the following options:
    - **Unique Keyword**  - A unique keyword identifying your research group and published in the metadata of each of your EDI data packages can be used as a filter. For example, the research lab of Cayelan Carey publishes data with the keyword "Carey Lab" and the filter query `'&fq=keyword:"Carey Lab"'` returns all their data.
@@ -25,6 +25,9 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
 ```
 <iframe loading="lazy" src="https://EDIorg.github.io/ezCatalog/public/demo.html" scrolling="no" allow="fullscreen" width="100%" height="2700px"></iframe>
 ```
+8. If you would like your catalog to reference data packages in the EDI staging environment, search for the string `pasta.lternet` and replace with `pasta-s.lternet` in the files:
+   - `/harvester/pasta_harvester.mjs`
+   - `/public/pasta.js`
 
 To see an example of how to embed the catalog in a web page `<iframe>`, view the page source code of the [Jornada Basin LTER Data Catalog](https://lter.jornada.nmsu.edu/data-catalog/) or experiment using the W3Schools [HTML Tryit editor](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_intro).
 
