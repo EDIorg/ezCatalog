@@ -28,6 +28,8 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
 8. If you would like your catalog to reference data packages in the EDI staging environment, search for the string `pasta.lternet` and replace with `pasta-s.lternet` in the files:
    - `/harvester/pasta_harvester.mjs`
    - `/public/pasta.js`
+    
+   Additionally, in `/public/pasta.js` replace the line `var uri = baseUri + pid;` with `var uri = baseUri + pid + "?env=staging";`
 
 To see an example of how to embed the catalog in a web page `<iframe>`, view the page source code of the [Jornada Basin LTER Data Catalog](https://lter.jornada.nmsu.edu/data-catalog/) or experiment using the W3Schools [HTML Tryit editor](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_intro).
 
