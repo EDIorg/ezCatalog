@@ -29,7 +29,11 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
    - `/harvester/pasta_harvester.mjs`
    - `/public/pasta.js`
     
-   Additionally, in `/public/pasta.js` replace the line `var uri = baseUri + pid;` with `var uri = baseUri + pid + "?env=staging";`
+   Additionally, in `/public/pasta.js` replace the line `var uri = baseUri + pid;` with `var uri = baseUri + pid + "?env=staging";`.
+
+
+
+   Finally, in `/public/pasta.js` replace the line `var link = (citation["doi"]) ? citation["doi"].slice(0, -1) : "https://portal.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];`, with the line `var link = "https://portal-s.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];`
 
 To see an example of how to embed the catalog in a web page `<iframe>`, view the page source code of the [Jornada Basin LTER Data Catalog](https://lter.jornada.nmsu.edu/data-catalog/) or experiment using the W3Schools [HTML Tryit editor](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_intro).
 
