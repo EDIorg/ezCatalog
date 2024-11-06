@@ -41,6 +41,11 @@ function parsePeople(doc) {
 }
 
 
+function parseAbstract(doc) {
+   return doc["abstract"] ? doc["abstract"][0] : "";
+}
+
+
 function fetchChunk(uri) {
    console.log(uri);
    return new Promise(function (resolve, reject) {
@@ -58,6 +63,8 @@ function fetchChunk(uri) {
                      chunk["taxonomic"] = chunk["taxonomic"].concat(parseTaxa(doc));
                   if (PASTA_CONFIG["fields"].indexOf("author") > -1)
                      chunk["author"] = chunk["author"].concat(parsePeople(doc));
+                  if (PASTA_CONFIG["fields"].indexOf("abstract") > -1)
+                     chunk["abstract"].push(parseAbstract(doc));
                }
                resolve(chunk);
             });
