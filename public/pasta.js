@@ -400,6 +400,7 @@ function clearParams() {
    var areas = document.getElementById("coreArea");
    areas[0].selected = true;
    document.forms.dataSearchForm.creator.value = "";
+   document.forms.dataSearchForm.project.value = "";
 //    document.forms.dataSearchForm.identifier.value = "";
    document.forms.dataSearchForm.taxon.value = "";
    document.forms.dataSearchForm.geo.value = "";
@@ -463,7 +464,7 @@ window.onload = function () {
    }
 
    function makeQueryUrlBase(userQuery, coreArea, creator, sYear, eYear, datayear, pubyear,
-      pkgId, taxon, geo, sortBy) {
+      pkgId, taxon, geo, project, sortBy) {
 
       function makeDateQuery(sYear, eYear, datayear, pubyear) {
          var query = "";
@@ -510,6 +511,7 @@ window.onload = function () {
       }
       var query = "&q=" + userQuery;
       if (creator) query += "+AND+(author:" + addQuotes(creator) + "+OR+organization:" + addQuotes(creator) + ")";
+      if (project) query += "+AND+(projectTitle:" + addQuotes(project) + "+OR+relatedProjectTitle:" + addQuotes(project) + ")";
       if (pkgId) {
          pkgId = pkgId.replace(":", "%5C:");
          query += "+AND+(doi:" + pkgId + "+packageid:" + pkgId + "+id:" + pkgId + ")";
@@ -525,6 +527,7 @@ window.onload = function () {
    var query = getParameterByName("q");
    var coreAreaParam = getParameterByName("coreArea");
    var creator = getParameterByName("creator");
+   var project = getParameterByName("project");
    var sYear = parseInt(getParameterByName("s"));
    var eYear = parseInt(getParameterByName("e"));
    var datayear = getParameterByName("datayear") === "y";
@@ -540,6 +543,8 @@ window.onload = function () {
    document.forms.dataSearchForm.q.value = query;
    if (document.forms.dataSearchForm.creator)
       document.forms.dataSearchForm.creator.value = creator;
+   if (document.forms.dataSearchForm.project)
+      document.forms.dataSearchForm.project.value = project;
    if (document.forms.dataSearchForm.identifier)
       document.forms.dataSearchForm.identifier.value = pkgId;
    if (document.forms.dataSearchForm.taxon)
@@ -569,11 +574,12 @@ window.onload = function () {
 
    if (!query) query = "*"; // default for empty query
    QUERY_URL = makeQueryUrlBase(query, coreArea, creator, sYear, eYear,
-      datayear, pubyear, pkgId, taxon, geo, sortBy)
+      datayear, pubyear, pkgId, taxon, geo, project, sortBy)
    searchPasta(PASTA_CONFIG["limit"], pageStart);
 
    if ("PASTA_LOOKUP" in window) {
       makeAutocomplete("creator", PASTA_LOOKUP["author"]);
+      makeAutocomplete("project", PASTA_LOOKUP["projectTitle"]);
       makeAutocomplete("taxon", PASTA_LOOKUP["taxonomic"]);
    }
 };

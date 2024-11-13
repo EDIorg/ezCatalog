@@ -43,7 +43,7 @@ To see an example of how to embed the catalog in a web page `<iframe>`, view the
 
 ### Autocomplete
 
-Autocomplete is currently supported for the creator and taxonomy input fields. Try typing a couple of characters into the creator box of the demo page and see what happens.
+Autocomplete is currently supported for the creator, taxonomy, and project input fields. Try typing a couple of characters into the creator box of the demo page and see what happens.
 
 Autocomplete requires creating a list of possible choices, which is automatically generated each time the GitHub Actions workflow `build_catalog` runs.
 
