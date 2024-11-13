@@ -579,7 +579,7 @@ window.onload = function () {
 
    if ("PASTA_LOOKUP" in window) {
       makeAutocomplete("creator", PASTA_LOOKUP["author"]);
-      makeAutocomplete("project", PASTA_LOOKUP["projectTitle"]);
+      makeAutocomplete("project", PASTA_LOOKUP["projectTitle"].concat(PASTA_LOOKUP["relatedProjectTitle"]));
       makeAutocomplete("taxon", PASTA_LOOKUP["taxonomic"]);
    }
 };

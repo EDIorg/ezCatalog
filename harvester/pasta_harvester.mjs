@@ -12,7 +12,9 @@ const PASTA_CONFIG = {
    "limit": 2000, // Max number of results to retrieve per page
    "fields": [
       "taxonomic",
-      "author"
+      "author",
+      "projectTitle",
+      "relatedProjectTitle"
    ]
 };
 
@@ -41,6 +43,30 @@ function parsePeople(doc) {
 }
 
 
+function parseProjectTitle(doc) {
+   var projectNodes = doc["projectTitle"];
+   var projects = [];
+   if (projectNodes) {
+      for (var projectIndex = 0; projectIndex < projectNodes.length; projectIndex++) {
+         projects.push(projectNodes[projectIndex]);
+      }
+   }
+   return projects;
+}
+
+
+function parseRelatedProjectTitle(doc) {
+   var projectNodes = doc["relatedProjectTitle"];
+   var projects = [];
+   if (projectNodes) {
+      for (var projectIndex = 0; projectIndex < projectNodes.length; projectIndex++) {
+         projects.push(projectNodes[projectIndex]);
+      }
+   }
+   return projects;
+}
+
+
 function parseAbstract(doc) {
    return doc["abstract"] ? doc["abstract"][0] : "";
 }
@@ -63,6 +89,10 @@ function fetchChunk(uri) {
                      chunk["taxonomic"] = chunk["taxonomic"].concat(parseTaxa(doc));
                   if (PASTA_CONFIG["fields"].indexOf("author") > -1)
                      chunk["author"] = chunk["author"].concat(parsePeople(doc));
+                  if (PASTA_CONFIG["fields"].indexOf("projectTitle") > -1)
+                     chunk["projectTitle"] = chunk["projectTitle"].concat(parseProjectTitle(doc));
+                  if (PASTA_CONFIG["fields"].indexOf("relatedProjectTitle") > -1)
+                     chunk["relatedProjectTitle"] = chunk["relatedProjectTitle"].concat(parseRelatedProjectTitle(doc));
                   if (PASTA_CONFIG["fields"].indexOf("abstract") > -1)
                      chunk["abstract"].push(parseAbstract(doc));
                }
