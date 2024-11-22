@@ -399,6 +399,7 @@ function initCollapsible(expanded) {
 function clearParams() {
    var areas = document.getElementById("coreArea");
    areas[0].selected = true;
+   document.forms.dataSearchForm.keyWord.value = "";
    document.forms.dataSearchForm.creator.value = "";
    document.forms.dataSearchForm.project.value = "";
 //    document.forms.dataSearchForm.identifier.value = "";
@@ -463,7 +464,7 @@ window.onload = function () {
       }
    }
 
-   function makeQueryUrlBase(userQuery, coreArea, creator, sYear, eYear, datayear, pubyear,
+   function makeQueryUrlBase(userQuery, coreArea, keyWord, creator, sYear, eYear, datayear, pubyear,
       pkgId, taxon, geo, project, sortBy) {
 
       function makeDateQuery(sYear, eYear, datayear, pubyear) {
@@ -509,6 +510,7 @@ window.onload = function () {
       if (coreArea && coreArea !== "any") {
          params += '&fq=keyword:"' + coreArea + '"';
       }
+      if (keyWord) params += '&fq=keyword:"' + keyWord + '"';
       var query = "&q=" + userQuery;
       if (creator) query += "+AND+(author:" + addQuotes(creator) + "+OR+organization:" + addQuotes(creator) + ")";
       if (project) query += "+AND+(projectTitle:" + addQuotes(project) + "+OR+relatedProjectTitle:" + addQuotes(project) + ")";
@@ -526,6 +528,7 @@ window.onload = function () {
 
    var query = getParameterByName("q");
    var coreAreaParam = getParameterByName("coreArea");
+   var keyWord = getParameterByName("keyWord");
    var creator = getParameterByName("creator");
    var project = getParameterByName("project");
    var sYear = parseInt(getParameterByName("s"));
@@ -543,6 +546,8 @@ window.onload = function () {
    document.forms.dataSearchForm.q.value = query;
    if (document.forms.dataSearchForm.creator)
       document.forms.dataSearchForm.creator.value = creator;
+   if (document.forms.dataSearchForm.keyWord)
+      document.forms.dataSearchForm.keyWord.value = keyWord;
    if (document.forms.dataSearchForm.project)
       document.forms.dataSearchForm.project.value = project;
    if (document.forms.dataSearchForm.identifier)
@@ -573,7 +578,7 @@ window.onload = function () {
    initApp(expanded);
 
    if (!query) query = "*"; // default for empty query
-   QUERY_URL = makeQueryUrlBase(query, coreArea, creator, sYear, eYear,
+   QUERY_URL = makeQueryUrlBase(query, coreArea, keyWord, creator, sYear, eYear,
       datayear, pubyear, pkgId, taxon, geo, project, sortBy)
    searchPasta(PASTA_CONFIG["limit"], pageStart);
 
