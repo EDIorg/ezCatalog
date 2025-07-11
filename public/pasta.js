@@ -491,16 +491,60 @@ function filterDocsByCreators(docs, selectedCreators) {
    });
 }
 
-// Patch successCallback to store all docs and update creator facet
+// --- Faceted Keyword Dropdown Logic ---
+function renderKeywordCheckboxes(keywords, selected, keywordCounts) {
+  return keywords.map(function(keyword, i) {
+    var checked = selected.includes(keyword) ? 'checked' : '';
+    var count = keywordCounts[keyword] || 0;
+    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
+      <input type="checkbox" class="keyword-checkbox" value="${keyword.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${keyword} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
+    </label>`;
+  }).join('');
+}
+
+function getSelectedKeywords() {
+  var boxes = document.querySelectorAll('.keyword-checkbox:checked');
+  return Array.from(boxes).map(function(box) { return box.value; });
+}
+
+function populateKeywordFacetOptions(docs, selected) {
+   var keywordSet = new Set();
+   var keywordCounts = {};
+   for (var i = 0; i < docs.length; i++) {
+      var keywordNodes = docs[i].getElementsByTagName("keyword");
+      for (var j = 0; j < keywordNodes.length; j++) {
+         var keyword = keywordNodes[j].innerHTML;
+         keywordSet.add(keyword);
+         keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+      }
+   }
+   var keywordDropdown = document.getElementById("keyword-dropdown");
+   var keywords = Array.from(keywordSet).sort();
+   keywordDropdown.innerHTML = renderKeywordCheckboxes(keywords, selected || [], keywordCounts);
+}
+
+function filterDocsByKeywords(docs, selectedKeywords) {
+   if (!selectedKeywords.length) return docs;
+   return docs.filter(function(doc) {
+      var keywordNodes = doc.getElementsByTagName("keyword");
+      var keywords = Array.from(keywordNodes).map(function(n) { return n.innerHTML; });
+      return selectedKeywords.some(function(sel) { return keywords.includes(sel); });
+   });
+}
+
+// Patch successCallback to store all docs and update creator and keyword facets
 var origSuccessCallback = successCallback;
 successCallback = function(headers, response) {
    var parser = new DOMParser();
    var xmlDoc = parser.parseFromString(response, "text/xml");
    var docs = Array.from(xmlDoc.getElementsByTagName("document"));
    ALL_PASTA_DOCS = docs;
-   var selected = getSelectedCreators();
-   populateCreatorFacetOptions(docs, selected);
-   var filteredDocs = filterDocsByCreators(docs, selected);
+   var selectedCreators = getSelectedCreators();
+   var selectedKeywords = getSelectedKeywords();
+   populateCreatorFacetOptions(docs, selectedCreators);
+   populateKeywordFacetOptions(docs, selectedKeywords);
+   var filteredDocs = filterDocsByCreators(docs, selectedCreators);
+   filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords);
    if (PASTA_CONFIG["useCiteService"]) {
       buildCitationsFromCite(filteredDocs);
    } else {
@@ -588,6 +632,72 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       });
    }
+   // Keyword dropdown logic
+   var keywordToggleBtn = document.getElementById("keyword-toggle-btn");
+   var keywordDropdown = document.getElementById("keyword-dropdown");
+   var keywordArrow = document.getElementById("keyword-arrow");
+   var keywordExpanded = false;
+   if (keywordToggleBtn && keywordDropdown && keywordArrow) {
+      keywordToggleBtn.addEventListener("click", function(e) {
+         e.preventDefault();
+         keywordExpanded = !keywordExpanded;
+         if (keywordExpanded) {
+            keywordDropdown.style.display = "block";
+            keywordArrow.innerHTML = "&#x25B2;";
+            keywordDropdown.focus();
+         } else {
+            keywordDropdown.style.display = "none";
+            keywordArrow.innerHTML = "&#x25BC;";
+         }
+      });
+      keywordDropdown.addEventListener("blur", function(e) {
+         setTimeout(function() {
+            if (!keywordDropdown.contains(document.activeElement)) {
+               keywordDropdown.style.display = "none";
+               keywordArrow.innerHTML = "&#x25BC;";
+               keywordExpanded = false;
+            }
+         }, 150);
+      });
+      // Debounced handler for keyword checkbox changes
+      var debounce = (window.debounce) ? window.debounce : function(func, wait) {
+        var timeout;
+        return function() {
+          var context = this, args = arguments;
+          clearTimeout(timeout);
+          timeout = setTimeout(function() {
+            func.apply(context, args);
+          }, wait);
+        };
+      };
+      var processKeywordChange = debounce(function() {
+        var selectedCreators = getSelectedCreators();
+        var selectedKeywords = getSelectedKeywords();
+        var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
+        filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+        if (PASTA_CONFIG["useCiteService"]) {
+          buildCitationsFromCite(filteredDocs);
+        } else {
+          buildCitationsFromPasta(filteredDocs);
+        }
+        var count = filteredDocs.length;
+        setHtml(PASTA_CONFIG["csvElementId"], '');
+        var currentStart = 0;
+        var limit = parseInt(PASTA_CONFIG["limit"]);
+        var showPages = parseInt(PASTA_CONFIG["showPages"]);
+        var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
+        var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
+        showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
+        showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
+        var query = getParameterByName("q");
+        showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+      }, 200);
+      keywordDropdown.addEventListener("change", function(e) {
+        if (e.target.classList.contains('keyword-checkbox')) {
+          processKeywordChange();
+        }
+      });
+   }
 });
 
 // When the window loads, read query parameters and perform search
@@ -645,7 +755,8 @@ window.onload = function () {
          "doi",
          "packageid",
          "author",
-         "abstract"
+         "abstract",
+         "keyword"
       ].toString();
 
       var params = "fl=" + fields + "&defType=edismax" + PASTA_CONFIG["filter"];
