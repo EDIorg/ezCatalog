@@ -25,15 +25,8 @@
       <input type="hidden" id="sort" name="sort" value="score">
       <input class="search-input" name="q" placeholder="Enter search term" type="text">
       <input type="submit" value="Search">
-      <div style="margin-top: 10px">
-         <input aria-expanded="false" aria-controls="advancedInputs" class="collapse-toggle" name="expanded" type="checkbox"
-            value="true" id="advancedToggle" role="button">
-         <label class="lbl-toggle" tabindex="0" for="advancedToggle">
-            Advanced
-         </label>
-      </div>
-
-      <div class="collapsible" id="advancedInputs">
+      <!-- Advanced search is now always visible -->
+      <div id="advancedInputs" style="margin-top: 10px">
          <div class="input-block">
             <i class="fas fa-leaf"></i><label class="group-label" for="coreArea">LTER Core Area</label><br>
             <select class="search-input" name="coreArea" id="coreArea">
@@ -45,9 +38,14 @@
                <option value="populations">Populations</option>
             </select>
          </div>
-         <div class="input-block">
-            <i class="fas fa-user"></i><label class="group-label" for="creator">Creator</label>
-            <input class="search-input" name="creator" id="creator" placeholder="Name" type="text" title="The name of the creator or originator of a dataset">
+         <div class="input-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span><i class="fas fa-user"></i><label class="group-label" for="creator">Creator</label></span>
+              <button type="button" id="creator-toggle-btn" aria-label="Toggle creator dropdown" style="background:none;border:none;cursor:pointer;font-size:1.2em;outline:none;padding:0 4px;">
+                <span id="creator-arrow">&#x25BC;</span>
+              </button>
+            </div>
+            <div class="creator-dropdown" id="creator-dropdown" style="display:none; position:absolute; right:0; top:100%; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
          </div>
          <div class="input-block">
             <i class="fas fa-calendar-alt"></i><span class="group-label">Year</span><br>

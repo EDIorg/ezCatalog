@@ -109,9 +109,44 @@ input[type='checkbox'].collapse-toggle {
    border-bottom: 1px dashed gray;
    margin-bottom: 5px;
    max-width: 256px;
+   position: relative;
 }
 
-.group-label {
-   font-weight: bold;
-   margin-left: 7px;
+#creator {
+  min-width: unset;
+  max-width: unset;
+  width: 100%;
+  position: static;
+  background: #fff;
+  box-shadow: none;
+  border: 1px solid #ccc;
+  display: block;
+  margin-left: 0;
+  margin-bottom: 10px;
+  font-size: 1em;
+  padding: 4px 8px;
+}
+#creator:focus {
+  outline: 2px solid #007bff;
+}
+#creator[multiple] {
+  height: 120px;
+  overflow-y: auto;
+  display: block;
+  margin-left: 0;
+}
+#creator.show {
+  display: block !important;
+}
+#creator-expand-btn {
+  /* already styled inline, but can add more here if needed */
+}
+#creator-expand-btn.active #creator-expand-icon {
+  transform: rotate(90deg);
+}
+@media (max-width: 600px) {
+  #creator {
+    min-width: 200px;
+    margin-left: 0;
+  }
 }

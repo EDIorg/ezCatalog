@@ -447,6 +447,130 @@ function makeAutocomplete(elementId, choices, minChars) {
    return autocomplete;
 }
 
+// --- Faceted Creator Dropdown Logic ---
+// Store all results for client-side filtering
+var ALL_PASTA_DOCS = [];
+
+function renderCreatorCheckboxes(creators, selected) {
+  return creators.map(function(creator, i) {
+    var checked = selected.includes(creator) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
+      <input type="checkbox" class="creator-checkbox" value="${creator.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${checked} style="margin-right:8px;">${creator}
+    </label>`;
+  }).join('');
+}
+
+function getSelectedCreators() {
+  var boxes = document.querySelectorAll('.creator-checkbox:checked');
+  return Array.from(boxes).map(function(box) { return box.value; });
+}
+
+function populateCreatorFacetOptions(docs, selected) {
+   var creatorSet = new Set();
+   for (var i = 0; i < docs.length; i++) {
+      var authorNodes = docs[i].getElementsByTagName("author");
+      for (var j = 0; j < authorNodes.length; j++) {
+         creatorSet.add(authorNodes[j].innerHTML);
+      }
+   }
+   var creatorDropdown = document.getElementById("creator-dropdown");
+   var creators = Array.from(creatorSet).sort();
+   creatorDropdown.innerHTML = renderCreatorCheckboxes(creators, selected || []);
+}
+
+function filterDocsByCreators(docs, selectedCreators) {
+   if (!selectedCreators.length) return docs;
+   return docs.filter(function(doc) {
+      var authorNodes = doc.getElementsByTagName("author");
+      var authors = Array.from(authorNodes).map(function(n) { return n.innerHTML; });
+      return selectedCreators.some(function(sel) { return authors.includes(sel); });
+   });
+}
+
+// Patch successCallback to store all docs and update creator facet
+var origSuccessCallback = successCallback;
+successCallback = function(headers, response) {
+   var parser = new DOMParser();
+   var xmlDoc = parser.parseFromString(response, "text/xml");
+   var docs = Array.from(xmlDoc.getElementsByTagName("document"));
+   ALL_PASTA_DOCS = docs;
+   var selected = getSelectedCreators();
+   populateCreatorFacetOptions(docs, selected);
+   var filteredDocs = filterDocsByCreators(docs, selected);
+   if (PASTA_CONFIG["useCiteService"]) {
+      buildCitationsFromCite(filteredDocs);
+   } else {
+      buildCitationsFromPasta(filteredDocs);
+   }
+   var count = filteredDocs.length;
+   setHtml(PASTA_CONFIG["csvElementId"], '');
+   var currentStart = getParameterByName("start");
+   if (!currentStart) currentStart = 0; else currentStart = parseInt(currentStart);
+   var limit = parseInt(PASTA_CONFIG["limit"]);
+   var showPages = parseInt(PASTA_CONFIG["showPages"]);
+   var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
+   var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
+   showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
+   showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
+   var query = getParameterByName("q");
+   showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+   var creatorToggleBtn = document.getElementById("creator-toggle-btn");
+   var creatorDropdown = document.getElementById("creator-dropdown");
+   var creatorArrow = document.getElementById("creator-arrow");
+   var expanded = false;
+   if (creatorToggleBtn && creatorDropdown && creatorArrow) {
+      creatorToggleBtn.addEventListener("click", function(e) {
+         e.preventDefault();
+         expanded = !expanded;
+         if (expanded) {
+            creatorDropdown.style.display = "block";
+            creatorArrow.innerHTML = "&#x25B2;";
+            creatorDropdown.focus();
+         } else {
+            creatorDropdown.style.display = "none";
+            creatorArrow.innerHTML = "&#x25BC;";
+         }
+      });
+      // Optional: collapse when focus is lost
+      creatorDropdown.addEventListener("blur", function() {
+         setTimeout(function() {
+            if (document.activeElement !== creatorDropdown) {
+               creatorDropdown.style.display = "none";
+               creatorArrow.innerHTML = "&#x25BC;";
+               expanded = false;
+            }
+         }, 150);
+      });
+      // Listen for checkbox changes
+      creatorDropdown.addEventListener("change", function(e) {
+        if (e.target.classList.contains('creator-checkbox')) {
+          var selected = getSelectedCreators();
+          var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selected);
+          if (PASTA_CONFIG["useCiteService"]) {
+            buildCitationsFromCite(filteredDocs);
+          } else {
+            buildCitationsFromPasta(filteredDocs);
+          }
+          var count = filteredDocs.length;
+          setHtml(PASTA_CONFIG["csvElementId"], '');
+          var currentStart = 0;
+          var limit = parseInt(PASTA_CONFIG["limit"]);
+          var showPages = parseInt(PASTA_CONFIG["showPages"]);
+          var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
+          var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
+          showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
+          showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
+          var query = getParameterByName("q");
+          showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+          // Do NOT close the dropdown on change
+        }
+      });
+   }
+});
+
 // When the window loads, read query parameters and perform search
 window.onload = function () {
    function initApp(expanded) {
