@@ -451,11 +451,12 @@ function makeAutocomplete(elementId, choices, minChars) {
 // Store all results for client-side filtering
 var ALL_PASTA_DOCS = [];
 
-function renderCreatorCheckboxes(creators, selected) {
+function renderCreatorCheckboxes(creators, selected, creatorCounts) {
   return creators.map(function(creator, i) {
     var checked = selected.includes(creator) ? 'checked' : '';
+    var count = creatorCounts[creator] || 0;
     return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="creator-checkbox" value="${creator.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${checked} style="margin-right:8px;">${creator}
+      <input type="checkbox" class="creator-checkbox" value="${creator.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${creator} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
     </label>`;
   }).join('');
 }
@@ -467,15 +468,18 @@ function getSelectedCreators() {
 
 function populateCreatorFacetOptions(docs, selected) {
    var creatorSet = new Set();
+   var creatorCounts = {};
    for (var i = 0; i < docs.length; i++) {
       var authorNodes = docs[i].getElementsByTagName("author");
       for (var j = 0; j < authorNodes.length; j++) {
-         creatorSet.add(authorNodes[j].innerHTML);
+         var creator = authorNodes[j].innerHTML;
+         creatorSet.add(creator);
+         creatorCounts[creator] = (creatorCounts[creator] || 0) + 1;
       }
    }
    var creatorDropdown = document.getElementById("creator-dropdown");
    var creators = Array.from(creatorSet).sort();
-   creatorDropdown.innerHTML = renderCreatorCheckboxes(creators, selected || []);
+   creatorDropdown.innerHTML = renderCreatorCheckboxes(creators, selected || [], creatorCounts);
 }
 
 function filterDocsByCreators(docs, selectedCreators) {
@@ -535,9 +539,10 @@ document.addEventListener("DOMContentLoaded", function() {
          }
       });
       // Optional: collapse when focus is lost
-      creatorDropdown.addEventListener("blur", function() {
+      creatorDropdown.addEventListener("blur", function(e) {
          setTimeout(function() {
-            if (document.activeElement !== creatorDropdown) {
+            // Only collapse if focus is not on a child element (e.g., a checkbox)
+            if (!creatorDropdown.contains(document.activeElement)) {
                creatorDropdown.style.display = "none";
                creatorArrow.innerHTML = "&#x25BC;";
                expanded = false;
