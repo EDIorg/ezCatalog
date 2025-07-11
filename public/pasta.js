@@ -549,28 +549,42 @@ document.addEventListener("DOMContentLoaded", function() {
             }
          }, 150);
       });
+      // Debounce utility
+      function debounce(func, wait) {
+        var timeout;
+        return function() {
+          var context = this, args = arguments;
+          clearTimeout(timeout);
+          timeout = setTimeout(function() {
+            func.apply(context, args);
+          }, wait);
+        };
+      }
+      // Debounced handler for creator checkbox changes
+      var processCreatorChange = debounce(function() {
+        var selected = getSelectedCreators();
+        var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selected || []);
+        if (PASTA_CONFIG["useCiteService"]) {
+          buildCitationsFromCite(filteredDocs);
+        } else {
+          buildCitationsFromPasta(filteredDocs);
+        }
+        var count = filteredDocs.length;
+        setHtml(PASTA_CONFIG["csvElementId"], '');
+        var currentStart = 0;
+        var limit = parseInt(PASTA_CONFIG["limit"]);
+        var showPages = parseInt(PASTA_CONFIG["showPages"]);
+        var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
+        var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
+        showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
+        showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
+        var query = getParameterByName("q");
+        showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+      }, 200);
       // Listen for checkbox changes
       creatorDropdown.addEventListener("change", function(e) {
         if (e.target.classList.contains('creator-checkbox')) {
-          var selected = getSelectedCreators();
-          var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selected);
-          if (PASTA_CONFIG["useCiteService"]) {
-            buildCitationsFromCite(filteredDocs);
-          } else {
-            buildCitationsFromPasta(filteredDocs);
-          }
-          var count = filteredDocs.length;
-          setHtml(PASTA_CONFIG["csvElementId"], '');
-          var currentStart = 0;
-          var limit = parseInt(PASTA_CONFIG["limit"]);
-          var showPages = parseInt(PASTA_CONFIG["showPages"]);
-          var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
-          var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
-          showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
-          showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
-          var query = getParameterByName("q");
-          showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-          // Do NOT close the dropdown on change
+          processCreatorChange();
         }
       });
    }
