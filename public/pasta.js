@@ -539,10 +539,17 @@ document.addEventListener("DOMContentLoaded", function() {
           }, wait);
         };
       }
-      // Debounced handler for creator checkbox changes
-      var processCreatorChange = debounce(function() {
-        var selected = getSelectedCreators();
-        var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selected || []);
+      // Unified handler for facet (creator/keyword) changes
+      var processFacetChange = debounce(function() {
+        var selectedCreators = getSelectedCreators();
+        var selectedKeywords = getSelectedKeywords();
+        // Apply both filters to get filteredDocs
+        var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
+        filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+        // Dynamically update facet options based on filteredDocs
+        populateCreatorFacetOptions(filteredDocs, selectedCreators);
+        populateKeywordFacetOptions(filteredDocs, selectedKeywords);
+        // Render filtered results
         if (PASTA_CONFIG["useCiteService"]) {
           buildCitationsFromCite(filteredDocs);
         } else {
@@ -560,10 +567,10 @@ document.addEventListener("DOMContentLoaded", function() {
         var query = getParameterByName("q");
         showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
       }, 200);
-      // Listen for checkbox changes
+      // Listen for creator checkbox changes
       creatorDropdown.addEventListener("change", function(e) {
         if (e.target.classList.contains('creator-checkbox')) {
-          processCreatorChange();
+          processFacetChange();
         }
       });
    }
@@ -578,58 +585,26 @@ document.addEventListener("DOMContentLoaded", function() {
          keywordExpanded = !keywordExpanded;
          if (keywordExpanded) {
             keywordDropdown.style.display = "block";
-            keywordArrow.innerHTML = "&#x25B2;";
+            keywordArrow.innerHTML = "\u25B2;";
             keywordDropdown.focus();
          } else {
             keywordDropdown.style.display = "none";
-            keywordArrow.innerHTML = "&#x25BC;";
+            keywordArrow.innerHTML = "\u25BC;";
          }
       });
       keywordDropdown.addEventListener("blur", function(e) {
          setTimeout(function() {
             if (!keywordDropdown.contains(document.activeElement)) {
                keywordDropdown.style.display = "none";
-               keywordArrow.innerHTML = "&#x25BC;";
+               keywordArrow.innerHTML = "\u25BC;";
                keywordExpanded = false;
             }
          }, 150);
       });
-      // Debounced handler for keyword checkbox changes
-      var debounce = (window.debounce) ? window.debounce : function(func, wait) {
-        var timeout;
-        return function() {
-          var context = this, args = arguments;
-          clearTimeout(timeout);
-          timeout = setTimeout(function() {
-            func.apply(context, args);
-          }, wait);
-        };
-      };
-      var processKeywordChange = debounce(function() {
-        var selectedCreators = getSelectedCreators();
-        var selectedKeywords = getSelectedKeywords();
-        var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
-        filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
-        if (PASTA_CONFIG["useCiteService"]) {
-          buildCitationsFromCite(filteredDocs);
-        } else {
-          buildCitationsFromPasta(filteredDocs);
-        }
-        var count = filteredDocs.length;
-        setHtml(PASTA_CONFIG["csvElementId"], '');
-        var currentStart = 0;
-        var limit = parseInt(PASTA_CONFIG["limit"]);
-        var showPages = parseInt(PASTA_CONFIG["showPages"]);
-        var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
-        var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
-        showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
-        showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
-        var query = getParameterByName("q");
-        showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-      }, 200);
+      // Listen for keyword checkbox changes
       keywordDropdown.addEventListener("change", function(e) {
         if (e.target.classList.contains('keyword-checkbox')) {
-          processKeywordChange();
+          processFacetChange();
         }
       });
    }
