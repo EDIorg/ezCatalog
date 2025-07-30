@@ -585,18 +585,18 @@ document.addEventListener("DOMContentLoaded", function() {
          keywordExpanded = !keywordExpanded;
          if (keywordExpanded) {
             keywordDropdown.style.display = "block";
-            keywordArrow.innerHTML = "\u25B2;";
+            keywordArrow.innerHTML = "\u25B2"; // Remove the semicolon
             keywordDropdown.focus();
          } else {
             keywordDropdown.style.display = "none";
-            keywordArrow.innerHTML = "\u25BC;";
+            keywordArrow.innerHTML = "\u25BC"; // Remove the semicolon
          }
       });
       keywordDropdown.addEventListener("blur", function(e) {
          setTimeout(function() {
             if (!keywordDropdown.contains(document.activeElement)) {
                keywordDropdown.style.display = "none";
-               keywordArrow.innerHTML = "\u25BC;";
+               keywordArrow.innerHTML = "\u25BC"; // Remove the semicolon
                keywordExpanded = false;
             }
          }, 150);
