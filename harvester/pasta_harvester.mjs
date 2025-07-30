@@ -106,7 +106,6 @@ function fetchChunk(uri) {
 
 function handleResults(chunks) {
    var result = {};
-   for (let i = 0; i < PASTA_CONFIG["fields"].length; i++) {
       result[PASTA_CONFIG["fields"][i]] = [];
    }
 
@@ -116,12 +115,6 @@ function handleResults(chunks) {
          let field = PASTA_CONFIG["fields"][j];
          result[field] = result[field].concat(chunk[field]);
       }
-   }
-
-   for (let j = 0; j < PASTA_CONFIG["fields"].length; j++) {
-      let field = PASTA_CONFIG["fields"][j];
-      result[field] = getUnique(result[field]);
-   }
 
    let js = "var PASTA_LOOKUP = " + JSON.stringify(result) + ";"
    fs.writeFile(OUT_FILE, js, function (err) {
@@ -130,8 +123,6 @@ function handleResults(chunks) {
       }
       console.log("Index saved as " + OUT_FILE);
    });
-}
-
 
 function getUnique(array) {
    return [...new Set(array)].sort();
