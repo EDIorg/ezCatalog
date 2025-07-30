@@ -19,7 +19,7 @@ var PASTA_CONFIG = {
    "abstractLimit": 500 // Limit the number of characters in the abstract
 };
 
-var QUERY_URL = ""; // Query URL without row limit or start parameter
+// --- Legacy server-driven search and pagination logic removed for client-side faceted search migration ---
 
 // Get URL arguments
 function getParameterByName(name, url) {
@@ -192,90 +192,6 @@ function setHtml(elId, innerHtml) {
    var el = document.getElementById(elId);
    if (el)
       el.innerHTML = innerHtml;
-}
-
-function downloadCsv(count) {
-   if (count) showLoading(true);
-   var limit = 2000;
-   var calls = count / limit;
-   if (parseInt(calls) != calls) calls = parseInt(calls) + 1;
-   var callsRemaining = calls;
-   var allRows = [
-      ["Title", "Creators", "Year_Published", "DOI", "Package_ID"]
-   ];
-   var start = 0;
-   var baseUri = QUERY_URL + "&rows=" + limit + "&start="
-
-   function addChunk(headers, response) {
-      var parser = new DOMParser();
-      var xmlDoc = parser.parseFromString(response, "text/xml");
-      var docs = xmlDoc.getElementsByTagName("document");
-      for (var i = 0; i < docs.length; i++) {
-         var doc = docs[i];
-         var authorNodes = doc.getElementsByTagName("author");
-         var authors = [];
-         for (var authorIndex = 0; authorIndex < authorNodes.length; authorIndex++) {
-            authors.push(authorNodes[authorIndex].innerHTML);
-         }
-         var names = authors.join("; ");
-
-         var date;
-         try {
-            date = doc.getElementsByTagName("pubdate")[0].childNodes[0].nodeValue;
-         } catch (error) {
-            date = "";
-         }
-         var doi = "";
-         var els = doc.getElementsByTagName("doi");
-         if (els.length && els[0].childNodes.length) {
-            doi = els[0].childNodes[0].nodeValue;
-         }
-         var packageId = doc.getElementsByTagName("packageid")[0].childNodes[0].nodeValue;
-         var title = doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim();
-         var abstract;
-         try {
-            abstract = doc.getElementsByTagName("abstract")[0].childNodes[0].nodeValue;
-         } catch (error) {
-            abstract = '';
-         }
-         var row = [title, names, date, doi, packageId, abstract];
-         allRows.push(row);
-      }
-
-      --callsRemaining;
-      if (callsRemaining <= 0) {
-         var csv = CSV.arrayToCsv(allRows);
-         var exportedFilenmae = "dataset_catalog.csv";
-         // Snippet from https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
-         var blob = new Blob([csv], {
-            type: 'text/csv;charset=utf-8;'
-         });
-         showLoading(false);
-         if (navigator.msSaveBlob) { // IE 10+
-            navigator.msSaveBlob(blob, exportedFilenmae);
-         } else {
-            var link = document.createElement("a");
-            if (link.download !== undefined) { // feature detection
-               // Browsers that support HTML5 download attribute
-               var csvUrl = URL.createObjectURL(blob);
-               link.setAttribute("href", csvUrl);
-               link.setAttribute("download", exportedFilenmae);
-               link.style.visibility = "hidden";
-               document.body.appendChild(link);
-               link.click();
-               document.body.removeChild(link);
-            }
-         }
-      }
-   }
-
-   for (var i = 0; i < calls; i++) {
-      var url = baseUri + start;
-      makeCorsRequest(url, null, addChunk, errorCallback);
-      start += limit;
-   }
-
-   return false; // Prevents calling function from following href
 }
 
 // Function to call if CORS request is successful
@@ -565,6 +481,25 @@ successCallback = function(headers, response) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+   // Fetch initial dataset from PASTA server and initialize facets/results
+   var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
+   showLoading(true);
+   makeCorsRequest(url, null, function(headers, response) {
+      var parser = new DOMParser();
+      var xmlDoc = parser.parseFromString(response, "text/xml");
+      var docs = Array.from(xmlDoc.getElementsByTagName("document"));
+      ALL_PASTA_DOCS = docs;
+      populateCreatorFacetOptions(docs, []);
+      populateKeywordFacetOptions(docs, []);
+      // Render all results initially
+      if (PASTA_CONFIG["useCiteService"]) {
+         buildCitationsFromCite(docs);
+      } else {
+         buildCitationsFromPasta(docs);
+      }
+      showLoading(false);
+   }, errorCallback);
+
    var creatorToggleBtn = document.getElementById("creator-toggle-btn");
    var creatorDropdown = document.getElementById("creator-dropdown");
    var creatorArrow = document.getElementById("creator-arrow");
@@ -716,68 +651,6 @@ window.onload = function () {
       }
    }
 
-   function makeQueryUrlBase(userQuery, coreArea, creator, sYear, eYear, datayear, pubyear,
-      pkgId, taxon, geo, project, sortBy) {
-
-      function makeDateQuery(sYear, eYear, datayear, pubyear) {
-         var query = "";
-         if (datayear && !pubyear) {
-            query = "&fq=(singledate:[" + sYear + "-01-01T00:00:00Z/DAY+TO+" + eYear + "-12-31T00:00:00Z/DAY]+OR+(begindate:[*+TO+" + eYear + "-12-31T00:00:00Z/DAY]+AND+enddate:[" + sYear + "-01-01T00:00:00Z/DAY+TO+NOW]))";
-         } else if (pubyear && !datayear) {
-            query = "&fq=pubdate:[" + sYear + "-01-01T00:00:00Z/DAY+TO+" + eYear + "-12-31T00:00:00Z/DAY]";
-         } else if (datayear && pubyear) {
-            query = "&fq=(pubdate:[" + sYear + "-01-01T00:00:00Z/DAY+TO+" + eYear + "-12-31T00:00:00Z/DAY]+AND+(singledate:[" + sYear + "-01-01T00:00:00Z/DAY+TO+" + eYear + "-12-31T00:00:00Z/DAY]+OR+(begindate:[*+TO+" + eYear + "-12-31T00:00:00Z/DAY]+AND+enddate:[" + sYear + "-01-01T00:00:00Z/DAY+TO+NOW])))";
-         }
-         return query;
-      }
-
-      function makeSortParam(sortBy) {
-         var param = "&sort=" + sortBy + ",";
-         if (sortBy === "score" || sortBy === "pubdate" || sortBy === "enddate")
-            param += "desc";
-         else
-            param += "asc";
-         param += "&sort=packageid,asc";
-         return param;
-      }
-
-      // Enclose text in quotes if there are spaces and if the text does not already include quotes or special operators
-      function addQuotes(text) {
-         if (!~text.indexOf(" ") || ~text.indexOf("+") || ~text.indexOf('"'))
-            return text;
-         else
-            return '"' + text + '"';
-      }
-
-      var base = PASTA_CONFIG["server"];
-      var fields = ["title",
-         "pubdate",
-         "doi",
-         "packageid",
-         "author",
-         "abstract",
-         "keyword"
-      ].toString();
-
-      var params = "fl=" + fields + "&defType=edismax" + PASTA_CONFIG["filter"];
-      if (coreArea && coreArea !== "any") {
-         params += '&fq=keyword:"' + coreArea + '"';
-      }
-      var query = "&q=" + userQuery;
-      if (creator) query += "+AND+(author:" + addQuotes(creator) + "+OR+organization:" + addQuotes(creator) + ")";
-      if (project) query += "+AND+(projectTitle:" + addQuotes(project) + "+OR+relatedProjectTitle:" + addQuotes(project) + ")";
-      if (pkgId) {
-         pkgId = pkgId.replace(":", "%5C:");
-         query += "+AND+(doi:" + pkgId + "+packageid:" + pkgId + "+id:" + pkgId + ")";
-      }
-      if (taxon) query += "+AND+taxonomic:" + addQuotes(taxon);
-      if (geo) query += "+AND+geographicdescription:" + addQuotes(geo);
-      var dateQuery = makeDateQuery(sYear, eYear, datayear, pubyear);
-      var sort = makeSortParam(sortBy);
-      var url = base + encodeURI(params + query + dateQuery + sort);
-      return url;
-   }
-
    var query = getParameterByName("q");
    var coreAreaParam = getParameterByName("coreArea");
    var creator = getParameterByName("creator");
@@ -794,41 +667,11 @@ window.onload = function () {
    var sortParam = getParameterByName("sort");
    if (!pageStart) pageStart = 0;
 
-   document.forms.dataSearchForm.q.value = query;
-   if (document.forms.dataSearchForm.creator)
-      document.forms.dataSearchForm.creator.value = creator;
-   if (document.forms.dataSearchForm.project)
-      document.forms.dataSearchForm.project.value = project;
-   if (document.forms.dataSearchForm.identifier)
-      document.forms.dataSearchForm.identifier.value = pkgId;
-   if (document.forms.dataSearchForm.taxon)
-      document.forms.dataSearchForm.taxon.value = taxon;
-   if (document.forms.dataSearchForm.geo)
-      document.forms.dataSearchForm.geo.value = geo;
-   if (document.forms.dataSearchForm.data_year)
-      document.forms.dataSearchForm.data_year.checked = datayear;
-   if (document.forms.dataSearchForm.publish_year)
-      document.forms.dataSearchForm.publish_year.checked = pubyear;
-   var coreArea = setSelectValue("coreArea", coreAreaParam);
-   var sortBy = setSelectValue("visibleSort", sortParam);
-   if (sortBy && document.forms.dataSearchForm.sort)
-      document.forms.dataSearchForm.sort.value = sortBy;
-   else
-      sortBy = document.forms.dataSearchForm.sort.value;
-
-   if (isInteger(sYear) && document.forms.dataSearchForm.min_year)
-      document.forms.dataSearchForm.min_year.value = sYear;
-   else if (document.forms.dataSearchForm.min_year)
-      sYear = document.forms.dataSearchForm.min_year.value;
-   if (!isInteger(eYear)) eYear = (new Date()).getFullYear()
-   if (document.forms.dataSearchForm.max_year)
-      document.forms.dataSearchForm.max_year.value = eYear;
-
    initApp(expanded);
 
    if (!query) query = "*"; // default for empty query
    QUERY_URL = makeQueryUrlBase(query, coreArea, creator, sYear, eYear,
-      datayear, pubyear, pkgId, taxon, geo, project, sortBy)
+      datayear, pubyear, pkgId, taxon, geo, project, sortParam)
    searchPasta(PASTA_CONFIG["limit"], pageStart);
 
    if ("PASTA_LOOKUP" in window) {
