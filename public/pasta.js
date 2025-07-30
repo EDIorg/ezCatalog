@@ -480,6 +480,61 @@ successCallback = function(headers, response) {
    showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
 }
 
+// --- Active Filters UI ---
+function renderActiveFilters(selectedCreators, selectedKeywords) {
+  var container = document.getElementById('active-filters');
+  if (!container) return;
+  var tags = [];
+  selectedCreators.forEach(function(creator) {
+    tags.push(`<span class="filter-tag">${creator} <button class="remove-filter" data-type="creator" data-value="${encodeURIComponent(creator)}" title="Remove filter">×</button></span>`);
+  });
+  selectedKeywords.forEach(function(keyword) {
+    tags.push(`<span class="filter-tag">${keyword} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
+  });
+  var clearBtn = (tags.length > 0) ? '<button id="clear-all-filters" class="clear-all-filters">Clear all filters</button>' : '';
+  container.innerHTML = tags.join(' ') + ' ' + clearBtn;
+}
+
+function uncheckFacet(type, value) {
+  var selector = type === 'creator' ? '.creator-checkbox' : '.keyword-checkbox';
+  var boxes = document.querySelectorAll(selector);
+  boxes.forEach(function(box) {
+    if (box.value === value) box.checked = false;
+  });
+}
+
+function clearAllFacets() {
+  var boxes = document.querySelectorAll('.creator-checkbox, .keyword-checkbox');
+  boxes.forEach(function(box) { box.checked = false; });
+}
+
+// Move processFacetChange to top-level scope so it can be called from anywhere
+function processFacetChange() {
+  var selectedCreators = getSelectedCreators();
+  var selectedKeywords = getSelectedKeywords();
+  var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
+  filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+  populateCreatorFacetOptions(filteredDocs, selectedCreators);
+  populateKeywordFacetOptions(filteredDocs, selectedKeywords);
+  renderActiveFilters(selectedCreators, selectedKeywords);
+  if (PASTA_CONFIG["useCiteService"]) {
+    buildCitationsFromCite(filteredDocs);
+  } else {
+    buildCitationsFromPasta(filteredDocs);
+  }
+  var count = filteredDocs.length;
+  setHtml(PASTA_CONFIG["csvElementId"], '');
+  var currentStart = 0;
+  var limit = parseInt(PASTA_CONFIG["limit"]);
+  var showPages = parseInt(PASTA_CONFIG["showPages"]);
+  var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
+  var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
+  showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
+  showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
+  var query = getParameterByName("q");
+  showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+}
+
 document.addEventListener("DOMContentLoaded", function() {
    // Fetch initial dataset from PASTA server and initialize facets/results
    var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
@@ -549,6 +604,8 @@ document.addEventListener("DOMContentLoaded", function() {
         // Dynamically update facet options based on filteredDocs
         populateCreatorFacetOptions(filteredDocs, selectedCreators);
         populateKeywordFacetOptions(filteredDocs, selectedKeywords);
+        // Render active filters UI
+        renderActiveFilters(selectedCreators, selectedKeywords);
         // Render filtered results
         if (PASTA_CONFIG["useCiteService"]) {
           buildCitationsFromCite(filteredDocs);
@@ -608,6 +665,20 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       });
    }
+
+   // Listen for remove filter clicks and clear all
+   document.body.addEventListener('click', function(e) {
+     if (e.target.classList.contains('remove-filter')) {
+       var type = e.target.getAttribute('data-type');
+       var value = decodeURIComponent(e.target.getAttribute('data-value'));
+       uncheckFacet(type, value);
+       processFacetChange();
+     }
+     if (e.target.id === 'clear-all-filters') {
+       clearAllFacets();
+       processFacetChange();
+     }
+   });
 });
 
 // When the window loads, read query parameters and perform search
