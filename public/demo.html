@@ -17,14 +17,12 @@
 </head>
 
 <body>
-   <!-- Active Filters UI -->
-   <div id="active-filters" style="margin-bottom: 1em;"></div>
-
    <form id="dataSearchForm" name="dataSearchForm">
       <input type="hidden" id="sort" name="sort" value="score">
       <input class="search-input" name="q" placeholder="Enter search term" type="text">
       <input type="submit" value="Search">
       <!-- Only new faceted search fields remain -->
+      <div id="active-filters"></div>
       <div id="advancedInputs" style="margin-top: 10px">
          <div class="input-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
             <div style="display: flex; justify-content: space-between; align-items: center;">

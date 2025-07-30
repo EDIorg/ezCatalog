@@ -191,3 +191,10 @@ input[type='checkbox'].collapse-toggle {
   background: #e0e7ef;
   color: #c00;
 }
+#active-filters {
+  min-height: 36px;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 1em;
+}

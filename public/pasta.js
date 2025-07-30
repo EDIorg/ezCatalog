@@ -669,12 +669,15 @@ document.addEventListener("DOMContentLoaded", function() {
    // Listen for remove filter clicks and clear all
    document.body.addEventListener('click', function(e) {
      if (e.target.classList.contains('remove-filter')) {
+       e.preventDefault();
+       e.stopPropagation();
        var type = e.target.getAttribute('data-type');
        var value = decodeURIComponent(e.target.getAttribute('data-value'));
        uncheckFacet(type, value);
        processFacetChange();
      }
      if (e.target.id === 'clear-all-filters') {
+       e.preventDefault();
        clearAllFacets();
        processFacetChange();
      }
