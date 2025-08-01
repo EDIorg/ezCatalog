@@ -464,15 +464,76 @@ function getSelectedProjects() {
   return Array.from(boxes).map(function(box) { return box.value; });
 }
 
+//function populateProjectFacetOptions(docs, selected) {
+//   var projectSet = new Set();
+//   var projectCounts = {};
+//   for (var i = 0; i < docs.length; i++) {
+//      var projectNodes = docs[i].getElementsByTagName("projectTitle");
+//      for (var j = 0; j < projectNodes.length; j++) {
+//         var project = projectNodes[j].innerHTML;
+//         projectSet.add(project);
+//         projectCounts[project] = (projectCounts[project] || 0) + 1;
+//      }
+//   }
+//   var projectDropdown = document.getElementById("project-dropdown");
+//   var projects = Array.from(projectSet).sort();
+//   projectDropdown.innerHTML = renderProjectCheckboxes(projects, selected || [], projectCounts);
+//}
+//
+//function filterDocsByProjects(docs, selectedProjects) {
+//   if (!selectedProjects.length) return docs;
+//   return docs.filter(function(doc) {
+//      var projectNodes = doc.getElementsByTagName("projectTitle");
+//      var projects = Array.from(projectNodes).map(function(n) { return n.innerHTML; });
+//      return selectedProjects.some(function(sel) { return projects.includes(sel); });
+//   });
+//}
+
+//function populateProjectFacetOptions(docs, selected) {
+//   var projectSet = new Set();
+//   var projectCounts = {};
+//   for (var i = 0; i < docs.length; i++) {
+//      var projectNodes = docs[i].getElementsByTagName("projectTitle");
+//      var relatedProjectNodes = docs[i].getElementsByTagName("relatedProjectTitle");
+//      // Add projectTitle values
+//      for (var j = 0; j < projectNodes.length; j++) {
+//         var project = projectNodes[j].innerHTML;
+//         projectSet.add(project);
+//         projectCounts[project] = (projectCounts[project] || 0) + 1;
+//      }
+//      // Add relatedProjectTitle values
+//      for (var k = 0; k < relatedProjectNodes.length; k++) {
+//         var relatedProject = relatedProjectNodes[k].innerHTML;
+//         projectSet.add(relatedProject);
+//         projectCounts[relatedProject] = (projectCounts[relatedProject] || 0) + 1;
+//      }
+//   }
+//   var projectDropdown = document.getElementById("project-dropdown");
+//   var projects = Array.from(projectSet).sort();
+//   projectDropdown.innerHTML = renderProjectCheckboxes(projects, selected || [], projectCounts);
+//}
+
 function populateProjectFacetOptions(docs, selected) {
    var projectSet = new Set();
    var projectCounts = {};
    for (var i = 0; i < docs.length; i++) {
       var projectNodes = docs[i].getElementsByTagName("projectTitle");
+      var relatedProjectNodes = docs[i].getElementsByTagName("relatedProjectTitle");
+      // Add projectTitle values
       for (var j = 0; j < projectNodes.length; j++) {
-         var project = projectNodes[j].innerHTML;
-         projectSet.add(project);
-         projectCounts[project] = (projectCounts[project] || 0) + 1;
+         var project = projectNodes[j].innerHTML.trim();
+         if (project) {
+            projectSet.add(project);
+            projectCounts[project] = (projectCounts[project] || 0) + 1;
+         }
+      }
+      // Add relatedProjectTitle values
+      for (var k = 0; k < relatedProjectNodes.length; k++) {
+         var relatedProject = relatedProjectNodes[k].innerHTML.trim();
+         if (relatedProject) {
+            projectSet.add(relatedProject);
+            projectCounts[relatedProject] = (projectCounts[relatedProject] || 0) + 1;
+         }
       }
    }
    var projectDropdown = document.getElementById("project-dropdown");
@@ -484,10 +545,14 @@ function filterDocsByProjects(docs, selectedProjects) {
    if (!selectedProjects.length) return docs;
    return docs.filter(function(doc) {
       var projectNodes = doc.getElementsByTagName("projectTitle");
-      var projects = Array.from(projectNodes).map(function(n) { return n.innerHTML; });
+      var relatedProjectNodes = doc.getElementsByTagName("relatedProjectTitle");
+      var projects = Array.from(projectNodes).map(function(n) { return n.innerHTML; })
+         .concat(Array.from(relatedProjectNodes).map(function(n) { return n.innerHTML; }));
       return selectedProjects.some(function(sel) { return projects.includes(sel); });
    });
 }
+
+
 
 // --- Faceted Location Dropdown Logic ---
 function renderLocationCheckboxes(locations, selected, locationCounts) {
