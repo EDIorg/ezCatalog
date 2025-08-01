@@ -759,7 +759,7 @@ document.addEventListener("DOMContentLoaded", function() {
         showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
         var query = getParameterByName("q");
         showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-      }, 200);
+      }, 400);
       // Listen for creator checkbox changes
       creatorDropdown.addEventListener("change", function(e) {
         if (e.target.classList.contains('creator-checkbox')) {
