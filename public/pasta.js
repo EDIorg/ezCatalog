@@ -448,7 +448,48 @@ function filterDocsByKeywords(docs, selectedKeywords) {
    });
 }
 
-// Patch successCallback to store all docs and update creator and keyword facets
+// --- Faceted Location Dropdown Logic ---
+function renderLocationCheckboxes(locations, selected, locationCounts) {
+  return locations.map(function(location, i) {
+    var checked = selected.includes(location) ? 'checked' : '';
+    var count = locationCounts[location] || 0;
+    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
+      <input type="checkbox" class="location-checkbox" value="${location.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${location} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
+    </label>`;
+  }).join('');
+}
+
+function getSelectedLocations() {
+  var boxes = document.querySelectorAll('.location-checkbox:checked');
+  return Array.from(boxes).map(function(box) { return box.value; });
+}
+
+function populateLocationFacetOptions(docs, selected) {
+   var locationSet = new Set();
+   var locationCounts = {};
+   for (var i = 0; i < docs.length; i++) {
+      var locationNodes = docs[i].getElementsByTagName("geographicdescription");
+      for (var j = 0; j < locationNodes.length; j++) {
+         var location = locationNodes[j].innerHTML;
+         locationSet.add(location);
+         locationCounts[location] = (locationCounts[location] || 0) + 1;
+      }
+   }
+   var locationDropdown = document.getElementById("location-dropdown");
+   var locations = Array.from(locationSet).sort();
+   locationDropdown.innerHTML = renderLocationCheckboxes(locations, selected || [], locationCounts);
+}
+
+function filterDocsByLocations(docs, selectedLocations) {
+   if (!selectedLocations.length) return docs;
+   return docs.filter(function(doc) {
+      var locationNodes = doc.getElementsByTagName("geographicdescription");
+      var locations = Array.from(locationNodes).map(function(n) { return n.innerHTML; });
+      return selectedLocations.some(function(sel) { return locations.includes(sel); });
+   });
+}
+
+// Patch successCallback to store all docs and update creator, keyword, and location facets
 var origSuccessCallback = successCallback;
 successCallback = function(headers, response) {
    var parser = new DOMParser();
@@ -457,10 +498,13 @@ successCallback = function(headers, response) {
    ALL_PASTA_DOCS = docs;
    var selectedCreators = getSelectedCreators();
    var selectedKeywords = getSelectedKeywords();
+   var selectedLocations = getSelectedLocations();
    populateCreatorFacetOptions(docs, selectedCreators);
    populateKeywordFacetOptions(docs, selectedKeywords);
+   populateLocationFacetOptions(docs, selectedLocations);
    var filteredDocs = filterDocsByCreators(docs, selectedCreators);
    filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords);
+   filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations);
    if (PASTA_CONFIG["useCiteService"]) {
       buildCitationsFromCite(filteredDocs);
    } else {
@@ -481,7 +525,7 @@ successCallback = function(headers, response) {
 }
 
 // --- Active Filters UI ---
-function renderActiveFilters(selectedCreators, selectedKeywords) {
+function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations) {
   var container = document.getElementById('active-filters');
   if (!container) return;
   var tags = [];
@@ -491,12 +535,15 @@ function renderActiveFilters(selectedCreators, selectedKeywords) {
   selectedKeywords.forEach(function(keyword) {
     tags.push(`<span class="filter-tag">${keyword} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
   });
+  selectedLocations.forEach(function(location) {
+    tags.push(`<span class="filter-tag">${location} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
+  });
   var clearBtn = (tags.length > 0) ? '<button id="clear-all-filters" class="clear-all-filters">Clear all filters</button>' : '';
   container.innerHTML = tags.join(' ') + ' ' + clearBtn;
 }
 
 function uncheckFacet(type, value) {
-  var selector = type === 'creator' ? '.creator-checkbox' : '.keyword-checkbox';
+  var selector = type === 'creator' ? '.creator-checkbox' : '.keyword-checkbox' : : '.location-checkbox';
   var boxes = document.querySelectorAll(selector);
   boxes.forEach(function(box) {
     if (box.value === value) box.checked = false;
@@ -504,7 +551,7 @@ function uncheckFacet(type, value) {
 }
 
 function clearAllFacets() {
-  var boxes = document.querySelectorAll('.creator-checkbox, .keyword-checkbox');
+  var boxes = document.querySelectorAll('.creator-checkbox, .keyword-checkbox', '.location-checkbox');
   boxes.forEach(function(box) { box.checked = false; });
 }
 
@@ -512,11 +559,14 @@ function clearAllFacets() {
 function processFacetChange() {
   var selectedCreators = getSelectedCreators();
   var selectedKeywords = getSelectedKeywords();
+  var selectedLocations = getSelectedLocations();
   var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
   filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+  filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations || []);
   populateCreatorFacetOptions(filteredDocs, selectedCreators);
   populateKeywordFacetOptions(filteredDocs, selectedKeywords);
-  renderActiveFilters(selectedCreators, selectedKeywords);
+  populateLocationFacetOptions(filteredDocs, selectedLocations);
+  renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations);
   if (PASTA_CONFIG["useCiteService"]) {
     buildCitationsFromCite(filteredDocs);
   } else {
@@ -537,7 +587,7 @@ function processFacetChange() {
 
 document.addEventListener("DOMContentLoaded", function() {
    // Fetch initial dataset from PASTA server and initialize facets/results
-   var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
+   var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword,geographicdescription&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
    showLoading(true);
    makeCorsRequest(url, null, function(headers, response) {
       var parser = new DOMParser();
@@ -546,6 +596,7 @@ document.addEventListener("DOMContentLoaded", function() {
       ALL_PASTA_DOCS = docs;
       populateCreatorFacetOptions(docs, []);
       populateKeywordFacetOptions(docs, []);
+      populateLocationFacetOptions(docs, []);
       // Render all results initially
       if (PASTA_CONFIG["useCiteService"]) {
          buildCitationsFromCite(docs);
@@ -594,18 +645,21 @@ document.addEventListener("DOMContentLoaded", function() {
           }, wait);
         };
       }
-      // Unified handler for facet (creator/keyword) changes
+      // Unified handler for facet (creator/keyword/location) changes
       var processFacetChange = debounce(function() {
         var selectedCreators = getSelectedCreators();
         var selectedKeywords = getSelectedKeywords();
+        var selectedLocations = getSelectedLocations();
         // Apply both filters to get filteredDocs
         var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
         filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+        filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations || []);
         // Dynamically update facet options based on filteredDocs
         populateCreatorFacetOptions(filteredDocs, selectedCreators);
         populateKeywordFacetOptions(filteredDocs, selectedKeywords);
+        populateLocationFacetOptions(filteredDocs, selectedLocations);
         // Render active filters UI
-        renderActiveFilters(selectedCreators, selectedKeywords);
+        renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations);
         // Render filtered results
         if (PASTA_CONFIG["useCiteService"]) {
           buildCitationsFromCite(filteredDocs);
@@ -631,7 +685,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       });
    }
-   // Keyword dropdown logic
+   // Keyword dropdown logic FIXME? where is the creator equivalent? Add for locations
    var keywordToggleBtn = document.getElementById("keyword-toggle-btn");
    var keywordDropdown = document.getElementById("keyword-dropdown");
    var keywordArrow = document.getElementById("keyword-arrow");
@@ -661,6 +715,41 @@ document.addEventListener("DOMContentLoaded", function() {
       // Listen for keyword checkbox changes
       keywordDropdown.addEventListener("change", function(e) {
         if (e.target.classList.contains('keyword-checkbox')) {
+          processFacetChange();
+        }
+      });
+   }
+
+   // Location dropdown logic FIXME? needed?
+   var locationToggleBtn = document.getElementById("location-toggle-btn");
+   var locationDropdown = document.getElementById("location-dropdown");
+   var locationArrow = document.getElementById("location-arrow");
+   var locationExpanded = false;
+   if (locationToggleBtn && locationDropdown && locationArrow) {
+      locationToggleBtn.addEventListener("click", function(e) {
+         e.preventDefault();
+         locationExpanded = !locationExpanded;
+         if (locationExpanded) {
+            locationDropdown.style.display = "block";
+            locationArrow.innerHTML = "\u25B2"; // Remove the semicolon
+            locationDropdown.focus();
+         } else {
+            locationDropdown.style.display = "none";
+            locationArrow.innerHTML = "\u25BC"; // Remove the semicolon
+         }
+      });
+      locationDropdown.addEventListener("blur", function(e) {
+         setTimeout(function() {
+            if (!locationDropdown.contains(document.activeElement)) {
+               locationDropdown.style.display = "none";
+               locationArrow.innerHTML = "\u25BC"; // Remove the semicolon
+               locationExpanded = false;
+            }
+         }, 150);
+      });
+      // Listen for location checkbox changes
+      locationDropdown.addEventListener("change", function(e) {
+        if (e.target.classList.contains('location-checkbox')) {
           processFacetChange();
         }
       });
