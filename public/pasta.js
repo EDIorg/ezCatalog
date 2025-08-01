@@ -543,7 +543,7 @@ function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocatio
 }
 
 function uncheckFacet(type, value) {
-  var selector = type === 'creator' ? '.creator-checkbox' : '.keyword-checkbox' : : '.location-checkbox';
+  var selector = type === 'creator' ? '.creator-checkbox' : (type === 'keyword' ? '.keyword-checkbox' : '.location-checkbox');
   var boxes = document.querySelectorAll(selector);
   boxes.forEach(function(box) {
     if (box.value === value) box.checked = false;
@@ -551,7 +551,7 @@ function uncheckFacet(type, value) {
 }
 
 function clearAllFacets() {
-  var boxes = document.querySelectorAll('.creator-checkbox, .keyword-checkbox', '.location-checkbox');
+  var boxes = document.querySelectorAll('.creator-checkbox, .keyword-checkbox, .location-checkbox');
   boxes.forEach(function(box) { box.checked = false; });
 }
 
