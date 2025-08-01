@@ -51,6 +51,15 @@
             </div>
             <div class="location-dropdown" id="location-dropdown" style="display:none; position:absolute; right:0; top:100%; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
          </div>
+         <div class="input-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span><i class="fas fa-tag"></i><label class="group-label" for="project">Project</label></span>
+              <button type="button" id="project-toggle-btn" aria-label="Toggle project dropdown" style="background:none;border:none;cursor:pointer;font-size:1.2em;outline:none;padding:0 4px;">
+                <span id="project-arrow">&#x25BC;</span>
+              </button>
+            </div>
+            <div class="project-dropdown" id="project-dropdown" style="display:none; position:absolute; right:0; top:100%; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
+         </div>
       </div>
    </form>
 

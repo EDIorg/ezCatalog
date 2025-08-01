@@ -448,6 +448,47 @@ function filterDocsByKeywords(docs, selectedKeywords) {
    });
 }
 
+// --- Faceted Project Dropdown Logic ---
+function renderProjectCheckboxes(projects, selected, projectCounts) {
+  return projects.map(function(project, i) {
+    var checked = selected.includes(project) ? 'checked' : '';
+    var count = projectCounts[project] || 0;
+    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
+      <input type="checkbox" class="project-checkbox" value="${project.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${project} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
+    </label>`;
+  }).join('');
+}
+
+function getSelectedProjects() {
+  var boxes = document.querySelectorAll('.project-checkbox:checked');
+  return Array.from(boxes).map(function(box) { return box.value; });
+}
+
+function populateProjectFacetOptions(docs, selected) {
+   var projectSet = new Set();
+   var projectCounts = {};
+   for (var i = 0; i < docs.length; i++) {
+      var projectNodes = docs[i].getElementsByTagName("projectTitle");
+      for (var j = 0; j < projectNodes.length; j++) {
+         var project = projectNodes[j].innerHTML;
+         projectSet.add(project);
+         projectCounts[project] = (projectCounts[project] || 0) + 1;
+      }
+   }
+   var projectDropdown = document.getElementById("project-dropdown");
+   var projects = Array.from(projectSet).sort();
+   projectDropdown.innerHTML = renderProjectCheckboxes(projects, selected || [], projectCounts);
+}
+
+function filterDocsByProjects(docs, selectedProjects) {
+   if (!selectedProjects.length) return docs;
+   return docs.filter(function(doc) {
+      var projectNodes = doc.getElementsByTagName("projectTitle");
+      var projects = Array.from(projectNodes).map(function(n) { return n.innerHTML; });
+      return selectedProjects.some(function(sel) { return projects.includes(sel); });
+   });
+}
+
 // --- Faceted Location Dropdown Logic ---
 function renderLocationCheckboxes(locations, selected, locationCounts) {
   return locations.map(function(location, i) {
@@ -489,7 +530,7 @@ function filterDocsByLocations(docs, selectedLocations) {
    });
 }
 
-// Patch successCallback to store all docs and update creator, keyword, and location facets
+// Patch successCallback to store all docs and update creator, keyword, projects, and location facets
 var origSuccessCallback = successCallback;
 successCallback = function(headers, response) {
    var parser = new DOMParser();
@@ -498,12 +539,15 @@ successCallback = function(headers, response) {
    ALL_PASTA_DOCS = docs;
    var selectedCreators = getSelectedCreators();
    var selectedKeywords = getSelectedKeywords();
+   var selectedProjects = getSelectedProjects();
    var selectedLocations = getSelectedLocations();
    populateCreatorFacetOptions(docs, selectedCreators);
    populateKeywordFacetOptions(docs, selectedKeywords);
+   populateProjectFacetOptions(docs, selectedProjects);
    populateLocationFacetOptions(docs, selectedLocations);
    var filteredDocs = filterDocsByCreators(docs, selectedCreators);
    filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords);
+    filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects);
    filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations);
    if (PASTA_CONFIG["useCiteService"]) {
       buildCitationsFromCite(filteredDocs);
@@ -525,7 +569,7 @@ successCallback = function(headers, response) {
 }
 
 // --- Active Filters UI ---
-function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations) {
+function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects) {
   var container = document.getElementById('active-filters');
   if (!container) return;
   var tags = [];
@@ -535,6 +579,9 @@ function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocatio
   selectedKeywords.forEach(function(keyword) {
     tags.push(`<span class="filter-tag">${keyword} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
   });
+  selectedProjects.forEach(function(project) {
+    tags.push(`<span class="filter-tag">${project} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
+  });
   selectedLocations.forEach(function(location) {
     tags.push(`<span class="filter-tag">${location} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
   });
@@ -543,7 +590,11 @@ function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocatio
 }
 
 function uncheckFacet(type, value) {
-  var selector = type === 'creator' ? '.creator-checkbox' : (type === 'keyword' ? '.keyword-checkbox' : '.location-checkbox');
+  var selector =
+    type === 'creator' ? '.creator-checkbox' :
+    type === 'keyword' ? '.keyword-checkbox' :
+    type === 'project' ? '.project-checkbox' :
+    '.location-checkbox';
   var boxes = document.querySelectorAll(selector);
   boxes.forEach(function(box) {
     if (box.value === value) box.checked = false;
@@ -551,22 +602,33 @@ function uncheckFacet(type, value) {
 }
 
 function clearAllFacets() {
-  var boxes = document.querySelectorAll('.creator-checkbox, .keyword-checkbox, .location-checkbox');
-  boxes.forEach(function(box) { box.checked = false; });
+  var selectors = [
+    '.creator-checkbox',
+    '.keyword-checkbox',
+    '.project-checkbox',
+    '.location-checkbox'
+  ];
+  selectors.forEach(function(selector) {
+    var boxes = document.querySelectorAll(selector);
+    boxes.forEach(function(box) { box.checked = false; });
+  });
 }
 
 // Move processFacetChange to top-level scope so it can be called from anywhere
 function processFacetChange() {
   var selectedCreators = getSelectedCreators();
   var selectedKeywords = getSelectedKeywords();
+  var selectedProjects = getSelectedProjects();
   var selectedLocations = getSelectedLocations();
   var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
   filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+  filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects || []);
   filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations || []);
   populateCreatorFacetOptions(filteredDocs, selectedCreators);
   populateKeywordFacetOptions(filteredDocs, selectedKeywords);
+  populateProjectFacetOptions(filteredDocs, selectedProjects);
   populateLocationFacetOptions(filteredDocs, selectedLocations);
-  renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations);
+  renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects);
   if (PASTA_CONFIG["useCiteService"]) {
     buildCitationsFromCite(filteredDocs);
   } else {
@@ -587,7 +649,7 @@ function processFacetChange() {
 
 document.addEventListener("DOMContentLoaded", function() {
    // Fetch initial dataset from PASTA server and initialize facets/results
-   var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword,geographicdescription&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
+   var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword,geographicdescription,projectTitle,relatedProjectTitle&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
    showLoading(true);
    makeCorsRequest(url, null, function(headers, response) {
       var parser = new DOMParser();
@@ -596,6 +658,7 @@ document.addEventListener("DOMContentLoaded", function() {
       ALL_PASTA_DOCS = docs;
       populateCreatorFacetOptions(docs, []);
       populateKeywordFacetOptions(docs, []);
+      populateProjectFacetOptions(docs, []);
       populateLocationFacetOptions(docs, []);
       // Render all results initially
       if (PASTA_CONFIG["useCiteService"]) {
@@ -645,21 +708,24 @@ document.addEventListener("DOMContentLoaded", function() {
           }, wait);
         };
       }
-      // Unified handler for facet (creator/keyword/location) changes
+      // Unified handler for facet (creator/keyword/location/project) changes
       var processFacetChange = debounce(function() {
         var selectedCreators = getSelectedCreators();
         var selectedKeywords = getSelectedKeywords();
+        var selectedProjects = getSelectedProjects();
         var selectedLocations = getSelectedLocations();
         // Apply both filters to get filteredDocs
         var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
         filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+        filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects || []);
         filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations || []);
         // Dynamically update facet options based on filteredDocs
         populateCreatorFacetOptions(filteredDocs, selectedCreators);
         populateKeywordFacetOptions(filteredDocs, selectedKeywords);
+        populateProjectFacetOptions(filteredDocs, selectedProjects);
         populateLocationFacetOptions(filteredDocs, selectedLocations);
         // Render active filters UI
-        renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations);
+        renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects);
         // Render filtered results
         if (PASTA_CONFIG["useCiteService"]) {
           buildCitationsFromCite(filteredDocs);
@@ -685,7 +751,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       });
    }
-   // Keyword dropdown logic FIXME? where is the creator equivalent? Add for locations
+   // Keyword dropdown logic
    var keywordToggleBtn = document.getElementById("keyword-toggle-btn");
    var keywordDropdown = document.getElementById("keyword-dropdown");
    var keywordArrow = document.getElementById("keyword-arrow");
@@ -720,7 +786,42 @@ document.addEventListener("DOMContentLoaded", function() {
       });
    }
 
-   // Location dropdown logic FIXME? needed?
+   // Project dropdown logic
+   var projectToggleBtn = document.getElementById("project-toggle-btn");
+   var projectDropdown = document.getElementById("project-dropdown");
+   var projectArrow = document.getElementById("project-arrow");
+   var projectExpanded = false;
+   if (projectToggleBtn && projectDropdown && projectArrow) {
+      projectToggleBtn.addEventListener("click", function(e) {
+         e.preventDefault();
+         projectExpanded = !projectExpanded;
+         if (projectExpanded) {
+            projectDropdown.style.display = "block";
+            projectArrow.innerHTML = "\u25B2"; // Remove the semicolon
+            projectDropdown.focus();
+         } else {
+            projectDropdown.style.display = "none";
+            projectArrow.innerHTML = "\u25BC"; // Remove the semicolon
+         }
+      });
+      projectDropdown.addEventListener("blur", function(e) {
+         setTimeout(function() {
+            if (!projectDropdown.contains(document.activeElement)) {
+               projectDropdown.style.display = "none";
+               projectArrow.innerHTML = "\u25BC"; // Remove the semicolon
+               projectExpanded = false;
+            }
+         }, 150);
+      });
+      // Listen for project checkbox changes
+      projectDropdown.addEventListener("change", function(e) {
+        if (e.target.classList.contains('project-checkbox')) {
+          processFacetChange();
+        }
+      });
+   }
+
+   // Location dropdown logic
    var locationToggleBtn = document.getElementById("location-toggle-btn");
    var locationDropdown = document.getElementById("location-dropdown");
    var locationArrow = document.getElementById("location-arrow");
