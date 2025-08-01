@@ -585,6 +585,25 @@ successCallback = function(headers, response) {
 }
 
 // --- Active Filters UI ---
+//function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects) {
+//  var container = document.getElementById('active-filters');
+//  if (!container) return;
+//  var tags = [];
+//  selectedCreators.forEach(function(creator) {
+//    tags.push(`<span class="filter-tag">${creator} <button class="remove-filter" data-type="creator" data-value="${encodeURIComponent(creator)}" title="Remove filter">×</button></span>`);
+//  });
+//  selectedKeywords.forEach(function(keyword) {
+//    tags.push(`<span class="filter-tag">${keyword} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
+//  });
+//  selectedProjects.forEach(function(project) {
+//    tags.push(`<span class="filter-tag">${project} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
+//  });
+//  selectedLocations.forEach(function(location) {
+//    tags.push(`<span class="filter-tag">${location} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
+//  });
+//  var clearBtn = (tags.length > 0) ? '<button id="clear-all-filters" class="clear-all-filters">Clear all filters</button>' : '';
+//  container.innerHTML = tags.join(' ') + ' ' + clearBtn;
+//}
 function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects) {
   var container = document.getElementById('active-filters');
   if (!container) return;
@@ -601,7 +620,9 @@ function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocatio
   selectedLocations.forEach(function(location) {
     tags.push(`<span class="filter-tag">${location} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
   });
-  var clearBtn = (tags.length > 0) ? '<button id="clear-all-filters" class="clear-all-filters">Clear all filters</button>' : '';
+  var clearBtn = (tags.length > 0)
+    ? '<span id="clear-all-filters" class="clear-all-filters-link">Clear all filters</span>'
+    : '';
   container.innerHTML = tags.join(' ') + ' ' + clearBtn;
 }
 
