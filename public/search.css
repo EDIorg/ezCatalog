@@ -236,3 +236,10 @@ input[type='checkbox'].collapse-toggle {
     padding-right: 0;
   }
 }
+.keyword-dropdown,
+.creator-dropdown,
+.location-dropdown,
+.project-dropdown {
+  display: block !important;
+  position: static !important;
+}
