@@ -200,3 +200,39 @@ input[type='checkbox'].collapse-toggle {
   flex-wrap: wrap;
   margin-bottom: 1em;
 }
+.main-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar {
+  min-width: 280px;
+  max-width: 340px;
+  padding: 16px 8px 0 0;
+  background: #fff;
+  border-right: 1px solid #e0e7ef;
+  height: 100%;
+}
+
+.content {
+  flex: 1;
+  padding: 16px 0 0 0;
+  min-width: 0;
+  background: #fff;
+}
+
+@media (max-width: 900px) {
+  .main-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    max-width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid #e0e7ef;
+    padding-right: 0;
+  }
+}
