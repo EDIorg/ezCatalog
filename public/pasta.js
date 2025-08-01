@@ -714,59 +714,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
          }, 150);
       });
-      // Debounce utility
-      function debounce(func, wait) {
-        var timeout;
-        return function() {
-          var context = this, args = arguments;
-          clearTimeout(timeout);
-          timeout = setTimeout(function() {
-            func.apply(context, args);
-          }, wait);
-        };
-      }
-      // Unified handler for facet (creator/keyword/location/project) changes
-      var processFacetChange = debounce(function() {
-        var selectedCreators = getSelectedCreators();
-        var selectedKeywords = getSelectedKeywords();
-        var selectedProjects = getSelectedProjects();
-        var selectedLocations = getSelectedLocations();
-        // Apply both filters to get filteredDocs
-        var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
-        filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
-        filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects || []);
-        filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations || []);
-        // Dynamically update facet options based on filteredDocs
-        populateCreatorFacetOptions(filteredDocs, selectedCreators);
-        populateKeywordFacetOptions(filteredDocs, selectedKeywords);
-        populateProjectFacetOptions(filteredDocs, selectedProjects);
-        populateLocationFacetOptions(filteredDocs, selectedLocations);
-        // Render active filters UI
-        renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects);
-        // Render filtered results
-        if (PASTA_CONFIG["useCiteService"]) {
-          buildCitationsFromCite(filteredDocs);
-        } else {
-          buildCitationsFromPasta(filteredDocs);
-        }
-        var count = filteredDocs.length;
-        setHtml(PASTA_CONFIG["csvElementId"], '');
-        var currentStart = 0;
-        var limit = parseInt(PASTA_CONFIG["limit"]);
-        var showPages = parseInt(PASTA_CONFIG["showPages"]);
-        var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
-        var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
-        showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
-        showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
-        var query = getParameterByName("q");
-        showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-      }, 400);
-      // Listen for creator checkbox changes
-      creatorDropdown.addEventListener("change", function(e) {
-        if (e.target.classList.contains('creator-checkbox')) {
-          processFacetChange();
-        }
-      });
    }
    // Keyword dropdown logic
    var keywordToggleBtn = document.getElementById("keyword-toggle-btn");
@@ -794,12 +741,6 @@ document.addEventListener("DOMContentLoaded", function() {
                keywordExpanded = false;
             }
          }, 150);
-      });
-      // Listen for keyword checkbox changes
-      keywordDropdown.addEventListener("change", function(e) {
-        if (e.target.classList.contains('keyword-checkbox')) {
-          processFacetChange();
-        }
       });
    }
 
@@ -830,12 +771,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
          }, 150);
       });
-      // Listen for project checkbox changes
-      projectDropdown.addEventListener("change", function(e) {
-        if (e.target.classList.contains('project-checkbox')) {
-          processFacetChange();
-        }
-      });
    }
 
    // Location dropdown logic
@@ -865,12 +800,43 @@ document.addEventListener("DOMContentLoaded", function() {
             }
          }, 150);
       });
-      // Listen for location checkbox changes
-      locationDropdown.addEventListener("change", function(e) {
-        if (e.target.classList.contains('location-checkbox')) {
-          processFacetChange();
-        }
-      });
+   }
+
+   // Always listen for creator checkbox changes
+   var creatorDropdown = document.getElementById("creator-dropdown");
+   if (creatorDropdown) {
+     creatorDropdown.addEventListener("change", function(e) {
+       if (e.target.classList.contains('creator-checkbox')) {
+         processFacetChange();
+       }
+     });
+   }
+   // Always listen for keyword checkbox changes
+   var keywordDropdown = document.getElementById("keyword-dropdown");
+   if (keywordDropdown) {
+     keywordDropdown.addEventListener("change", function(e) {
+       if (e.target.classList.contains('keyword-checkbox')) {
+         processFacetChange();
+       }
+     });
+   }
+   // Always listen for project checkbox changes
+   var projectDropdown = document.getElementById("project-dropdown");
+   if (projectDropdown) {
+     projectDropdown.addEventListener("change", function(e) {
+       if (e.target.classList.contains('project-checkbox')) {
+         processFacetChange();
+       }
+     });
+   }
+   // Always listen for location checkbox changes
+   var locationDropdown = document.getElementById("location-dropdown");
+   if (locationDropdown) {
+     locationDropdown.addEventListener("change", function(e) {
+       if (e.target.classList.contains('location-checkbox')) {
+         processFacetChange();
+       }
+     });
    }
 
    // Listen for remove filter clicks and clear all
