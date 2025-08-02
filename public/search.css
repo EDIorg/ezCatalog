@@ -106,8 +106,7 @@ input[type='checkbox'].collapse-toggle {
 }
 
 .input-block {
-   border-bottom: 1px dashed gray;
-   margin-bottom: 5px;
+   margin-bottom: 20px;
    max-width: 256px;
    position: relative;
 }
@@ -242,4 +241,8 @@ input[type='checkbox'].collapse-toggle {
 .project-dropdown {
   display: block !important;
   position: static !important;
+  margin-top: 8px;
+}
+.group-label {
+  margin-left: 6px;
 }
