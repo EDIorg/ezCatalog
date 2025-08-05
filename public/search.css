@@ -250,7 +250,7 @@ input[type='checkbox'].collapse-toggle {
 .dataset-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 18px;
+  margin-bottom: 38px; /* Increased vertical separation */
 }
 .dataset-info {
   flex: 1;
