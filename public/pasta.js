@@ -45,17 +45,17 @@ function buildHtml(citations, abstracts) {
       }
       var authors = citation["authors"];
       var date = (citation["pub_year"]) ? " Published " + citation["pub_year"] + "" : "";
-      // default ESIP formatting has trailing period after DOI
       var link = (citation["doi"]) ? citation["doi"].slice(0, -1) : "https://portal.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];
       var title = '<a rel="external noopener" href="' + link + '" target="_blank" aria-label="open data in new tab">' + citation["title"] + '</a>';
+      // --- THUMBNAIL LOGIC ---
+      var pkgid = citation["pid"];
+      var imgBase = pkgid.split(".").slice(0,2).join(".");
+      var imgSrc = "images/" + imgBase + ".png";
+      var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
       if (PASTA_CONFIG["showAbstracts"]) {
-         var row = '<p><span class="dataset-title">' + title +
-            '</span><br><span class="dataset-author">' + authors + date +
-            '</span><br>' + abstract + '</p>';
+         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${authors}${date}</span><br>${abstract}</p></div>${imgHtml}</div>`;
       } else {
-         var row = '<p><span class="dataset-title">' + title +
-            '</span><br><span class="dataset-author">' + authors + date +
-            '</span></p>';
+         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${authors}${date}</span></p></div>${imgHtml}</div>`;
       }
       html.push(row);
    }
@@ -126,7 +126,6 @@ function buildCitationsFromPasta(pastaDocs) {
       for (var authorIndex = 0; authorIndex < authorNodes.length; authorIndex++) {
          authors.push(authorNodes[authorIndex].innerHTML);
       }
-
       var names = authors.join("; ");
       var date;
       try {
@@ -145,8 +144,7 @@ function buildCitationsFromPasta(pastaDocs) {
          link = ("https://portal.edirepository.org/nis/mapbrowse?packageid=" +
             doc.getElementsByTagName("packageid")[0].childNodes[0].nodeValue);
       }
-      var title = '<a rel="external noopener" href="' + link + '" target="_blank" aria-label="open data in new tab">' +
-         doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim() + '</a>';
+      var title = '<a rel="external noopener" href="' + link + '" target="_blank" aria-label="open data in new tab">' + doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim() + '</a>';
       var abstract;
       try {
          abstract = '<br><span class="dataset-abstract">' + doc.getElementsByTagName("abstract")[0].childNodes[0].nodeValue + '</span>';
@@ -156,14 +154,15 @@ function buildCitationsFromPasta(pastaDocs) {
       } catch (error) {
          abstract = '';
       }
+      // --- THUMBNAIL LOGIC ---
+      var pkgid = doc.getElementsByTagName("packageid")[0].childNodes[0].nodeValue;
+      var imgBase = pkgid.split(".").slice(0,2).join(".");
+      var imgSrc = "images/" + imgBase + ".png";
+      var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
       if (PASTA_CONFIG["showAbstracts"]) {
-         var row = '<p><span class="dataset-title">' + title +
-            '</span><br><span class="dataset-author">' + names + date +
-            '</span>' + abstract + '</p>';
+         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${names}${date}</span>${abstract}</p></div>${imgHtml}</div>`;
       } else {
-         var row = '<p><span class="dataset-title">' + title +
-            '</span><br><span class="dataset-author">' + names + date +
-            '</span></p>';
+         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${names}${date}</span></p></div>${imgHtml}</div>`;
       }
       html.push(row);
    }
