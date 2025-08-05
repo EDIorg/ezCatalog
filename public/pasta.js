@@ -46,16 +46,17 @@ function buildHtml(citations, abstracts) {
       var authors = citation["authors"];
       var date = (citation["pub_year"]) ? " Published " + citation["pub_year"] + "" : "";
       var link = (citation["doi"]) ? citation["doi"].slice(0, -1) : "https://portal.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];
-      var title = '<a rel="external noopener" href="' + link + '" target="_blank" aria-label="open data in new tab">' + citation["title"] + '</a>';
+      var title = citation["title"];
       // --- THUMBNAIL LOGIC ---
       var pkgid = citation["pid"];
       var imgBase = pkgid.split(".").slice(0,2).join(".");
       var imgSrc = "images/" + imgBase + ".png";
       var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
+      var exploreLink = `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
       if (PASTA_CONFIG["showAbstracts"]) {
-         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${authors}${date}</span><br>${abstract}</p></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class=\"dataset-title\">${title}</span><br><span class=\"dataset-author\">${authors}${date}</span><br>${abstract}</p><div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
       } else {
-         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${authors}${date}</span></p></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class=\"dataset-title\">${title}</span><br><span class=\"dataset-author\">${authors}${date}</span></p><div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
       }
       html.push(row);
    }
