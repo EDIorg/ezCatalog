@@ -256,12 +256,12 @@ input[type='checkbox'].collapse-toggle {
   flex: 1;
 }
 .dataset-thumb-container {
-  width: 280px;
-  height: 280px;
-  min-width: 280px;
-  min-height: 280px;
-  max-width: 280px;
-  max-height: 280px;
+  width: 320px;
+  height: 180px;
+  min-width: 320px;
+  min-height: 180px;
+  max-width: 320px;
+  max-height: 180px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -275,18 +275,18 @@ input[type='checkbox'].collapse-toggle {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  aspect-ratio: 1/1;
+  aspect-ratio: 16/9;
   border-radius: 6px;
   background: #eee;
 }
 @media (max-width: 600px) {
   .dataset-thumb-container {
-    width: 120px;
-    height: 120px;
-    min-width: 120px;
-    min-height: 120px;
-    max-width: 120px;
-    max-height: 120px;
+    width: 160px;
+    height: 90px;
+    min-width: 160px;
+    min-height: 90px;
+    max-width: 160px;
+    max-height: 90px;
     margin-left: 10px;
   }
 }
