@@ -46,7 +46,7 @@ function buildHtml(citations, abstracts) {
       var authors = citation["authors"];
       var date = (citation["pub_year"]) ? " Published " + citation["pub_year"] + "" : "";
       var link = (citation["doi"]) ? citation["doi"].slice(0, -1) : "https://portal.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];
-      var title = citation["title"];
+      var title = `<strong>${citation["title"]}</strong>`;
       // --- THUMBNAIL LOGIC ---
       var pkgid = citation["pid"];
       var imgBase = pkgid.split(".").slice(0,2).join(".");
