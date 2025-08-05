@@ -290,3 +290,14 @@ input[type='checkbox'].collapse-toggle {
     margin-left: 10px;
   }
 }
+
+.explore-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.18s, text-decoration 0.18s;
+}
+.explore-link:hover, .explore-link:focus {
+  color: #0d3760;
+  text-decoration: underline;
+}
