@@ -16,7 +16,7 @@ var PASTA_CONFIG = {
    "sortDiv": "sortDiv", // Element with interactive sort options
    "useCiteService": true, // true if we should use EDI Cite service to build citations instead of building from PASTA results,
    "showAbstracts": true, // true if we should show abstracts in search results
-   "abstractLimit": 1000 // Limit the number of characters in the abstract
+   "abstractLimit": 750 // Limit the number of characters in the abstract
 };
 
 // --- Legacy server-driven search and pagination logic removed for client-side faceted search migration ---
