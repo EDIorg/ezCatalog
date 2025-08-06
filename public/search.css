@@ -24,6 +24,11 @@ body {
     margin: auto;
 }
 
+.dataset-title {
+  color: #000000;
+  font-weight: bold;
+  font-size: 1.2em;
+}
 .dataset-title a {
     font-size: 1.2em;
     text-decoration: none;
@@ -34,7 +39,7 @@ body {
 }
 
 .dataset-author {
-    color: #808080;
+    color: #333333;
 }
 
 .search-input {
@@ -43,18 +48,19 @@ body {
 }
 
 .resultCount {
-    color: #808080;
+    color: #333333;
 }
 
 .result-query {
     font-weight: bold;
+    color: #333333;
 }
 
 .pagination {
 	margin: 16px 8px 16px 8px;
 }
 .pagination a {
-	color: black;
+	color: #333333;
 	padding: 8px 16px;
 	text-decoration: none;
 }
@@ -256,7 +262,16 @@ input[type='checkbox'].collapse-toggle {
   margin-top: 8px;
 }
 .group-label {
+  color: #000000;
+  font-weight: bold;
+  font-size: 1.2em;
   margin-left: 6px;
+}
+.input-block i {
+  color: #000000;
+  font-size: 1.2em;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 .dataset-row {
@@ -354,3 +369,12 @@ input[type='checkbox'].collapse-toggle {
     margin-right: 10px;
   }
 }
+
+p, .dataset-author, .resultCount, .result-query, .filter-tag, .clear-all-filters-link, .pagination a, .pagination a.active, .pagination a:hover:not(.active), .input-block label, .keyword-dropdown, .creator-dropdown, .location-dropdown, .project-dropdown {
+  color: #333333;
+}
+
+
+
+
+
