@@ -318,7 +318,7 @@ input[type='checkbox'].collapse-toggle {
 .banner-bar {
   width: 100%;
   height: 64px;
-  background: var(--banner-color, #1976d2); /* Easily configurable */
+  background: var(--banner-color, #0046AD); /* Easily configurable */
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -333,8 +333,16 @@ input[type='checkbox'].collapse-toggle {
   height: 100%;
   max-height: 64px;
   width: auto;
-  margin-right: 18px;
+  margin-right: 4px;
   display: block;
+}
+.branding-text {
+  font-size: 2em;
+  font-weight: bold;
+  color: #FFFFFF;
+  margin-left: 4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 @media (max-width: 600px) {
   .banner-bar {

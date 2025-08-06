@@ -855,6 +855,16 @@ document.addEventListener("DOMContentLoaded", function() {
        processFacetChange();
      }
    });
+
+   // Branding text for banner bar
+var brandingText = "Seattle Public Utilities Data Catalog"; // <-- Set this to your desired branding text
+
+window.addEventListener('DOMContentLoaded', function() {
+  var brandingSpan = document.getElementById('branding-text');
+  if (brandingSpan && typeof brandingText === 'string') {
+    brandingSpan.textContent = brandingText;
+  }
+});
 });
 
 // When the window loads, read query parameters and perform search
