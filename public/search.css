@@ -31,7 +31,7 @@ body {
 .dataset-title {
   color: #000000;
   font-weight: bold;
-  font-size: 1.2em;
+  font-size: 20px;
   margin-bottom: 8px; /* Add space below title */
 }
 .dataset-title a {
@@ -388,6 +388,7 @@ input[type='checkbox'].collapse-toggle {
   }
 }
 
-p, .dataset-author, .resultCount, .result-query, .filter-tag, .clear-all-filters-link, .pagination a, .pagination a.active, .pagination a:hover:not(.active), .input-block label, .keyword-dropdown, .creator-dropdown, .location-dropdown, .project-dropdown {
+p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-query, .filter-tag, .clear-all-filters-link, .pagination a, .pagination a.active, .pagination a:hover:not(.active), .keyword-dropdown, .creator-dropdown, .location-dropdown, .project-dropdown {
   color: #333333;
+  font-size: 14px;
 }
