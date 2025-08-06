@@ -28,6 +28,7 @@ body {
   color: #000000;
   font-weight: bold;
   font-size: 1.2em;
+  margin-bottom: 8px; /* Add space below title */
 }
 .dataset-title a {
     font-size: 1.2em;
@@ -40,6 +41,12 @@ body {
 
 .dataset-author {
     color: #333333;
+    margin-bottom: 8px; /* Add space below author */
+}
+
+.dataset-abstract {
+    display: block;
+    margin-bottom: 8px; /* Add space below description/abstract */
 }
 
 .search-input {
@@ -373,8 +380,3 @@ input[type='checkbox'].collapse-toggle {
 p, .dataset-author, .resultCount, .result-query, .filter-tag, .clear-all-filters-link, .pagination a, .pagination a.active, .pagination a:hover:not(.active), .input-block label, .keyword-dropdown, .creator-dropdown, .location-dropdown, .project-dropdown {
   color: #333333;
 }
-
-
-
-
-

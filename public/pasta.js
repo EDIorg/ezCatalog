@@ -46,17 +46,19 @@ function buildHtml(citations, abstracts) {
       var authors = citation["authors"];
       var date = (citation["pub_year"]) ? " Published " + citation["pub_year"] + "" : "";
       var link = (citation["doi"]) ? citation["doi"].slice(0, -1) : "https://portal.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];
-      var title = `<strong>${citation["title"]}</strong>`;
+      var title = `<div class='dataset-title'><strong>${citation["title"]}</strong></div>`;
       // --- THUMBNAIL LOGIC ---
       var pkgid = citation["pid"];
       var imgBase = pkgid.split(".").slice(0,2).join(".");
       var imgSrc = "images/" + imgBase + ".png";
       var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
       var exploreLink = `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+      var authorHtml = `<div class='dataset-author'>${authors}${date}</div>`;
+      var abstractHtml = `<div class='dataset-abstract'>${abstract}</div>`;
       if (PASTA_CONFIG["showAbstracts"]) {
-         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class=\"dataset-title\">${title}</span><br><span class=\"dataset-author\">${authors}${date}</span><br>${abstract}</p><div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstractHtml}<div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
       } else {
-         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class=\"dataset-title\">${title}</span><br><span class=\"dataset-author\">${authors}${date}</span></p><div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
       }
       html.push(row);
    }
@@ -145,13 +147,14 @@ function buildCitationsFromPasta(pastaDocs) {
          link = ("https://portal.edirepository.org/nis/mapbrowse?packageid=" +
             doc.getElementsByTagName("packageid")[0].childNodes[0].nodeValue);
       }
-      var title = '<a rel="external noopener" href="' + link + '" target="_blank" aria-label="open data in new tab">' + doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim() + '</a>';
+      var title = '<div class="dataset-title"><a rel="external noopener" href="' + link + '" target="_blank" aria-label="open data in new tab">' + doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim() + '</a></div>';
       var abstract;
       try {
-         abstract = '<br><span class="dataset-abstract">' + doc.getElementsByTagName("abstract")[0].childNodes[0].nodeValue + '</span>';
+         abstract = doc.getElementsByTagName("abstract")[0].childNodes[0].nodeValue;
          if (abstract.length > PASTA_CONFIG["abstractLimit"]) {
             abstract = abstract.substring(0, PASTA_CONFIG["abstractLimit"]) + "...";
          }
+         abstract = '<div class="dataset-abstract">' + abstract + '</div>';
       } catch (error) {
          abstract = '';
       }
@@ -160,10 +163,11 @@ function buildCitationsFromPasta(pastaDocs) {
       var imgBase = pkgid.split(".").slice(0,2).join(".");
       var imgSrc = "images/" + imgBase + ".png";
       var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
+      var authorHtml = `<div class='dataset-author'>${names}${date}</div>`;
       if (PASTA_CONFIG["showAbstracts"]) {
-         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${names}${date}</span>${abstract}</p></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstract}<div class='dataset-actions'></div></div>${imgHtml}</div>`;
       } else {
-         var row = `<div class='dataset-row'><div class='dataset-info'><p><span class="dataset-title">${title}</span><br><span class="dataset-author">${names}${date}</span></p></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'></div></div>${imgHtml}</div>`;
       }
       html.push(row);
    }
