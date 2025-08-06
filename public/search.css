@@ -33,6 +33,10 @@ body {
 .dataset-title a {
     font-size: 1.2em;
     text-decoration: none;
+    color: #0046AD;
+}
+.dataset-title a:visited {
+    color: #4C2C92;
 }
 
 .dataset-title a:hover {
@@ -326,10 +330,13 @@ input[type='checkbox'].collapse-toggle {
 }
 
 .explore-link {
-  color: #1976d2;
+  color: #0046AD;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.18s, text-decoration 0.18s;
+}
+.explore-link:visited {
+  color: #4C2C92;
 }
 .explore-link:hover, .explore-link:focus {
   color: #0d3760;
