@@ -1,4 +1,8 @@
-html {
+/* Add Open Sans font from Google Fonts */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
+
+html, body {
+  font-family: 'Open Sans', Arial, Helvetica, sans-serif !important;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
