@@ -399,11 +399,13 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
 .location-dropdown label:hover,
 .project-dropdown label:hover {
   text-decoration: underline;
+  text-decoration-color: #0d3760;
+  text-underline-offset: 2px;
 }
 .keyword-dropdown label:hover input[type="checkbox"],
 .creator-dropdown label:hover input[type="checkbox"],
 .location-dropdown label:hover input[type="checkbox"],
 .project-dropdown label:hover input[type="checkbox"] {
-  outline: 2px solid #1976d2;
+  outline: 2px solid #0d3760;
   box-shadow: 0 0 0 2px #b5d6f7;
 }
