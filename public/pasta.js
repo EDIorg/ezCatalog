@@ -53,12 +53,15 @@ function buildHtml(citations, abstracts) {
       var imgSrc = "images/" + imgBase + ".png";
       var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
       var exploreLink = `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+      // --- RELATED STORIES LINK ---
+      var pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
+      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}' target='_blank' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
       var authorHtml = `<div class='dataset-author'>${authors}${date}</div>`;
       var abstractHtml = `<div class='dataset-abstract'>${abstract}</div>`;
       if (PASTA_CONFIG["showAbstracts"]) {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstractHtml}<div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstractHtml}<div class='dataset-actions'>${exploreLink}${relatedStoriesLink}</div></div>${imgHtml}</div>`;
       } else {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'>${exploreLink}</div></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'>${exploreLink}${relatedStoriesLink}</div></div>${imgHtml}</div>`;
       }
       html.push(row);
    }
@@ -164,10 +167,13 @@ function buildCitationsFromPasta(pastaDocs) {
       var imgSrc = "images/" + imgBase + ".png";
       var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
       var authorHtml = `<div class='dataset-author'>${names}${date}</div>`;
+      // --- RELATED STORIES LINK ---
+      var pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
+      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}' target='_blank' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
       if (PASTA_CONFIG["showAbstracts"]) {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstract}<div class='dataset-actions'></div></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstract}<div class='dataset-actions'>${relatedStoriesLink}</div></div>${imgHtml}</div>`;
       } else {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'></div></div>${imgHtml}</div>`;
+         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'>${relatedStoriesLink}</div></div>${imgHtml}</div>`;
       }
       html.push(row);
    }
