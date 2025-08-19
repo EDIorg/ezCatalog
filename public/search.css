@@ -334,16 +334,16 @@ input[type='checkbox'].collapse-toggle {
 }
 
 .explore-link {
-  color: #0046AD;
+  color: #0046AD !important;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.18s, text-decoration 0.18s;
 }
 .explore-link:visited {
-  color: #4C2C92;
+  color: #4C2C92 !important;
 }
 .explore-link:hover, .explore-link:focus {
-  color: #0d3760;
+  color: #0d3760 !important;
   text-decoration: underline;
 }
 
