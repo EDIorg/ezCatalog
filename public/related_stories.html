@@ -107,8 +107,7 @@ function uCSV(url, success, error) {
       var title = getParameterByName('title');
       var titleDiv = document.getElementById('dataset-title');
       if (title) {
-        // Insert a line break after the label for readability
-        titleDiv.innerHTML = `Related Stories for:<br><br><span class="dataset-title-value">${title}</span>`;
+        titleDiv.textContent = title;
       } else {
         titleDiv.textContent = '';
       }
