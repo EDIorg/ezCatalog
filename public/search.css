@@ -392,3 +392,18 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
   color: #333333;
   font-size: 14px;
 }
+
+/* Facet filter label hover underline and checkbox highlight */
+.keyword-dropdown label:hover,
+.creator-dropdown label:hover,
+.location-dropdown label:hover,
+.project-dropdown label:hover {
+  text-decoration: underline;
+}
+.keyword-dropdown label:hover input[type="checkbox"],
+.creator-dropdown label:hover input[type="checkbox"],
+.location-dropdown label:hover input[type="checkbox"],
+.project-dropdown label:hover input[type="checkbox"] {
+  outline: 2px solid #1976d2;
+  box-shadow: 0 0 0 2px #b5d6f7;
+}
