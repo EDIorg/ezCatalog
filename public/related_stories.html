@@ -19,6 +19,7 @@
     <img src="images/logo.png" alt="Logo" class="banner-logo" />
     <span id="branding-text" class="branding-text">Seattle Public Utilities Data Catalog</span>
   </div>
+  <div id="dataset-title" style="font-size:1.4em;font-weight:bold;margin:32px auto 12px auto;max-width:700px;"></div>
   <div class="story-list" id="story-list">
     <p>Loading related stories...</p>
   </div>
@@ -65,7 +66,7 @@ function uCSV(url, success, error) {
     }
     function getParameterByName(name, url) {
       if (!url) url = window.location.href;
-      name = name.replace(/\[\]]/g, "\\$&");
+      name = name.replace(/[\[\]]/g, "\\$&");
       var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
         results = regex.exec(url);
       if (!results) return null;
@@ -100,8 +101,18 @@ function uCSV(url, success, error) {
         document.getElementById('story-list').innerHTML = '<div class="no-stories">Failed to load related stories.</div>';
       });
     }
+    function displayDatasetTitleFromQuery() {
+      var title = getParameterByName('title');
+      var titleDiv = document.getElementById('dataset-title');
+      if (title) {
+        titleDiv.textContent = `Related Stories for: ${title}`;
+      } else {
+        titleDiv.textContent = '';
+      }
+    }
     document.addEventListener('DOMContentLoaded', function() {
       var pkgId = getParameterByName('package_id');
+      displayDatasetTitleFromQuery();
       if (!pkgId) {
         document.getElementById('story-list').innerHTML = '<div class="no-stories">No package specified.</div>';
         return;

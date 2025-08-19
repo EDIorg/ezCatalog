@@ -55,7 +55,8 @@ function buildHtml(citations, abstracts) {
       var exploreLink = `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
       // --- RELATED STORIES LINK ---
       var pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
-      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+      var encodedTitle = encodeURIComponent(citation["title"]);
+      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
       var authorHtml = `<div class='dataset-author'>${authors}${date}</div>`;
       var abstractHtml = `<div class='dataset-abstract'>${abstract}</div>`;
       if (PASTA_CONFIG["showAbstracts"]) {
@@ -169,7 +170,8 @@ function buildCitationsFromPasta(pastaDocs) {
       var authorHtml = `<div class='dataset-author'>${names}${date}</div>`;
       // --- RELATED STORIES LINK ---
       var pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
-      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+      var encodedTitle = encodeURIComponent(doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim());
+      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
       if (PASTA_CONFIG["showAbstracts"]) {
          var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstract}<div class='dataset-actions'>${relatedStoriesLink}</div></div>${imgHtml}</div>`;
       } else {
