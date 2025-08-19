@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Related Stories</title>
+  <link rel="stylesheet" href="search.css">
+  <style>
+    .story-list { margin: 32px auto; max-width: 700px; }
+    .story-item { background: #f7f7f7; border-radius: 8px; margin-bottom: 24px; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .story-title { font-size: 1.2em; font-weight: bold; color: #0046AD; margin-bottom: 6px; }
+    .story-summary { color: #333; margin-bottom: 8px; }
+    .story-link { color: #1976d2; text-decoration: none; font-weight: 500; }
+    .story-link:hover { text-decoration: underline; }
+    .no-stories { color: #c00; font-size: 1.1em; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <div class="banner-bar">
+    <img src="images/logo.png" alt="Logo" class="banner-logo" />
+    <span id="branding-text" class="branding-text">Seattle Public Utilities Data Catalog</span>
+  </div>
+  <div class="story-list" id="story-list">
+    <p>Loading related stories...</p>
+  </div>
+  <script src="ucsv-1.2.0.min.js"></script>
+  <script>
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return "";
+      return decodeURIComponent(results[2].replace(/\+/g, " ")).trim();
+    }
+    function renderStories(stories) {
+      var container = document.getElementById('story-list');
+      if (!stories.length) {
+        container.innerHTML = '<div class="no-stories">No related stories found for this dataset.</div>';
+        return;
+      }
+      container.innerHTML = stories.map(function(story) {
+        return `<div class="story-item">
+          <div class="story-title">${story.title}</div>
+          <div class="story-summary">${story.summary}</div>
+          <a class="story-link" href="${story.url}" target="_blank" rel="noopener noreferrer">Read Full Story <i class="fas fa-external-link-alt"></i></a>
+        </div>`;
+      }).join('');
+    }
+    function loadStories(packageId) {
+      uCSV('/related_stories.csv', function(data) {
+        var stories = data.filter(function(row) {
+          return row.package_id === packageId;
+        });
+        renderStories(stories);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var pkgId = getParameterByName('package_id');
+      if (!pkgId) {
+        document.getElementById('story-list').innerHTML = '<div class="no-stories">No package specified.</div>';
+        return;
+      }
+      loadStories(pkgId);
+    });
+  </script>
+  <script src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" crossorigin="anonymous"></script>
+</body>
+</html>
+
