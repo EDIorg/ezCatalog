@@ -18,8 +18,6 @@ var PASTA_CONFIG = {
    "abstractLimit": 750 // Limit the number of characters in the abstract
 };
 
-// --- Legacy server-driven search and pagination logic removed for client-side faceted search migration ---
-
 // Get URL arguments
 function getParameterByName(name, url) {
    if (!url) url = window.location.href;
