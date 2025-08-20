@@ -13,7 +13,6 @@ var PASTA_CONFIG = {
    "pagesTopElementId": "paginationTop", // Element to display result page links above results
    "pagesBotElementId": "paginationBot", // Element to display result page links below results
    "showPages": 5, // MUST BE ODD NUMBER! Max number of page links to show
-   "sortDiv": "sortDiv", // Element with interactive sort options
    "useCiteService": true, // true if we should use EDI Cite service to build citations instead of building from PASTA results,
    "showAbstracts": true, // true if we should show abstracts in search results
    "abstractLimit": 750 // Limit the number of characters in the abstract
@@ -219,13 +218,6 @@ function successCallback(headers, response) {
    var parser = new DOMParser();
    var xmlDoc = parser.parseFromString(response, "text/xml");
    var docs = xmlDoc.getElementsByTagName("document");
-   var sortDiv = document.getElementById(PASTA_CONFIG["sortDiv"]);
-   if (sortDiv) {
-      if (docs.length)
-         sortDiv.style.display = "block";
-      else
-         sortDiv.style.display = "none";
-   }
    if (PASTA_CONFIG["useCiteService"]) {
       buildCitationsFromCite(docs);
    } else {
@@ -861,44 +853,3 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 });
 });
-
-// When the window loads, read query parameters and perform search
-window.onload = function () {
-   function initApp(expanded) {
-      initCollapsible(expanded);
-
-      var sortControl = document.getElementById("visibleSort");
-      if (sortControl) {
-         sortControl.onchange = function () {
-            var hiddenSortControl = document.getElementById("sort");
-            hiddenSortControl.value = this.options[this.selectedIndex].value;
-            var form = document.getElementById("dataSearchForm");
-            form.submit();
-         };
-      }
-   }
-
-   var query = getParameterByName("q");
-   var coreAreaParam = getParameterByName("coreArea");
-   var creator = getParameterByName("creator");
-   var project = getParameterByName("project");
-   var sYear = parseInt(getParameterByName("s"));
-   var eYear = parseInt(getParameterByName("e"));
-   var datayear = getParameterByName("datayear") === "y";
-   var pubyear = getParameterByName("pubyear") === "y";
-   var pkgId = getParameterByName("id");
-   var taxon = getParameterByName("taxon");
-   var geo = getParameterByName("geo");
-   var expanded = Boolean(getParameterByName("expanded"));
-   var pageStart = getParameterByName("start");
-   var sortParam = getParameterByName("sort");
-   if (!pageStart) pageStart = 0;
-
-   initApp(expanded);
-
-   if (!query) query = "*"; // default for empty query
-   QUERY_URL = makeQueryUrlBase(query, coreArea, creator, sYear, eYear,
-      datayear, pubyear, pkgId, taxon, geo, project, sortParam)
-   searchPasta(PASTA_CONFIG["limit"], pageStart);
-
-};
