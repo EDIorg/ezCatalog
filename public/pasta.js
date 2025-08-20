@@ -358,23 +358,6 @@ function isInteger(x) {
    return (typeof x === 'number') && (x % 1 === 0);
 }
 
-function makeAutocomplete(elementId, choices, minChars) {
-   if (!minChars) minChars = 2;
-   var autocomplete = new autoComplete({
-      selector: "#" + elementId,
-      minChars: minChars,
-      source: function (term, suggest) {
-         term = term.toLowerCase();
-         var suggestions = [];
-         for (var i = 0; i < choices.length; i++)
-            if (~choices[i].toLowerCase().indexOf(term))
-               suggestions.push(choices[i]);
-         suggest(suggestions);
-      }
-   });
-   return autocomplete;
-}
-
 // --- Faceted Creator Dropdown Logic ---
 // Store all results for client-side filtering
 var ALL_PASTA_DOCS = [];
@@ -918,9 +901,4 @@ window.onload = function () {
       datayear, pubyear, pkgId, taxon, geo, project, sortParam)
    searchPasta(PASTA_CONFIG["limit"], pageStart);
 
-   if ("PASTA_LOOKUP" in window) {
-      makeAutocomplete("creator", PASTA_LOOKUP["author"]);
-      makeAutocomplete("project", PASTA_LOOKUP["projectTitle"].concat(PASTA_LOOKUP["relatedProjectTitle"]));
-      makeAutocomplete("taxon", PASTA_LOOKUP["taxonomic"]);
-   }
 };

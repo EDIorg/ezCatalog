@@ -41,12 +41,6 @@ To see an example of how to embed the catalog in a web page `<iframe>`, view the
 
 ## Features
 
-### Autocomplete
-
-Autocomplete is currently supported for the creator, taxonomy, and project input fields. Try typing a couple of characters into the creator box of the demo page and see what happens.
-
-Autocomplete requires creating a list of possible choices, which is automatically generated each time the GitHub Actions workflow `build_catalog` runs.
-
 ### Pagination
 
 ezCatalog allows you to limit the number of results returned per page. If you do not wish to use pagination, set the `limit` parameter in `config.txt` to a number higher than the number of datasets available for your group.
@@ -67,5 +61,3 @@ ezCatalog is a basic data catalog. If interested in developing a more feature ri
 
 CSV export uses uselesscode's JS CSV serializer (MIT Licensed):
 http://www.uselesscode.org/javascript/csv/
-
-We use Pixabay's autocomplete plugin. Thanks Pixabay!
