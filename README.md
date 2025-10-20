@@ -61,3 +61,17 @@ ezCatalog is a basic data catalog. If interested in developing a more feature ri
 
 CSV export uses uselesscode's JS CSV serializer (MIT Licensed):
 http://www.uselesscode.org/javascript/csv/
+
+## Running Unit Tests
+
+This project uses [Jest](https://jestjs.io/) for unit testing JavaScript code.
+
+To run all tests:
+
+```
+npm test
+```
+
+Test files should be named with `.test.js` and placed alongside the code they test (e.g., `public/sample.test.js`).
+
+For more information, see the [Jest documentation](https://jestjs.io/docs/getting-started).
