@@ -1,4 +1,4 @@
-const { fetchDataPackageIdentifiers, buildRidarePayload } = require('./pasta-utils');
+const { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint } = require('./pasta-utils');
 
 // Sample Jest test
 
@@ -82,5 +82,39 @@ describe('buildRidarePayload', () => {
         const payload = buildRidarePayload(pids);
         expect(payload.pid).toEqual([]);
         expect(Array.isArray(payload.query)).toBe(true);
+    });
+});
+
+describe('postToRidareEndpoint', () => {
+    beforeAll(() => {
+        global.fetch = jest.fn();
+    });
+    afterEach(() => {
+        fetch.mockClear();
+    });
+    it('sends POST request and returns XML response', async () => {
+        const payload = { pid: ['cos-spu.13.3'], query: ['//creator/individualName'] };
+        const xmlResponse = `<?xml version="1.0"?><resultset><document><packageid>cos-spu.13.3</packageid></document></resultset>`;
+        fetch.mockResolvedValue({ ok: true, text: async () => xmlResponse });
+        const result = await postToRidareEndpoint(payload, 'http://127.0.0.1:5000/multi');
+        expect(result).toBe(xmlResponse);
+        expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:5000/multi', expect.objectContaining({
+            method: 'POST',
+            headers: expect.objectContaining({
+                'Content-Type': 'application/json',
+                'Accept': 'application/xml'
+            }),
+            body: JSON.stringify(payload)
+        }));
+    });
+});
+
+describe('postToRidareEndpoint (real request)', () => {
+    it('sends real POST request and receives XML', async () => {
+        global.fetch = require('node-fetch');
+        const payload = { pid: ['cos-spu.13.3'], query: ['//creator/individualName'] };
+        const xml = await postToRidareEndpoint(payload, 'http://127.0.0.1:5000/multi');
+        expect(typeof xml).toBe('string');
+        expect(xml.startsWith('<?xml')).toBe(true);
     });
 });
