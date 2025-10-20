@@ -1,4 +1,4 @@
-const { fetchDataPackageIdentifiers } = require('./pasta-utils');
+const { fetchDataPackageIdentifiers, buildRidarePayload } = require('./pasta-utils');
 
 // Sample Jest test
 
@@ -49,5 +49,38 @@ describe('fetchDataPackageIdentifiers (real request)', () => {
             expect(typeof pid).toBe('string');
             expect(pid).toMatch(/^cos-spu\.[0-9]+\.[0-9]+$/);
         });
+    });
+});
+
+describe('buildRidarePayload', () => {
+    it('returns correct payload for multiple pids', () => {
+        const pids = ['cos-spu.13.3', 'cos-spu.9.1'];
+        const payload = buildRidarePayload(pids);
+        expect(payload).toEqual({
+            pid: ['cos-spu.13.3', 'cos-spu.9.1'],
+            query: [
+                { keywords: "//keywordSet/keyword" },
+                "//creator/individualName",
+                "//contact/individualName",
+                "//associatedParty/individualName",
+                "//geographicCoverage/geographicDescription",
+                { projectTitle: "//project/title" },
+                { relatedProjectTitle: "//relatedProject" },
+                "//taxonRankValue",
+                "//commonName"
+            ]
+        });
+    });
+    it('returns correct payload for single pid', () => {
+        const pids = ['cos-spu.13.3'];
+        const payload = buildRidarePayload(pids);
+        expect(payload.pid).toEqual(['cos-spu.13.3']);
+        expect(Array.isArray(payload.query)).toBe(true);
+    });
+    it('returns correct payload for empty pid array', () => {
+        const pids = [];
+        const payload = buildRidarePayload(pids);
+        expect(payload.pid).toEqual([]);
+        expect(Array.isArray(payload.query)).toBe(true);
     });
 });

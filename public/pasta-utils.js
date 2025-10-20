@@ -18,4 +18,26 @@ async function fetchDataPackageIdentifiers(scope, filter = `&fq=scope:${scope}`)
     return pids;
 }
 
-module.exports = { fetchDataPackageIdentifiers };
+/**
+ * Build the JSON payload for the Ridare endpoint.
+ * @param {string[]} pids - Array of package identifiers.
+ * @returns {object} Ridare payload JSON object.
+ */
+function buildRidarePayload(pids) {
+    return {
+        pid: pids,
+        query: [
+            { keywords: "//keywordSet/keyword" },
+            "//creator/individualName",
+            "//contact/individualName",
+            "//associatedParty/individualName",
+            "//geographicCoverage/geographicDescription",
+            { projectTitle: "//project/title" },
+            { relatedProjectTitle: "//relatedProject" },
+            "//taxonRankValue",
+            "//commonName"
+        ]
+    };
+}
+
+module.exports = { fetchDataPackageIdentifiers, buildRidarePayload };
