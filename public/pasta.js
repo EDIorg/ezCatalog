@@ -616,30 +616,37 @@ function clearAllFacets() {
   });
 }
 
-/**
- * Fetch all data package identifiers (pids) for a given scope from the PASTA search endpoint.
- * @param {string} scope - The scope to filter data packages.
- * @returns {Promise<string[]>} - Promise resolving to an array of pid strings.
- */
-async function fetchDataPackageIdentifiers(scope) {
-    const baseUrl = PASTA_CONFIG.server;
-    const filter = `&fq=scope:${scope}`;
-    const url = `${baseUrl}${filter}&fl=packageId&wt=json&rows=1000`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Failed to fetch data packages: ${response.status}`);
-    }
-    const data = await response.json();
-    // The response should have docs with packageId fields
-    if (!data.response || !Array.isArray(data.response.docs)) {
-        return [];
-    }
-    return data.response.docs.map(doc => doc.packageId);
-}
-
-// Export for testing (before any DOM code)
-if (typeof module !== 'undefined') {
-    module.exports = { fetchDataPackageIdentifiers };
+// Move processFacetChange to top-level scope so it can be called from anywhere
+function processFacetChange() {
+  var selectedCreators = getSelectedCreators();
+  var selectedKeywords = getSelectedKeywords();
+  var selectedProjects = getSelectedProjects();
+  var selectedLocations = getSelectedLocations();
+  var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
+  filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
+  filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects || []);
+  filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations || []);
+  populateCreatorFacetOptions(filteredDocs, selectedCreators);
+  populateKeywordFacetOptions(filteredDocs, selectedKeywords);
+  populateProjectFacetOptions(filteredDocs, selectedProjects);
+  populateLocationFacetOptions(filteredDocs, selectedLocations);
+  renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects);
+  if (PASTA_CONFIG["useCiteService"]) {
+    buildCitationsFromCite(filteredDocs);
+  } else {
+    buildCitationsFromPasta(filteredDocs);
+  }
+  var count = filteredDocs.length;
+  setHtml(PASTA_CONFIG["csvElementId"], '');
+  var currentStart = 0;
+  var limit = parseInt(PASTA_CONFIG["limit"]);
+  var showPages = parseInt(PASTA_CONFIG["showPages"]);
+  var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
+  var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
+  showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
+  showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
+  var query = getParameterByName("q");
+  showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
