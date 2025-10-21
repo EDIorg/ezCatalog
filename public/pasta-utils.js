@@ -62,4 +62,50 @@ async function postToRidareEndpoint(payload, url = 'http://127.0.0.1:5000/multi'
     return await response.text();
 }
 
-module.exports = { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint };
+/**
+ * Parse Ridare XML response and extract relevant fields.
+ * @param {string} xmlText - Ridare XML response as a string.
+ * @returns {Array<Object>} Array of parsed document objects.
+ */
+function parseRidareXmlResponse(xmlText) {
+    const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+    const documents = Array.from(doc.getElementsByTagName('document')).map(documentNode => {
+        // Package ID
+        const packageid = documentNode.getElementsByTagName('packageid')[0]?.textContent.trim() || '';
+        // Keywords
+        const keywordNodes = documentNode.getElementsByTagName('keyword');
+        const keywords = Array.from(keywordNodes).map(k => k.textContent.trim());
+        // Geographic Description
+        const geoDescNode = documentNode.getElementsByTagName('geographicDescription')[0];
+        const geographicDescription = geoDescNode ? geoDescNode.textContent.trim() : '';
+        // Project Titles
+        const projectTitleNodes = documentNode.getElementsByTagName('projectTitle');
+        const projectTitles = Array.from(projectTitleNodes).map(pt => pt.getElementsByTagName('title')[0]?.textContent.trim()).filter(Boolean);
+        // Taxon Rank Values
+        const taxonRankNodes = documentNode.getElementsByTagName('taxonRankValue');
+        const taxonRankValues = Array.from(taxonRankNodes).map(tr => tr.textContent.trim());
+        // Common Names
+        const commonNameNodes = documentNode.getElementsByTagName('commonName');
+        const commonNames = Array.from(commonNameNodes).map(cn => cn.textContent.trim());
+        // Authors
+        const individualNameNodes = documentNode.getElementsByTagName('individualName');
+        const authors = Array.from(individualNameNodes).map(indNode => {
+            const surName = indNode.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+            const givenNameNodes = indNode.getElementsByTagName('givenName');
+            const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
+            return `${surName}, ${givenNames.join(' ')}`.trim();
+        }).filter(a => a !== ',');
+        return {
+            packageid,
+            keywords,
+            geographicDescription,
+            projectTitles,
+            taxonRankValues,
+            commonNames,
+            authors: authors.join('\n')
+        };
+    });
+    return documents;
+}
+
+module.exports = { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint, parseRidareXmlResponse };
