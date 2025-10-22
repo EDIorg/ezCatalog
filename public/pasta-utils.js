@@ -1,46 +1,27 @@
-/**
- * Utility: Safely get text content from the first matching child node.
- * @param {Element} parent - Parent XML node.
- * @param {string} tag - Tag name to search for.
- * @returns {string} Text content or empty string.
- */
-function getText(parent, tag) {
-    const node = parent.getElementsByTagName(tag)[0];
-    return node ? node.textContent.trim() : '';
-}
-
-/**
- * Utility: Map text content from all child nodes of a given tag.
- * @param {Element} parent - Parent XML node.
- * @param {string} tag - Tag name to search for.
- * @returns {string[]} Array of trimmed text contents.
- */
-function mapText(parent, tag) {
-    return Array.from(parent.getElementsByTagName(tag)).map(n => n.textContent.trim());
-}
-
 const { DOMParser } = require('xmldom');
-const PASTA_SERVER = "https://pasta.lternet.edu/package/search/eml?";
 
-/**
- * Fetch package identifiers from PASTA server.
- * @param {string} scope
- * @param {string} [filter]
- * @returns {Promise<string[]>}
- */
+const PASTA_SERVER = "https://pasta.lternet.edu/package/search/eml?";
 async function fetchDataPackageIdentifiers(scope, filter = `&fq=scope:${scope}`) {
     const url = `${PASTA_SERVER}fl=packageid&defType=edismax${filter}&q=*&rows=1000`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to fetch data packages: ${response.status}`);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch data packages: ${response.status}`);
+    }
     const xmlText = await response.text();
     const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-    return mapText(doc, 'packageid');
+    const packageidNodes = doc.getElementsByTagName('packageid');
+    const pids = [];
+    for (let i = 0; i < packageidNodes.length; i++) {
+        const pid = packageidNodes[i].textContent.trim();
+        if (pid) pids.push(pid);
+    }
+    return pids;
 }
 
 /**
  * Build the JSON payload for the Ridare endpoint.
- * @param {string[]} pids
- * @returns {object}
+ * @param {string[]} pids - Array of package identifiers.
+ * @returns {object} Ridare payload JSON object.
  */
 function buildRidarePayload(pids) {
     return {
@@ -60,10 +41,10 @@ function buildRidarePayload(pids) {
 }
 
 /**
- * POST JSON payload to Ridare endpoint and get XML response.
- * @param {object} payload
- * @param {string} [url]
- * @returns {Promise<string>}
+ * Send a POST request to the Ridare endpoint with the constructed payload.
+ * @param {object} payload - JSON payload for Ridare.
+ * @param {string} [url] - Optional endpoint URL (default: 'http://127.0.0.1:5000/multi').
+ * @returns {Promise<string>} - XML response from Ridare as a string.
  */
 async function postToRidareEndpoint(payload, url = 'http://127.0.0.1:5000/multi') {
     const fetchImpl = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
@@ -75,30 +56,44 @@ async function postToRidareEndpoint(payload, url = 'http://127.0.0.1:5000/multi'
         },
         body: JSON.stringify(payload)
     });
-    if (!response.ok) throw new Error(`Ridare POST failed: ${response.status}`);
+    if (!response.ok) {
+        throw new Error(`Ridare POST failed: ${response.status}`);
+    }
     return await response.text();
 }
 
 /**
  * Parse Ridare XML response and extract relevant fields.
- * @param {string} xmlText
- * @returns {Array<Object>}
+ * @param {string} xmlText - Ridare XML response as a string.
+ * @returns {Array<Object>} Array of parsed document objects.
  */
 function parseRidareXmlResponse(xmlText) {
     const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-    return Array.from(doc.getElementsByTagName('document')).map(documentNode => {
-        const packageid = getText(documentNode, 'packageid');
-        const keywords = mapText(documentNode, 'keyword');
-        const geographicDescription = getText(documentNode, 'geographicDescription');
-        const projectTitles = Array.from(documentNode.getElementsByTagName('projectTitle')).map(pt => getText(pt, 'title')).filter(Boolean);
-        const taxonRankValues = mapText(documentNode, 'taxonRankValue');
-        const commonNames = mapText(documentNode, 'commonName');
-        // Authors: combine surName and givenName(s)
+    const documents = Array.from(doc.getElementsByTagName('document')).map(documentNode => {
+        // Package ID
+        const packageid = documentNode.getElementsByTagName('packageid')[0]?.textContent.trim() || '';
+        // Keywords
+        const keywordNodes = documentNode.getElementsByTagName('keyword');
+        const keywords = Array.from(keywordNodes).map(k => k.textContent.trim());
+        // Geographic Description
+        const geoDescNode = documentNode.getElementsByTagName('geographicDescription')[0];
+        const geographicDescription = geoDescNode ? geoDescNode.textContent.trim() : '';
+        // Project Titles
+        const projectTitleNodes = documentNode.getElementsByTagName('projectTitle');
+        const projectTitles = Array.from(projectTitleNodes).map(pt => pt.getElementsByTagName('title')[0]?.textContent.trim()).filter(Boolean);
+        // Taxon Rank Values
+        const taxonRankNodes = documentNode.getElementsByTagName('taxonRankValue');
+        const taxonRankValues = Array.from(taxonRankNodes).map(tr => tr.textContent.trim());
+        // Common Names
+        const commonNameNodes = documentNode.getElementsByTagName('commonName');
+        const commonNames = Array.from(commonNameNodes).map(cn => cn.textContent.trim());
+        // Authors
         const individualNameNodes = documentNode.getElementsByTagName('individualName');
         const authors = Array.from(individualNameNodes).map(indNode => {
-            const surName = getText(indNode, 'surName');
-            const givenNames = mapText(indNode, 'givenName').join(' ');
-            return `${surName}, ${givenNames}`.trim();
+            const surName = indNode.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+            const givenNameNodes = indNode.getElementsByTagName('givenName');
+            const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
+            return `${surName}, ${givenNames.join(' ')}`.trim();
         }).filter(a => a !== ',');
         return {
             packageid,
@@ -110,11 +105,8 @@ function parseRidareXmlResponse(xmlText) {
             authors: authors.join('\n')
         };
     });
+    return documents;
 }
 
-module.exports = {
-    fetchDataPackageIdentifiers,
-    buildRidarePayload,
-    postToRidareEndpoint,
-    parseRidareXmlResponse
-};
+module.exports = { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint, parseRidareXmlResponse };
+
