@@ -612,207 +612,115 @@ function processFacetChange() {
   showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-   // Fetch initial dataset from PASTA server and initialize facets/results
-   var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword,geographicdescription,projectTitle,relatedProjectTitle&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
-   showLoading(true);
-   makeCorsRequest(url, null, function(headers, response) {
-      var parser = new DOMParser();
-      var xmlDoc = parser.parseFromString(response, "text/xml");
-      var docs = Array.from(xmlDoc.getElementsByTagName("document"));
-      ALL_PASTA_DOCS = docs;
-      populateCreatorFacetOptions(docs, []);
-      populateKeywordFacetOptions(docs, []);
-      populateProjectFacetOptions(docs, []);
-      populateLocationFacetOptions(docs, []);
-      // Render all results initially
-      if (PASTA_CONFIG["useCiteService"]) {
-         buildCitationsFromCite(docs);
-      } else {
-         buildCitationsFromPasta(docs);
+// Helper to initialise a dropdown (toggle + blur collapse)
+function initDropdown(toggleId, dropdownId, arrowId) {
+  const toggleBtn = document.getElementById(toggleId);
+  const dropdown = document.getElementById(dropdownId);
+  const arrow = document.getElementById(arrowId);
+  if (!toggleBtn || !dropdown || !arrow) return;
+
+  let expanded = false;
+  toggleBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    expanded = !expanded;
+    dropdown.style.display = expanded ? 'block' : 'none';
+    arrow.innerHTML = expanded ? '\u25B2' : '\u25BC';
+    if (expanded) dropdown.focus();
+  });
+
+  dropdown.addEventListener('blur', function() {
+    setTimeout(function() {
+      if (!dropdown.contains(document.activeElement)) {
+        expanded = false;
+        dropdown.style.display = 'none';
+        arrow.innerHTML = '\u25BC';
       }
-      showLoading(false);
-   }, errorCallback);
+    }, 150);
+  });
+}
 
-   var creatorToggleBtn = document.getElementById("creator-toggle-btn");
-   var creatorDropdown = document.getElementById("creator-dropdown");
-   var creatorArrow = document.getElementById("creator-arrow");
-   var expanded = false;
-   if (creatorToggleBtn && creatorDropdown && creatorArrow) {
-      creatorToggleBtn.addEventListener("click", function(e) {
-         e.preventDefault();
-         expanded = !expanded;
-         if (expanded) {
-            creatorDropdown.style.display = "block";
-            creatorArrow.innerHTML = "&#x25B2;";
-            creatorDropdown.focus();
-         } else {
-            creatorDropdown.style.display = "none";
-            creatorArrow.innerHTML = "&#x25BC;";
-         }
-      });
-      // Optional: collapse when focus is lost
-      creatorDropdown.addEventListener("blur", function(e) {
-         setTimeout(function() {
-            // Only collapse if focus is not on a child element (e.g., a checkbox)
-            if (!creatorDropdown.contains(document.activeElement)) {
-               creatorDropdown.style.display = "none";
-               creatorArrow.innerHTML = "&#x25BC;";
-               expanded = false;
-            }
-         }, 150);
-      });
-   }
-   // Keyword dropdown logic
-   var keywordToggleBtn = document.getElementById("keyword-toggle-btn");
-   var keywordDropdown = document.getElementById("keyword-dropdown");
-   var keywordArrow = document.getElementById("keyword-arrow");
-   var keywordExpanded = false;
-   if (keywordToggleBtn && keywordDropdown && keywordArrow) {
-      keywordToggleBtn.addEventListener("click", function(e) {
-         e.preventDefault();
-         keywordExpanded = !keywordExpanded;
-         if (keywordExpanded) {
-            keywordDropdown.style.display = "block";
-            keywordArrow.innerHTML = "\u25B2"; // Remove the semicolon
-            keywordDropdown.focus();
-         } else {
-            keywordDropdown.style.display = "none";
-            keywordArrow.innerHTML = "\u25BC"; // Remove the semicolon
-         }
-      });
-      keywordDropdown.addEventListener("blur", function(e) {
-         setTimeout(function() {
-            if (!keywordDropdown.contains(document.activeElement)) {
-               keywordDropdown.style.display = "none";
-               keywordArrow.innerHTML = "\u25BC"; // Remove the semicolon
-               keywordExpanded = false;
-            }
-         }, 150);
-      });
-   }
-
-   // Project dropdown logic
-   var projectToggleBtn = document.getElementById("project-toggle-btn");
-   var projectDropdown = document.getElementById("project-dropdown");
-   var projectArrow = document.getElementById("project-arrow");
-   var projectExpanded = false;
-   if (projectToggleBtn && projectDropdown && projectArrow) {
-      projectToggleBtn.addEventListener("click", function(e) {
-         e.preventDefault();
-         projectExpanded = !projectExpanded;
-         if (projectExpanded) {
-            projectDropdown.style.display = "block";
-            projectArrow.innerHTML = "\u25B2"; // Remove the semicolon
-            projectDropdown.focus();
-         } else {
-            projectDropdown.style.display = "none";
-            projectArrow.innerHTML = "\u25BC"; // Remove the semicolon
-         }
-      });
-      projectDropdown.addEventListener("blur", function(e) {
-         setTimeout(function() {
-            if (!projectDropdown.contains(document.activeElement)) {
-               projectDropdown.style.display = "none";
-               projectArrow.innerHTML = "\u25BC"; // Remove the semicolon
-               projectExpanded = false;
-            }
-         }, 150);
-      });
-   }
-
-   // Location dropdown logic
-   var locationToggleBtn = document.getElementById("location-toggle-btn");
-   var locationDropdown = document.getElementById("location-dropdown");
-   var locationArrow = document.getElementById("location-arrow");
-   var locationExpanded = false;
-   if (locationToggleBtn && locationDropdown && locationArrow) {
-      locationToggleBtn.addEventListener("click", function(e) {
-         e.preventDefault();
-         locationExpanded = !locationExpanded;
-         if (locationExpanded) {
-            locationDropdown.style.display = "block";
-            locationArrow.innerHTML = "\u25B2"; // Remove the semicolon
-            locationDropdown.focus();
-         } else {
-            locationDropdown.style.display = "none";
-            locationArrow.innerHTML = "\u25BC"; // Remove the semicolon
-         }
-      });
-      locationDropdown.addEventListener("blur", function(e) {
-         setTimeout(function() {
-            if (!locationDropdown.contains(document.activeElement)) {
-               locationDropdown.style.display = "none";
-               locationArrow.innerHTML = "\u25BC"; // Remove the semicolon
-               locationExpanded = false;
-            }
-         }, 150);
-      });
-   }
-
-   // Always listen for creator checkbox changes
-   var creatorDropdown = document.getElementById("creator-dropdown");
-   if (creatorDropdown) {
-     creatorDropdown.addEventListener("change", function(e) {
-       if (e.target.classList.contains('creator-checkbox')) {
-         processFacetChange();
-       }
-     });
-   }
-   // Always listen for keyword checkbox changes
-   var keywordDropdown = document.getElementById("keyword-dropdown");
-   if (keywordDropdown) {
-     keywordDropdown.addEventListener("change", function(e) {
-       if (e.target.classList.contains('keyword-checkbox')) {
-         processFacetChange();
-       }
-     });
-   }
-   // Always listen for project checkbox changes
-   var projectDropdown = document.getElementById("project-dropdown");
-   if (projectDropdown) {
-     projectDropdown.addEventListener("change", function(e) {
-       if (e.target.classList.contains('project-checkbox')) {
-         processFacetChange();
-       }
-     });
-   }
-   // Always listen for location checkbox changes
-   var locationDropdown = document.getElementById("location-dropdown");
-   if (locationDropdown) {
-     locationDropdown.addEventListener("change", function(e) {
-       if (e.target.classList.contains('location-checkbox')) {
-         processFacetChange();
-       }
-     });
-   }
-
-   // Listen for remove filter clicks and clear all
-   document.body.addEventListener('click', function(e) {
-     if (e.target.classList.contains('remove-filter')) {
-       e.preventDefault();
-       e.stopPropagation();
-       var type = e.target.getAttribute('data-type');
-       var value = decodeURIComponent(e.target.getAttribute('data-value'));
-       uncheckFacet(type, value);
-       processFacetChange();
-     }
-     if (e.target.id === 'clear-all-filters') {
-       e.preventDefault();
-       clearAllFacets();
-       processFacetChange();
-     }
-   });
-
-   // Branding text for banner bar
-var brandingText = "Seattle Public Utilities Data Catalog"; // <-- Set this to your desired branding text
-
-window.addEventListener('DOMContentLoaded', function() {
-  var brandingSpan = document.getElementById('branding-text');
-  if (brandingSpan && typeof brandingText === 'string') {
-    brandingSpan.textContent = brandingText;
+// Helper to initialise facet change listeners
+function initFacetChangeListener(dropdownId, checkboxClass) {
+  const dropdown = document.getElementById(dropdownId);
+  if (dropdown) {
+    dropdown.addEventListener('change', function(e) {
+      if (e.target.classList.contains(checkboxClass)) {
+        processFacetChange();
+      }
+    });
   }
-});
+}
+
+// Main initialization split into focused functions
+function initData() {
+  var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword,geographicdescription,projectTitle,relatedProjectTitle&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
+  showLoading(true);
+  makeCorsRequest(url, null, function(headers, response) {
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(response, "text/xml");
+    var docs = Array.from(xmlDoc.getElementsByTagName("document"));
+    ALL_PASTA_DOCS = docs;
+    populateCreatorFacetOptions(docs, []);
+    populateKeywordFacetOptions(docs, []);
+    populateProjectFacetOptions(docs, []);
+    populateLocationFacetOptions(docs, []);
+    // Render all results initially
+    if (PASTA_CONFIG["useCiteService"]) {
+      buildCitationsFromCite(docs);
+    } else {
+      buildCitationsFromPasta(docs);
+    }
+    showLoading(false);
+  }, errorCallback);
+}
+
+function initDropdowns() {
+  initDropdown('creator-toggle-btn', 'creator-dropdown', 'creator-arrow');
+  initDropdown('keyword-toggle-btn', 'keyword-dropdown', 'keyword-arrow');
+  initDropdown('project-toggle-btn', 'project-dropdown', 'project-arrow');
+  initDropdown('location-toggle-btn', 'location-dropdown', 'location-arrow');
+}
+
+function bindFacetEvents() {
+  initFacetChangeListener('creator-dropdown', 'creator-checkbox');
+  initFacetChangeListener('keyword-dropdown', 'keyword-checkbox');
+  initFacetChangeListener('project-dropdown', 'project-checkbox');
+  initFacetChangeListener('location-dropdown', 'location-checkbox');
+}
+
+function bindFilterEvents() {
+  document.body.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-filter')) {
+      e.preventDefault();
+      e.stopPropagation();
+      var type = e.target.getAttribute('data-type');
+      var value = decodeURIComponent(e.target.getAttribute('data-value'));
+      uncheckFacet(type, value);
+      processFacetChange();
+    }
+    if (e.target.id === 'clear-all-filters') {
+      e.preventDefault();
+      clearAllFacets();
+      processFacetChange();
+    }
+  });
+}
+
+// Branding text for banner bar
+function setBrandingText() {
+  var brandingText = "Seattle Public Utilities Data Catalog"; // <-- Set this to your desired branding text
+  var brandingSpan = document.getElementById('branding-text');
+  if (brandingSpan) brandingSpan.textContent = brandingText;
+}
+
+// Refactored DOMContentLoaded
+
+document.addEventListener("DOMContentLoaded", function() {
+  initData();
+  initDropdowns();
+  bindFacetEvents();
+  bindFilterEvents();
+  setBrandingText();
 });
 
 // Export for testing
