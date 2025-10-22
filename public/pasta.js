@@ -13,7 +13,6 @@ const PASTA_CONFIG = {
    "pagesTopElementId": "paginationTop", // Element to display result page links above results
    "pagesBotElementId": "paginationBot", // Element to display result page links below results
    "showPages": 5, // MUST BE ODD NUMBER! Max number of page links to show
-   "useCiteService": true, // true if we should use EDI Cite service to build citations instead of building from PASTA results,
    "showAbstracts": true, // true if we should show abstracts in search results
    "abstractLimit": 750 // Limit the number of characters in the abstract
 };
