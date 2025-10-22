@@ -2,7 +2,7 @@
 
 "use strict";
 
-var PASTA_CONFIG = {
+const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
    "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "limit": 20, // Max number of results to retrieve per page
@@ -18,56 +18,68 @@ var PASTA_CONFIG = {
    "abstractLimit": 750 // Limit the number of characters in the abstract
 };
 
-// Get URL arguments
+/**
+ * Get URL arguments by name
+ * @param {string} name
+ * @param {string} [url]
+ * @returns {string|null}
+ */
 function getParameterByName(name, url) {
-   if (!url) url = window.location.href;
+   url = url || window.location.href;
    name = name.replace(/[\[\]]/g, "\\$&");
-   var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-      results = regex.exec(url);
+   const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+   const results = regex.exec(url);
    if (!results) return null;
    if (!results[2]) return "";
    return decodeURIComponent(results[2].replace(/\+/g, " ")).trim();
 }
 
-// Parse citation dictionary into HTML
-function buildHtml(citations, abstracts) {
-   var html = [];
-   var citationCount = Object.keys(citations).length;
+// --- HTML fragment helpers ---
+function authorHtml(authors, date) {
+   return `<div class='dataset-author'>${authors}${date}</div>`;
+}
+function abstractHtml(abstract) {
+   return `<div class='dataset-abstract'>${abstract}</div>`;
+}
+function titleHtml(title) {
+   return `<div class='dataset-title'><strong>${title}</strong></div>`;
+}
+function imgHtml(pkgid) {
+   const imgBase = pkgid.split(".").slice(0,2).join(".");
+   const imgSrc = `images/${imgBase}.png`;
+   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
+}
+function exploreLink(link) {
+   return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+}
+function relatedStoriesLink(pkgid, title) {
+   const pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
+   const encodedTitle = encodeURIComponent(title);
+   return `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+}
 
-   for (var i = 0; i < citationCount; i++) {
-      var citation = citations[i];
-      var abstract = abstracts[i];
-      if (abstract.length > PASTA_CONFIG["abstractLimit"]) {
-         abstract = abstract.substring(0, PASTA_CONFIG["abstractLimit"]) + "...";
+/**
+ * Parse citation dictionary into HTML
+ * @param {Object[]} citations
+ * @param {string[]} abstracts
+ * @returns {string}
+ */
+function buildHtml(citations, abstracts) {
+   const html = [];
+   const citationCount = Object.keys(citations).length;
+   for (let i = 0; i < citationCount; i++) {
+      const citation = citations[i];
+      let abstract = abstracts[i];
+      if (abstract.length > PASTA_CONFIG.abstractLimit) {
+         abstract = abstract.substring(0, PASTA_CONFIG.abstractLimit) + "...";
       }
-      var authors = citation["authors"];
-      var date = (citation["pub_year"]) ? " Published " + citation["pub_year"] + "" : "";
-      var link = (citation["doi"]) ? citation["doi"].slice(0, -1) : "https://portal.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];
-      var title = `<div class='dataset-title'><strong>${citation["title"]}</strong></div>`;
-      // --- THUMBNAIL LOGIC ---
-      var pkgid = citation["pid"];
-      var imgBase = pkgid.split(".").slice(0,2).join(".");
-      var imgSrc = "images/" + imgBase + ".png";
-      var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
-      var exploreLink = `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
-      // --- RELATED STORIES LINK ---
-      var pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
-      var encodedTitle = encodeURIComponent(citation["title"]);
-      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
-      var authorHtml = `<div class='dataset-author'>${authors}${date}</div>`;
-      var abstractHtml = `<div class='dataset-abstract'>${abstract}</div>`;
-      if (PASTA_CONFIG["showAbstracts"]) {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstractHtml}<div class='dataset-actions'>${exploreLink}${relatedStoriesLink}</div></div>${imgHtml}</div>`;
-      } else {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'>${exploreLink}${relatedStoriesLink}</div></div>${imgHtml}</div>`;
-      }
+      const authors = citation.authors;
+      const date = citation.pub_year ? ` Published ${citation.pub_year}` : "";
+      const link = citation.doi ? citation.doi.slice(0, -1) : `https://portal.edirepository.org/nis/mapbrowse?packageid=${citation.pid}`;
+      const row = `<div class='dataset-row'><div class='dataset-info'>${titleHtml(citation.title)}${authorHtml(authors, date)}${PASTA_CONFIG.showAbstracts ? abstractHtml(abstract) : ""}<div class='dataset-actions'>${exploreLink(link)}${relatedStoriesLink(citation.pid, citation.title)}</div></div>${imgHtml(citation.pid)}</div>`;
       html.push(row);
    }
-   if (citationCount) {
-      return html.join("\n");
-   } else {
-      return "<p>Your search returned no results.</p>";
-   }
+   return citationCount ? html.join("\n") : "<p>Your search returned no results.</p>";
 }
 
 // Download citations to a dictionary keyed by package ID
@@ -528,6 +540,52 @@ function filterDocsByLocations(docs, selectedLocations) {
       var locationNodes = doc.getElementsByTagName("geographicdescription");
       var locations = Array.from(locationNodes).map(function(n) { return n.innerHTML; });
       return selectedLocations.some(function(sel) { return locations.includes(sel); });
+   });
+}
+
+/**
+ * Generic facet checkbox renderer
+ */
+function renderFacetCheckboxes(items, selected, counts, className) {
+  return items.map(function(item) {
+    const checked = selected.includes(item) ? 'checked' : '';
+    const count = counts[item] || 0;
+    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
+      <input type="checkbox" class="${className}" value="${item.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${checked} style="margin-right:8px;">${item} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
+    </label>`;
+  }).join('');
+}
+
+/**
+ * Generic facet option populator
+ */
+function populateFacetOptions(docs, tagName, dropdownId, selected, className) {
+   const set = new Set();
+   const counts = {};
+   for (let i = 0; i < docs.length; i++) {
+      const nodes = docs[i].getElementsByTagName(tagName);
+      for (let j = 0; j < nodes.length; j++) {
+         const value = nodes[j].innerHTML.trim();
+         if (value) {
+            set.add(value);
+            counts[value] = (counts[value] || 0) + 1;
+         }
+      }
+   }
+   const dropdown = document.getElementById(dropdownId);
+   const items = Array.from(set).sort();
+   dropdown.innerHTML = renderFacetCheckboxes(items, selected || [], counts, className);
+}
+
+/**
+ * Generic facet filter
+ */
+function filterDocsByFacet(docs, tagName, selected) {
+   if (!selected.length) return docs;
+   return docs.filter(function(doc) {
+      const nodes = doc.getElementsByTagName(tagName);
+      const values = Array.from(nodes).map(n => n.innerHTML.trim());
+      return selected.some(sel => values.includes(sel));
    });
 }
 
