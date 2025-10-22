@@ -132,72 +132,6 @@ function buildCitationsFromCite(pastaDocs) {
    }
 }
 
-// Build dataset citations from PASTA XML
-function buildCitationsFromPasta(pastaDocs) {
-   var html = [];
-   for (var i = 0; i < pastaDocs.length; i++) {
-      var doc = pastaDocs[i];
-      var authorNodes = doc.getElementsByTagName("author");
-      var authors = [];
-      for (var authorIndex = 0; authorIndex < authorNodes.length; authorIndex++) {
-         authors.push(authorNodes[authorIndex].innerHTML);
-      }
-      var names = authors.join("; ");
-      var date;
-      try {
-         date = " (Published " + doc.getElementsByTagName("pubdate")[0].childNodes[0].nodeValue + ")";
-      } catch (error) {
-         date = "";
-      }
-      var link = "";
-      try {
-         var doi = doc.getElementsByTagName("doi")[0].childNodes[0].nodeValue;
-         if (doi.slice(0, 4) === "doi:") {
-            doi = doi.slice(4);
-         }
-         link = "http://dx.doi.org/" + doi;
-      } catch (err) {
-         link = ("https://portal.edirepository.org/nis/mapbrowse?packageid=" +
-            doc.getElementsByTagName("packageid")[0].childNodes[0].nodeValue);
-      }
-      var title = '<div class="dataset-title"><a rel="external noopener" href="' + link + '" target="_blank" aria-label="open data in new tab">' + doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim() + '</a></div>';
-      var abstract;
-      try {
-         abstract = doc.getElementsByTagName("abstract")[0].childNodes[0].nodeValue;
-         if (abstract.length > PASTA_CONFIG["abstractLimit"]) {
-            abstract = abstract.substring(0, PASTA_CONFIG["abstractLimit"]) + "...";
-         }
-         abstract = '<div class="dataset-abstract">' + abstract + '</div>';
-      } catch (error) {
-         abstract = '';
-      }
-      // --- THUMBNAIL LOGIC ---
-      var pkgid = doc.getElementsByTagName("packageid")[0].childNodes[0].nodeValue;
-      var imgBase = pkgid.split(".").slice(0,2).join(".");
-      var imgSrc = "images/" + imgBase + ".png";
-      var imgHtml = `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
-      var authorHtml = `<div class='dataset-author'>${names}${date}</div>`;
-      // --- RELATED STORIES LINK ---
-      var pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
-      var encodedTitle = encodeURIComponent(doc.getElementsByTagName("title")[0].childNodes[0].nodeValue.trim());
-      var relatedStoriesLink = `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
-      if (PASTA_CONFIG["showAbstracts"]) {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}${abstract}<div class='dataset-actions'>${relatedStoriesLink}</div></div>${imgHtml}</div>`;
-      } else {
-         var row = `<div class='dataset-row'><div class='dataset-info'>${title}${authorHtml}<div class='dataset-actions'>${relatedStoriesLink}</div></div>${imgHtml}</div>`;
-      }
-      html.push(row);
-   }
-   var resultHtml;
-   if (html.length) {
-      resultHtml = html.join("\n");
-   } else {
-      resultHtml = "<p>Your search returned no results.</p>";
-   }
-   document.getElementById("searchResults").innerHTML = resultHtml;
-   showLoading(false);
-}
-
 function showLoading(isLoading) {
    var x = document.getElementById("loading-div");
    if (isLoading) {
@@ -228,11 +162,7 @@ function successCallback(headers, response) {
    var parser = new DOMParser();
    var xmlDoc = parser.parseFromString(response, "text/xml");
    var docs = xmlDoc.getElementsByTagName("document");
-   if (PASTA_CONFIG["useCiteService"]) {
-      buildCitationsFromCite(docs);
-   } else {
-      buildCitationsFromPasta(docs);
-   }
+   buildCitationsFromCite(docs);
    var count = parseInt(xmlDoc.getElementsByTagName("resultset")[0].getAttribute("numFound"));
    setHtml(PASTA_CONFIG["csvElementId"], makeCsvLink(count));
 
@@ -513,11 +443,7 @@ successCallback = function(headers, response) {
    filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords);
     filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects);
    filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations);
-   if (PASTA_CONFIG["useCiteService"]) {
-      buildCitationsFromCite(filteredDocs);
-   } else {
-      buildCitationsFromPasta(filteredDocs);
-   }
+   buildCitationsFromCite(filteredDocs);
    var count = filteredDocs.length;
    setHtml(PASTA_CONFIG["csvElementId"], '');
    var currentStart = getParameterByName("start");
@@ -594,11 +520,7 @@ function processFacetChange() {
   populateProjectFacetOptions(filteredDocs, selectedProjects);
   populateLocationFacetOptions(filteredDocs, selectedLocations);
   renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects);
-  if (PASTA_CONFIG["useCiteService"]) {
-    buildCitationsFromCite(filteredDocs);
-  } else {
-    buildCitationsFromPasta(filteredDocs);
-  }
+  buildCitationsFromCite(filteredDocs);
   var count = filteredDocs.length;
   setHtml(PASTA_CONFIG["csvElementId"], '');
   var currentStart = 0;
@@ -665,11 +587,7 @@ function initData() {
     populateProjectFacetOptions(docs, []);
     populateLocationFacetOptions(docs, []);
     // Render all results initially
-    if (PASTA_CONFIG["useCiteService"]) {
-      buildCitationsFromCite(docs);
-    } else {
-      buildCitationsFromPasta(docs);
-    }
+    buildCitationsFromCite(docs);
     showLoading(false);
   }, errorCallback);
 }
