@@ -27,8 +27,8 @@ function buildRidarePayload(pids) {
         query: [
             { keywords: "//keywordSet/keyword" },
             "//creator/individualName",
-            "//contact/individualName",
-            "//associatedParty/individualName",
+//            "//contact/individualName",
+//            "//associatedParty/individualName",
             "//geographicCoverage/geographicDescription",
             { projectTitle: "//project/title" },
             { relatedProjectTitle: "//relatedProject" },
