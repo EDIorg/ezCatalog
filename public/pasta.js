@@ -573,22 +573,34 @@ function initFacetChangeListener(dropdownId, checkboxClass) {
 }
 
 // Main initialization split into focused functions
-function initData() {
-  var url = PASTA_CONFIG.server + "fl=title,pubdate,doi,packageid,author,abstract,keyword,geographicdescription,projectTitle,relatedProjectTitle&defType=edismax" + PASTA_CONFIG.filter + "&q=*&rows=1000";
+async function initData() {
   showLoading(true);
-  makeCorsRequest(url, null, function(headers, response) {
+  try {
+    // Step 1: Get package IDs from PASTA
+    const scope = PASTA_CONFIG.scope || 'edi'; // Adjust as needed
+    const filter = PASTA_CONFIG.filter || '';
+    const pids = await fetchDataPackageIdentifiers(scope, filter);
+    // Step 2: Build Ridare payload
+    const payload = buildRidarePayload(pids);
+    // Step 3: POST to Ridare endpoint and get XML response
+    const response = await postToRidareEndpoint(payload);
+    // Step 4: Parse returned XML
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(response, "text/xml");
     var docs = Array.from(xmlDoc.getElementsByTagName("document"));
     ALL_PASTA_DOCS = docs;
+    // Step 5: Pass to facet population and filtering functions
     populateCreatorFacetOptions(docs, []);
     populateKeywordFacetOptions(docs, []);
     populateProjectFacetOptions(docs, []);
     populateLocationFacetOptions(docs, []);
-    // Render all results initially
     buildCitationsFromCite(docs);
+  } catch (err) {
+    console.error('Error initializing data:', err);
+    errorCallback(err);
+  } finally {
     showLoading(false);
-  }, errorCallback);
+  }
 }
 
 function initDropdowns() {
