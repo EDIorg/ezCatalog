@@ -130,7 +130,40 @@ function parseRidareXmlResponse(xmlText) {
  * @returns {Document} Reformatted XML document.
  */
 function reformatXMLDocument(xmlDoc) {
-    // TODO: Implement reformatting logic in subsequent steps
+    // Iterate over all <document> nodes in the parent <resultset>
+    const documents = xmlDoc.getElementsByTagName('document');
+    for (let i = 0; i < documents.length; i++) {
+        const doc = documents[i];
+        const individualNames = Array.from(doc.getElementsByTagName('individualName'));
+        let authorNames = [];
+        individualNames.forEach(indNode => {
+            const surNames = Array.from(indNode.getElementsByTagName('surName')).map(e => e.textContent.trim());
+            const givenNames = Array.from(indNode.getElementsByTagName('givenName')).map(e => e.textContent.trim());
+            let fullName = '';
+            if (surNames.length && givenNames.length) {
+                fullName = surNames.join(', ') + ', ' + givenNames.join(' ');
+            } else if (surNames.length) {
+                fullName = surNames.join(', ');
+            } else if (givenNames.length) {
+                fullName = givenNames.join(' ');
+            }
+            if (fullName) authorNames.push(fullName);
+            // Remove the individualName element from its parent
+            if (indNode.parentNode) {
+                indNode.parentNode.removeChild(indNode);
+            }
+        });
+        if (authorNames.length) {
+            // Create a single <authors> element with child <author> elements
+            const authorsElem = xmlDoc.createElement('authors');
+            authorNames.forEach(name => {
+                const authorElem = xmlDoc.createElement('author');
+                authorElem.textContent = name;
+                authorsElem.appendChild(authorElem);
+            });
+            doc.appendChild(authorsElem);
+        }
+    }
     return xmlDoc;
 }
 
