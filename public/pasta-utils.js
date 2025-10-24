@@ -32,6 +32,7 @@ function buildRidarePayload(pids) {
             "//geographicCoverage/geographicDescription",
             { projectTitle: "//project/title" },
             { relatedProjectTitle: "//relatedProject" },
+            "//dataset/abstract",
             "//taxonRankValue",
             "//commonName"
         ]
@@ -93,6 +94,22 @@ function parseRidareXmlResponse(xmlText) {
             const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
             return `${surName}, ${givenNames.join(' ')}`.trim();
         }).filter(a => a !== ',');
+        // Abstract
+        const abstractNode = documentNode.getElementsByTagName('abstract')[0];
+        let abstract = '';
+        if (abstractNode) {
+            // If abstract has child elements, concatenate their textContent
+            if (abstractNode.children && abstractNode.children.length > 0) {
+                abstract = Array.from(abstractNode.children)
+                    .map(child => child.textContent.trim())
+                    .filter(Boolean)
+                    .join(' ');
+            } else {
+                abstract = abstractNode.textContent.trim();
+            }
+        }
+        // Strip any XML tags from abstract
+        abstract = abstract.replace(/<[^>]+>/g, '');
         return {
             packageid,
             keywords,
@@ -100,7 +117,8 @@ function parseRidareXmlResponse(xmlText) {
             projectTitles,
             taxonRankValues,
             commonNames,
-            authors: authors.join('\n')
+            authors: authors.join('\n'),
+            abstract
         };
     });
     return documents;

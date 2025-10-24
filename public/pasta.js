@@ -68,7 +68,7 @@ function buildHtml(citations, abstracts) {
    const citationCount = Object.keys(citations).length;
    for (let i = 0; i < citationCount; i++) {
       const citation = citations[i];
-      let abstract = abstracts[i];
+      let abstract = abstracts[i] || ""; // Ensure abstract is a string
       if (abstract.length > PASTA_CONFIG.abstractLimit) {
          abstract = abstract.substring(0, PASTA_CONFIG.abstractLimit) + "...";
       }
