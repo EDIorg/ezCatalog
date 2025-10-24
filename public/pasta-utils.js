@@ -29,7 +29,7 @@ function buildRidarePayload(pids) {
             "//creator/individualName",
 //            "//contact/individualName",
 //            "//associatedParty/individualName",
-            "//geographicCoverage/geographicDescription",
+            { geographicDescriptions: "//geographicCoverage/geographicDescription" },
             { projectTitle: "//project/title" },
             { relatedProjectTitle: "//relatedProject" },
             "//dataset/abstract",
@@ -134,6 +134,7 @@ function reformatXMLDocument(xmlDoc) {
     const documents = xmlDoc.getElementsByTagName('document');
     for (let i = 0; i < documents.length; i++) {
         const doc = documents[i];
+        // --- Author transformation ---
         const individualNames = Array.from(doc.getElementsByTagName('individualName'));
         let authorNames = [];
         individualNames.forEach(indNode => {
@@ -148,13 +149,11 @@ function reformatXMLDocument(xmlDoc) {
                 fullName = givenNames.join(' ');
             }
             if (fullName) authorNames.push(fullName);
-            // Remove the individualName element from its parent
             if (indNode.parentNode) {
                 indNode.parentNode.removeChild(indNode);
             }
         });
         if (authorNames.length) {
-            // Create a single <authors> element with child <author> elements
             const authorsElem = xmlDoc.createElement('authors');
             authorNames.forEach(name => {
                 const authorElem = xmlDoc.createElement('author');
@@ -162,6 +161,41 @@ function reformatXMLDocument(xmlDoc) {
                 authorsElem.appendChild(authorElem);
             });
             doc.appendChild(authorsElem);
+        }
+        // --- Project Titles transformation ---
+        let projectTitles = [];
+        // Gather <title> children from <projectTitle> elements
+        const projectTitleElems = Array.from(doc.getElementsByTagName('projectTitle'));
+        projectTitleElems.forEach(ptElem => {
+            const titleElems = Array.from(ptElem.getElementsByTagName('title'));
+            titleElems.forEach(titleElem => {
+                const titleText = titleElem.textContent.trim();
+                if (titleText) projectTitles.push(titleText);
+            });
+            if (ptElem.parentNode) {
+                ptElem.parentNode.removeChild(ptElem);
+            }
+        });
+        // Gather <title> children from <relatedProjectTitle> elements
+        const relatedProjectTitleElems = Array.from(doc.getElementsByTagName('relatedProjectTitle'));
+        relatedProjectTitleElems.forEach(rptElem => {
+            const titleElems = Array.from(rptElem.getElementsByTagName('title'));
+            titleElems.forEach(titleElem => {
+                const titleText = titleElem.textContent.trim();
+                if (titleText) projectTitles.push(titleText);
+            });
+            if (rptElem.parentNode) {
+                rptElem.parentNode.removeChild(rptElem);
+            }
+        });
+        if (projectTitles.length) {
+            const projectTitlesElem = xmlDoc.createElement('projectTitles');
+            projectTitles.forEach(title => {
+                const titleElem = xmlDoc.createElement('title');
+                titleElem.textContent = title;
+                projectTitlesElem.appendChild(titleElem);
+            });
+            doc.appendChild(projectTitlesElem);
         }
     }
     return xmlDoc;
