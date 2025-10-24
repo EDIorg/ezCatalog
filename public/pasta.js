@@ -303,22 +303,14 @@ function populateProjectFacetOptions(docs, selected) {
    var projectSet = new Set();
    var projectCounts = {};
    for (var i = 0; i < docs.length; i++) {
-      var projectNodes = docs[i].getElementsByTagName("projectTitle");
-      var relatedProjectNodes = docs[i].getElementsByTagName("relatedProjectTitle");
-      // Add projectTitle values
-      for (var j = 0; j < projectNodes.length; j++) {
-         var project = projectNodes[j].innerHTML.trim();
-         if (project) {
-            projectSet.add(project);
-            projectCounts[project] = (projectCounts[project] || 0) + 1;
-         }
-      }
-      // Add relatedProjectTitle values
-      for (var k = 0; k < relatedProjectNodes.length; k++) {
-         var relatedProject = relatedProjectNodes[k].innerHTML.trim();
-         if (relatedProject) {
-            projectSet.add(relatedProject);
-            projectCounts[relatedProject] = (projectCounts[relatedProject] || 0) + 1;
+      // Collect all <title> children of <projectTitles> for each document
+      var projectTitlesElem = docs[i].getElementsByTagName("projectTitles")[0];
+      if (projectTitlesElem) {
+         var titleNodes = projectTitlesElem.getElementsByTagName("title");
+         for (var j = 0; j < titleNodes.length; j++) {
+            var title = titleNodes[j].innerHTML;
+            projectSet.add(title);
+            projectCounts[title] = (projectCounts[title] || 0) + 1;
          }
       }
    }
@@ -330,10 +322,15 @@ function populateProjectFacetOptions(docs, selected) {
 function filterDocsByProjects(docs, selectedProjects) {
    if (!selectedProjects.length) return docs;
    return docs.filter(function(doc) {
-      var projectNodes = doc.getElementsByTagName("projectTitle");
-      var relatedProjectNodes = doc.getElementsByTagName("relatedProjectTitle");
-      var projects = Array.from(projectNodes).map(function(n) { return n.innerHTML; })
-         .concat(Array.from(relatedProjectNodes).map(function(n) { return n.innerHTML; }));
+      // Use <title> children of <projectTitles> for filtering
+      var projectTitlesElem = doc.getElementsByTagName("projectTitles")[0];
+      var projects = [];
+      if (projectTitlesElem) {
+         var titleNodes = projectTitlesElem.getElementsByTagName("title");
+         for (var j = 0; j < titleNodes.length; j++) {
+            projects.push(titleNodes[j].innerHTML);
+         }
+      }
       return selectedProjects.some(function(sel) { return projects.includes(sel); });
    });
 }
