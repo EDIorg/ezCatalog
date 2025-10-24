@@ -197,6 +197,32 @@ function reformatXMLDocument(xmlDoc) {
             });
             doc.appendChild(projectTitlesElem);
         }
+        // --- Abstract transformation ---
+        const abstractElems = Array.from(doc.getElementsByTagName('abstract'));
+        abstractElems.forEach(absElem => {
+            // Helper to recursively extract text from element and children
+            function extractText(node) {
+                let text = '';
+                node.childNodes.forEach(child => {
+                    if (child.nodeType === 3) { // TEXT_NODE
+                        text += child.textContent.trim() + ' ';
+                    } else if (child.nodeType === 1) { // ELEMENT_NODE
+                        if (child.tagName && child.tagName.toLowerCase() === 'para') {
+                            text += extractText(child).trim() + '\n\n';
+                        } else {
+                            text += extractText(child);
+                        }
+                    }
+                });
+                return text;
+            }
+            const abstractText = extractText(absElem).trim();
+            // Remove all children and set textContent to the flattened string
+            while (absElem.firstChild) {
+                absElem.removeChild(absElem.firstChild);
+            }
+            absElem.textContent = abstractText;
+        });
     }
     return xmlDoc;
 }
@@ -207,3 +233,4 @@ window.buildRidarePayload = buildRidarePayload;
 window.postToRidareEndpoint = postToRidareEndpoint;
 window.parseRidareXmlResponse = parseRidareXmlResponse;
 window.reformatXMLDocument = reformatXMLDocument;
+
