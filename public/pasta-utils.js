@@ -124,8 +124,19 @@ function parseRidareXmlResponse(xmlText) {
     return documents;
 }
 
+/**
+ * Reformat an XML document according to custom rules.
+ * @param {Document} xmlDoc - The XML document to reformat.
+ * @returns {Document} Reformatted XML document.
+ */
+function reformatXMLDocument(xmlDoc) {
+    // TODO: Implement reformatting logic in subsequent steps
+    return xmlDoc;
+}
+
 // Remove Node.js module.exports and attach functions to window for browser use
 window.fetchDataPackageIdentifiers = fetchDataPackageIdentifiers;
 window.buildRidarePayload = buildRidarePayload;
 window.postToRidareEndpoint = postToRidareEndpoint;
 window.parseRidareXmlResponse = parseRidareXmlResponse;
+window.reformatXMLDocument = reformatXMLDocument;

@@ -591,6 +591,8 @@ async function initData() {
     // Step 4: Parse returned XML
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(response, "text/xml");
+    // Apply XML reformatting
+    xmlDoc = reformatXMLDocument(xmlDoc);
     var docs = Array.from(xmlDoc.getElementsByTagName("document"));
     ALL_PASTA_DOCS = docs;
     // Step 5: Pass to facet population and filtering functions
