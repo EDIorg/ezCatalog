@@ -120,8 +120,12 @@ function buildCitationsFromCite(pastaDocs) {
    var abstracts = [];
    for (var i = 0; i < pastaDocs.length; i++) {
       var doc = pastaDocs[i];
-      packageIds.push(doc.getElementsByTagName("packageid")[0].childNodes[0].nodeValue);
-      abstracts.push(doc.getElementsByTagName("abstract")[0].childNodes[0].nodeValue);
+      var packageidNode = doc.getElementsByTagName("packageid")[0];
+      var abstractNode = doc.getElementsByTagName("abstract")[0];
+      var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : "";
+      var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : "";
+      packageIds.push(packageid);
+      abstracts.push(abstract);
    }
    if (packageIds.length) {
       getCitations(packageIds, abstracts);
