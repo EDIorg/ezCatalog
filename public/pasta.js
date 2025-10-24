@@ -357,11 +357,15 @@ function populateLocationFacetOptions(docs, selected) {
    var locationSet = new Set();
    var locationCounts = {};
    for (var i = 0; i < docs.length; i++) {
-      var locationNodes = docs[i].getElementsByTagName("geographicdescription");
-      for (var j = 0; j < locationNodes.length; j++) {
-         var location = locationNodes[j].innerHTML;
-         locationSet.add(location);
-         locationCounts[location] = (locationCounts[location] || 0) + 1;
+      // Collect all <geographicDescription> children of <geographicDescriptions>
+      var geoDescsElem = docs[i].getElementsByTagName("geographicDescriptions")[0];
+      if (geoDescsElem) {
+         var geoDescNodes = geoDescsElem.getElementsByTagName("geographicDescription");
+         for (var j = 0; j < geoDescNodes.length; j++) {
+            var location = geoDescNodes[j].innerHTML;
+            locationSet.add(location);
+            locationCounts[location] = (locationCounts[location] || 0) + 1;
+         }
       }
    }
    var locationDropdown = document.getElementById("location-dropdown");
@@ -372,8 +376,15 @@ function populateLocationFacetOptions(docs, selected) {
 function filterDocsByLocations(docs, selectedLocations) {
    if (!selectedLocations.length) return docs;
    return docs.filter(function(doc) {
-      var locationNodes = doc.getElementsByTagName("geographicdescription");
-      var locations = Array.from(locationNodes).map(function(n) { return n.innerHTML; });
+      // Use <geographicDescription> children of <geographicDescriptions> for filtering
+      var geoDescsElem = doc.getElementsByTagName("geographicDescriptions")[0];
+      var locations = [];
+      if (geoDescsElem) {
+         var geoDescNodes = geoDescsElem.getElementsByTagName("geographicDescription");
+         for (var j = 0; j < geoDescNodes.length; j++) {
+            locations.push(geoDescNodes[j].innerHTML);
+         }
+      }
       return selectedLocations.some(function(sel) { return locations.includes(sel); });
    });
 }
