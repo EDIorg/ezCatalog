@@ -1,5 +1,3 @@
-const { DOMParser } = require('xmldom');
-
 const PASTA_SERVER = "https://pasta.lternet.edu/package/search/eml?";
 async function fetchDataPackageIdentifiers(scope, filter = `&fq=scope:${scope}`) {
     const url = `${PASTA_SERVER}fl=packageid&defType=edismax${filter}&q=*&rows=1000`;
@@ -108,5 +106,8 @@ function parseRidareXmlResponse(xmlText) {
     return documents;
 }
 
-module.exports = { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint, parseRidareXmlResponse };
-
+// Remove Node.js module.exports and attach functions to window for browser use
+window.fetchDataPackageIdentifiers = fetchDataPackageIdentifiers;
+window.buildRidarePayload = buildRidarePayload;
+window.postToRidareEndpoint = postToRidareEndpoint;
+window.parseRidareXmlResponse = parseRidareXmlResponse;
