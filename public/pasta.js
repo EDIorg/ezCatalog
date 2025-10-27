@@ -415,13 +415,17 @@ function populateTaxonFacetOptions(docs, selected) {
    for (var i = 0; i < docs.length; i++) {
       var node = docs[i];
       var taxonNodes = node.getElementsByTagName("taxonRankValue");
+      var uniqueTaxa = new Set();
       for (var j = 0; j < taxonNodes.length; j++) {
          var taxon = taxonNodes[j].textContent.trim();
          if (taxon) {
-            taxonSet.add(taxon);
-            taxonCounts[taxon] = (taxonCounts[taxon] || 0) + 1;
+            uniqueTaxa.add(taxon);
          }
       }
+      uniqueTaxa.forEach(function(taxon) {
+         taxonSet.add(taxon);
+         taxonCounts[taxon] = (taxonCounts[taxon] || 0) + 1;
+      });
    }
    var taxonDropdown = document.getElementById("taxonRankValue-dropdown");
    var taxa = Array.from(taxonSet).sort();
@@ -464,13 +468,17 @@ function populateCommonNameFacetOptions(docs, selected) {
    for (var i = 0; i < docs.length; i++) {
       var node = docs[i];
       var commonNameNodes = node.getElementsByTagName("commonName");
+      var uniqueCommonNames = new Set();
       for (var j = 0; j < commonNameNodes.length; j++) {
          var commonName = commonNameNodes[j].textContent.trim();
          if (commonName) {
-            commonNameSet.add(commonName);
-            commonNameCounts[commonName] = (commonNameCounts[commonName] || 0) + 1;
+            uniqueCommonNames.add(commonName);
          }
       }
+      uniqueCommonNames.forEach(function(commonName) {
+         commonNameSet.add(commonName);
+         commonNameCounts[commonName] = (commonNameCounts[commonName] || 0) + 1;
+      });
    }
    var commonNameDropdown = document.getElementById("commonName-dropdown");
    var commonNames = Array.from(commonNameSet).sort();
