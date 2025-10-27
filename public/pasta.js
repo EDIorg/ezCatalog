@@ -222,11 +222,17 @@ function populateCreatorFacetOptions(docs, selected) {
    var creatorCounts = {};
    for (var i = 0; i < docs.length; i++) {
       var authorNodes = docs[i].getElementsByTagName("author");
+      var uniqueCreators = new Set();
       for (var j = 0; j < authorNodes.length; j++) {
          var creator = authorNodes[j].innerHTML;
+         if (creator) {
+            uniqueCreators.add(creator);
+         }
+      }
+      uniqueCreators.forEach(function(creator) {
          creatorSet.add(creator);
          creatorCounts[creator] = (creatorCounts[creator] || 0) + 1;
-      }
+      });
    }
    var creatorDropdown = document.getElementById("creator-dropdown");
    var creators = Array.from(creatorSet).sort();
@@ -264,11 +270,17 @@ function populateKeywordFacetOptions(docs, selected) {
    var keywordCounts = {};
    for (var i = 0; i < docs.length; i++) {
       var keywordNodes = docs[i].getElementsByTagName("keyword");
+      var uniqueKeywords = new Set();
       for (var j = 0; j < keywordNodes.length; j++) {
          var keyword = keywordNodes[j].innerHTML;
+         if (keyword) {
+            uniqueKeywords.add(keyword);
+         }
+      }
+      uniqueKeywords.forEach(function(keyword) {
          keywordSet.add(keyword);
          keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
-      }
+      });
    }
    var keywordDropdown = document.getElementById("keyword-dropdown");
    var keywords = Array.from(keywordSet).sort();
@@ -305,16 +317,21 @@ function populateProjectFacetOptions(docs, selected) {
    var projectSet = new Set();
    var projectCounts = {};
    for (var i = 0; i < docs.length; i++) {
-      // Collect all <title> children of <projectTitles> for each document
       var projectTitlesElem = docs[i].getElementsByTagName("projectTitles")[0];
+      var uniqueProjects = new Set();
       if (projectTitlesElem) {
          var titleNodes = projectTitlesElem.getElementsByTagName("title");
          for (var j = 0; j < titleNodes.length; j++) {
             var title = titleNodes[j].innerHTML;
-            projectSet.add(title);
-            projectCounts[title] = (projectCounts[title] || 0) + 1;
+            if (title) {
+               uniqueProjects.add(title);
+            }
          }
       }
+      uniqueProjects.forEach(function(title) {
+         projectSet.add(title);
+         projectCounts[title] = (projectCounts[title] || 0) + 1;
+      });
    }
    var projectDropdown = document.getElementById("project-dropdown");
    var projects = Array.from(projectSet).sort();
@@ -360,16 +377,21 @@ function populateLocationFacetOptions(docs, selected) {
    var locationSet = new Set();
    var locationCounts = {};
    for (var i = 0; i < docs.length; i++) {
-      // Collect all <geographicDescription> children of <geographicDescriptions>
       var geoDescsElem = docs[i].getElementsByTagName("geographicDescriptions")[0];
+      var uniqueLocations = new Set();
       if (geoDescsElem) {
          var geoDescNodes = geoDescsElem.getElementsByTagName("geographicDescription");
          for (var j = 0; j < geoDescNodes.length; j++) {
             var location = geoDescNodes[j].innerHTML;
-            locationSet.add(location);
-            locationCounts[location] = (locationCounts[location] || 0) + 1;
+            if (location) {
+               uniqueLocations.add(location);
+            }
          }
       }
+      uniqueLocations.forEach(function(location) {
+         locationSet.add(location);
+         locationCounts[location] = (locationCounts[location] || 0) + 1;
+      });
    }
    var locationDropdown = document.getElementById("location-dropdown");
    var locations = Array.from(locationSet).sort();
@@ -381,7 +403,7 @@ function filterDocsByLocations(docs, selectedLocations) {
    if (!selectedLocations.length) return docs;
    return docs.filter(function(doc) {
       // Use <geographicDescription> children of <geographicDescriptions> for filtering
-      var geoDescsElem = doc.getElementsByTagName("geographicDescriptions")[0];
+      var geoDescsElem = doc.getElementsByTagName("projectTitles")[0];
       var locations = [];
       if (geoDescsElem) {
          var geoDescNodes = geoDescsElem.getElementsByTagName("geographicDescription");
