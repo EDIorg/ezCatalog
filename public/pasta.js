@@ -231,6 +231,7 @@ function populateCreatorFacetOptions(docs, selected) {
    var creatorDropdown = document.getElementById("creator-dropdown");
    var creators = Array.from(creatorSet).sort();
    creatorDropdown.innerHTML = renderCreatorCheckboxes(creators, selected || [], creatorCounts);
+   bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
 function filterDocsByCreators(docs, selectedCreators) {
@@ -272,6 +273,7 @@ function populateKeywordFacetOptions(docs, selected) {
    var keywordDropdown = document.getElementById("keyword-dropdown");
    var keywords = Array.from(keywordSet).sort();
    keywordDropdown.innerHTML = renderKeywordCheckboxes(keywords, selected || [], keywordCounts);
+   bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
 function filterDocsByKeywords(docs, selectedKeywords) {
@@ -317,6 +319,7 @@ function populateProjectFacetOptions(docs, selected) {
    var projectDropdown = document.getElementById("project-dropdown");
    var projects = Array.from(projectSet).sort();
    projectDropdown.innerHTML = renderProjectCheckboxes(projects, selected || [], projectCounts);
+   bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
 function filterDocsByProjects(docs, selectedProjects) {
@@ -371,6 +374,7 @@ function populateLocationFacetOptions(docs, selected) {
    var locationDropdown = document.getElementById("location-dropdown");
    var locations = Array.from(locationSet).sort();
    locationDropdown.innerHTML = renderLocationCheckboxes(locations, selected || [], locationCounts);
+   bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
 function filterDocsByLocations(docs, selectedLocations) {
@@ -425,6 +429,7 @@ function populateTaxonFacetOptions(docs, selected) {
      taxonDropdown.innerHTML = '<span style="color:#888;">No scientific names found in data.</span>';
    } else {
      taxonDropdown.innerHTML = renderTaxonCheckboxes(taxa, selected || [], taxonCounts);
+     bindFacetEvents(); // Ensure listeners are attached after rendering
    }
 }
 
@@ -473,6 +478,7 @@ function populateCommonNameFacetOptions(docs, selected) {
      commonNameDropdown.innerHTML = '<span style="color:#888;">No common names found in data.</span>';
    } else {
      commonNameDropdown.innerHTML = renderCommonNameCheckboxes(commonNames, selected || [], commonNameCounts);
+     bindFacetEvents(); // Ensure listeners are attached after rendering
    }
 }
 
@@ -649,8 +655,20 @@ function processFacetChange() {
   populateLocationFacetOptions(filteredDocs, selectedLocations);
   populateTaxonFacetOptions(filteredDocs, selectedTaxa);
   populateCommonNameFacetOptions(filteredDocs, selectedCommonNames);
-  renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects, selectedTaxa, selectedCommonNames);
-  buildCitationsFromCite(filteredDocs);
+  renderActiveFilters({
+    creators: selectedCreators,
+    keywords: selectedKeywords,
+    projects: selectedProjects,
+    locations: selectedLocations,
+    taxa: selectedTaxa,
+    commonNames: selectedCommonNames
+  });
+  // Update dataset list immediately
+  if (typeof renderResults === 'function') {
+    renderResults(filteredDocs);
+  } else {
+    buildCitationsFromCite(filteredDocs);
+  }
   var count = filteredDocs.length;
   setHtml(PASTA_CONFIG["csvElementId"], '');
   var currentStart = 0;
