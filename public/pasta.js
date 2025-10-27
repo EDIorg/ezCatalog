@@ -389,6 +389,103 @@ function filterDocsByLocations(docs, selectedLocations) {
    });
 }
 
+// --- Faceted Taxon Dropdown Logic ---
+function renderTaxonCheckboxes(taxa, selected, taxonCounts) {
+  return taxa.map(function(taxon, i) {
+    var checked = selected.includes(taxon) ? 'checked' : '';
+    var count = taxonCounts[taxon] || 0;
+    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
+      <input type="checkbox" class="taxon-checkbox" value="${taxon.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${taxon} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
+    </label>`;
+  }).join('');
+}
+
+function getSelectedTaxa() {
+  var boxes = document.querySelectorAll('.taxon-checkbox:checked');
+  return Array.from(boxes).map(function(box) { return box.value; });
+}
+
+function populateTaxonFacetOptions(docs, selected) {
+   var taxonSet = new Set();
+   var taxonCounts = {};
+   for (var i = 0; i < docs.length; i++) {
+      var node = docs[i];
+      var taxonNodes = node.getElementsByTagName("taxonRankValue");
+      for (var j = 0; j < taxonNodes.length; j++) {
+         var taxon = taxonNodes[j].textContent.trim();
+         if (taxon) {
+            taxonSet.add(taxon);
+            taxonCounts[taxon] = (taxonCounts[taxon] || 0) + 1;
+         }
+      }
+   }
+   var taxonDropdown = document.getElementById("taxonRankValue-dropdown");
+   var taxa = Array.from(taxonSet).sort();
+   if (taxa.length === 0) {
+     taxonDropdown.innerHTML = '<span style="color:#888;">No scientific names found in data.</span>';
+   } else {
+     taxonDropdown.innerHTML = renderTaxonCheckboxes(taxa, selected || [], taxonCounts);
+   }
+}
+
+function filterDocsByTaxa(docs, selectedTaxa) {
+   if (!selectedTaxa.length) return docs;
+   return docs.filter(function(doc) {
+      var taxonNodes = doc.getElementsByTagName("taxonRankValue");
+      var taxa = Array.from(taxonNodes).map(function(n) { return n.textContent.trim(); });
+      return selectedTaxa.some(function(sel) { return taxa.includes(sel); });
+   });
+}
+
+// --- Faceted Common Name Dropdown Logic ---
+function renderCommonNameCheckboxes(commonNames, selected, commonNameCounts) {
+  return commonNames.map(function(commonName, i) {
+    var checked = selected.includes(commonName) ? 'checked' : '';
+    var count = commonNameCounts[commonName] || 0;
+    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
+      <input type="checkbox" class="commonname-checkbox" value="${commonName.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${commonName} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
+    </label>`;
+  }).join('');
+}
+
+function getSelectedCommonNames() {
+  var boxes = document.querySelectorAll('.commonname-checkbox:checked');
+  return Array.from(boxes).map(function(box) { return box.value; });
+}
+
+function populateCommonNameFacetOptions(docs, selected) {
+   var commonNameSet = new Set();
+   var commonNameCounts = {};
+   for (var i = 0; i < docs.length; i++) {
+      var node = docs[i];
+      var commonNameNodes = node.getElementsByTagName("commonName");
+      for (var j = 0; j < commonNameNodes.length; j++) {
+         var commonName = commonNameNodes[j].textContent.trim();
+         if (commonName) {
+            commonNameSet.add(commonName);
+            commonNameCounts[commonName] = (commonNameCounts[commonName] || 0) + 1;
+         }
+      }
+   }
+   var commonNameDropdown = document.getElementById("commonName-dropdown");
+   var commonNames = Array.from(commonNameSet).sort();
+   if (commonNames.length === 0) {
+     commonNameDropdown.innerHTML = '<span style="color:#888;">No common names found in data.</span>';
+   } else {
+     commonNameDropdown.innerHTML = renderCommonNameCheckboxes(commonNames, selected || [], commonNameCounts);
+   }
+}
+
+function filterDocsByCommonNames(docs, selectedCommonNames) {
+   if (!selectedCommonNames.length) return docs;
+   return docs.filter(function(doc) {
+      var commonNameNodes = doc.getElementsByTagName("commonName");
+      var commonNames = Array.from(commonNameNodes).map(function(n) { return n.textContent.trim(); });
+      return selectedCommonNames.some(function(sel) { return commonNames.includes(sel); });
+   });
+}
+
+// --- Faceted Generic Logic ---
 /**
  * Generic facet checkbox renderer
  */
@@ -435,55 +532,67 @@ function filterDocsByFacet(docs, tagName, selected) {
    });
 }
 
-// Patch successCallback to store all docs and update creator, keyword, projects, and location facets
+// Patch successCallback to store all docs and update creator, keyword, projects, location, taxon, and common name facets
 var origSuccessCallback = successCallback;
 successCallback = function(headers, response) {
    var parser = new DOMParser();
    var xmlDoc = parser.parseFromString(response, "text/xml");
-   var docs = Array.from(xmlDoc.getElementsByTagName("document"));
-   ALL_PASTA_DOCS = docs;
+   var docs = Array.from(xmlDoc.getElementsByTagName("doc"));
+   window.allDocs = docs;
    var selectedCreators = getSelectedCreators();
    var selectedKeywords = getSelectedKeywords();
    var selectedProjects = getSelectedProjects();
    var selectedLocations = getSelectedLocations();
+   var selectedTaxa = getSelectedTaxa();
+   var selectedCommonNames = getSelectedCommonNames();
    populateCreatorFacetOptions(docs, selectedCreators);
    populateKeywordFacetOptions(docs, selectedKeywords);
    populateProjectFacetOptions(docs, selectedProjects);
    populateLocationFacetOptions(docs, selectedLocations);
-   var filteredDocs = filterDocsByCreators(docs, selectedCreators);
-   filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords);
-    filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects);
-   filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations);
-   buildCitationsFromCite(filteredDocs);
-   var count = filteredDocs.length;
-   setHtml(PASTA_CONFIG["csvElementId"], '');
-   var currentStart = getParameterByName("start");
-   if (!currentStart) currentStart = 0; else currentStart = parseInt(currentStart);
-   var limit = parseInt(PASTA_CONFIG["limit"]);
-   var showPages = parseInt(PASTA_CONFIG["showPages"]);
-   var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
-   var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
-   showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
-   showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
-   var query = getParameterByName("q");
-   showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-}
+   populateTaxonFacetOptions(docs, selectedTaxa);
+   populateCommonNameFacetOptions(docs, selectedCommonNames);
+   var filtered = docs;
+   filtered = filterDocsByCreators(filtered, selectedCreators);
+   filtered = filterDocsByKeywords(filtered, selectedKeywords);
+   filtered = filterDocsByProjects(filtered, selectedProjects);
+   filtered = filterDocsByLocations(filtered, selectedLocations);
+   filtered = filterDocsByTaxa(filtered, selectedTaxa);
+   filtered = filterDocsByCommonNames(filtered, selectedCommonNames);
+   renderResults(filtered);
+   renderActiveFilters({
+     creators: selectedCreators,
+     keywords: selectedKeywords,
+     projects: selectedProjects,
+     locations: selectedLocations,
+     taxa: selectedTaxa,
+     commonNames: selectedCommonNames
+   });
+};
 
-function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects) {
+// Update renderActiveFilters to include tags for selected scientific and common names
+function renderActiveFilters(selected) {
   var container = document.getElementById('active-filters');
   if (!container) return;
   var tags = [];
-  selectedCreators.forEach(function(creator) {
+  selected.creators.forEach(function(creator) {
     tags.push(`<span class="filter-tag">${creator} <button class="remove-filter" data-type="creator" data-value="${encodeURIComponent(creator)}" title="Remove filter">×</button></span>`);
   });
-  selectedKeywords.forEach(function(keyword) {
+  selected.keywords.forEach(function(keyword) {
     tags.push(`<span class="filter-tag">${keyword} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
   });
-  selectedProjects.forEach(function(project) {
+  selected.projects.forEach(function(project) {
     tags.push(`<span class="filter-tag">${project} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
   });
-  selectedLocations.forEach(function(location) {
+  selected.locations.forEach(function(location) {
     tags.push(`<span class="filter-tag">${location} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
+  });
+  // Add tags for scientific names
+  selected.taxa.forEach(function(taxon) {
+    tags.push(`<span class="filter-tag">${taxon} <button class="remove-filter" data-type="taxa" data-value="${encodeURIComponent(taxon)}" title="Remove filter">×</button></span>`);
+  });
+  // Add tags for common names
+  selected.commonNames.forEach(function(commonName) {
+    tags.push(`<span class="filter-tag">${commonName} <button class="remove-filter" data-type="commonNames" data-value="${encodeURIComponent(commonName)}" title="Remove filter">×</button></span>`);
   });
   var clearBtn = (tags.length > 0)
     ? '<span id="clear-all-filters" class="clear-all-filters-link">Clear all filters</span>'
@@ -491,12 +600,14 @@ function renderActiveFilters(selectedCreators, selectedKeywords, selectedLocatio
   container.innerHTML = tags.join(' ') + ' ' + clearBtn;
 }
 
-function uncheckFacet(type, value) {
+function uncheckFacet(facetType, value) {
   var selector =
-    type === 'creator' ? '.creator-checkbox' :
-    type === 'keyword' ? '.keyword-checkbox' :
-    type === 'project' ? '.project-checkbox' :
-    '.location-checkbox';
+    facetType === 'creator' ? '.creator-checkbox' :
+    facetType === 'keyword' ? '.keyword-checkbox' :
+    facetType === 'project' ? '.project-checkbox' :
+    facetType === 'location' ? '.location-checkbox' :
+    facetType === 'taxa' ? '.taxon-checkbox' :
+    '.commonname-checkbox';
   var boxes = document.querySelectorAll(selector);
   boxes.forEach(function(box) {
     if (box.value === value) box.checked = false;
@@ -508,7 +619,9 @@ function clearAllFacets() {
     '.creator-checkbox',
     '.keyword-checkbox',
     '.project-checkbox',
-    '.location-checkbox'
+    '.location-checkbox',
+    '.taxon-checkbox',
+    '.commonname-checkbox'
   ];
   selectors.forEach(function(selector) {
     var boxes = document.querySelectorAll(selector);
@@ -522,15 +635,21 @@ function processFacetChange() {
   var selectedKeywords = getSelectedKeywords();
   var selectedProjects = getSelectedProjects();
   var selectedLocations = getSelectedLocations();
+  var selectedTaxa = getSelectedTaxa();
+  var selectedCommonNames = getSelectedCommonNames();
   var filteredDocs = filterDocsByCreators(ALL_PASTA_DOCS, selectedCreators || []);
   filteredDocs = filterDocsByKeywords(filteredDocs, selectedKeywords || []);
   filteredDocs = filterDocsByProjects(filteredDocs, selectedProjects || []);
   filteredDocs = filterDocsByLocations(filteredDocs, selectedLocations || []);
+  filteredDocs = filterDocsByTaxa(filteredDocs, selectedTaxa || []);
+  filteredDocs = filterDocsByCommonNames(filteredDocs, selectedCommonNames || []);
   populateCreatorFacetOptions(filteredDocs, selectedCreators);
   populateKeywordFacetOptions(filteredDocs, selectedKeywords);
   populateProjectFacetOptions(filteredDocs, selectedProjects);
   populateLocationFacetOptions(filteredDocs, selectedLocations);
-  renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects);
+  populateTaxonFacetOptions(filteredDocs, selectedTaxa);
+  populateCommonNameFacetOptions(filteredDocs, selectedCommonNames);
+  renderActiveFilters(selectedCreators, selectedKeywords, selectedLocations, selectedProjects, selectedTaxa, selectedCommonNames);
   buildCitationsFromCite(filteredDocs);
   var count = filteredDocs.length;
   setHtml(PASTA_CONFIG["csvElementId"], '');
@@ -608,6 +727,8 @@ async function initData() {
     populateKeywordFacetOptions(docs, []);
     populateProjectFacetOptions(docs, []);
     populateLocationFacetOptions(docs, []);
+    populateTaxonFacetOptions(docs, []);
+    populateCommonNameFacetOptions(docs, []);
     buildCitationsFromCite(docs);
   } catch (err) {
     console.error('Error initializing data:', err);
@@ -625,10 +746,18 @@ function initDropdowns() {
 }
 
 function bindFacetEvents() {
-  initFacetChangeListener('creator-dropdown', 'creator-checkbox');
-  initFacetChangeListener('keyword-dropdown', 'keyword-checkbox');
-  initFacetChangeListener('project-dropdown', 'project-checkbox');
-  initFacetChangeListener('location-dropdown', 'location-checkbox');
+  [
+    'creator-checkbox',
+    'keyword-checkbox',
+    'project-checkbox',
+    'location-checkbox',
+    'taxon-checkbox',
+    'commonname-checkbox'
+  ].forEach(function(className) {
+    document.querySelectorAll('.' + className).forEach(function(box) {
+      box.addEventListener('change', processFacetChange);
+    });
+  });
 }
 
 function bindFilterEvents() {
