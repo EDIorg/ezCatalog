@@ -4,7 +4,7 @@
 
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
-   "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
+   "filter": '&fq=scope:knb-lter-ble', // Filter results on a unique keyword of a research group
    "limit": 20, // Max number of results to retrieve per page
    "resultsElementId": "searchResults", // Element to contain results
    "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
@@ -46,7 +46,7 @@ function titleHtml(title) {
 function imgHtml(pkgid) {
    const imgBase = pkgid.split(".").slice(0,2).join(".");
    const imgSrc = `images/${imgBase}.png`;
-   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror='this.style.display=\'none\''></div>`;
+   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none'"></div>`;
 }
 function exploreLink(link) {
    return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
@@ -86,32 +86,40 @@ function getCitations(packageIds, abstracts) {
    var header = {
       "Accept": "application/json"
    };
-   var callsRemaining = packageIds.length;
    var baseUri = "https://cite.edirepository.org/cite/";
    var citations = {};
+   var callsRemaining = packageIds.length;
 
-   packageIds.forEach(function (pid, index) {
+   function processNext(index) {
+      if (index >= packageIds.length) return;
+      var pid = packageIds[index];
       var uri = baseUri + pid;
       makeCorsRequest(
          uri,
          header,
-         (function (index) { // enable the callback to know which package this is
-            return function (headers, response) {
-               var citation = JSON.parse(response);
-               citation["pid"] = packageIds[index];
-               citations[index] = citation;
+         function (headers, response) {
+            var citation = JSON.parse(response);
+            citation["pid"] = packageIds[index];
+            citations[index] = citation;
 
-               --callsRemaining;
-               if (callsRemaining <= 0) {
-                  var html = buildHtml(citations, abstracts);
-                  document.getElementById("searchResults").innerHTML = html;
-                  showLoading(false);
-               }
-            };
-         })(index), // immediately call the closure with the current index value
+            --callsRemaining;
+            if (callsRemaining <= 0) {
+               var html = buildHtml(citations, abstracts);
+               document.getElementById("searchResults").innerHTML = html;
+               showLoading(false);
+            } else {
+               setTimeout(function() {
+                  processNext(index + 1);
+               }, 100);
+            }
+         },
          errorCallback
       );
-   });
+   }
+   if (packageIds.length > 0) {
+      showLoading(true);
+      processNext(0);
+   }
 }
 
 // Build dataset citations using Cite service, with package IDs from PASTA
