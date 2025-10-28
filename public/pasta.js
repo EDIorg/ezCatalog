@@ -789,8 +789,6 @@ async function initData() {
   } catch (err) {
     console.error('Error initializing data:', err);
     errorCallback(err);
-  } finally {
-    showLoading(false);
   }
 }
 
