@@ -89,8 +89,14 @@ function getCitations(packageIds, abstracts) {
    var baseUri = "https://cite.edirepository.org/cite/";
    var citations = {};
    var callsRemaining = packageIds.length;
+   const MAX_RETRIES = 5;
+   const BASE_DELAY = 200; // ms
 
-   function processNext(index) {
+   function isTransientError(status) {
+      return status === 429 || status === 503 || status === 0; // 0 for network error
+   }
+
+   function processNext(index, attempt = 0) {
       if (index >= packageIds.length) return;
       var pid = packageIds[index];
       var uri = baseUri + pid;
@@ -101,7 +107,6 @@ function getCitations(packageIds, abstracts) {
             var citation = JSON.parse(response);
             citation["pid"] = packageIds[index];
             citations[index] = citation;
-
             --callsRemaining;
             if (callsRemaining <= 0) {
                var html = buildHtml(citations, abstracts);
@@ -110,10 +115,31 @@ function getCitations(packageIds, abstracts) {
             } else {
                setTimeout(function() {
                   processNext(index + 1);
-               }, 100);
+               }, BASE_DELAY); // Small delay between successful requests
             }
          },
-         errorCallback
+         function (status, error) {
+            if (isTransientError(status) && attempt < MAX_RETRIES) {
+               // Exponential backoff with jitter
+               var delay = Math.floor(BASE_DELAY * Math.pow(2, attempt) + Math.random() * 100);
+               setTimeout(function() {
+                  processNext(index, attempt + 1);
+               }, delay);
+            } else {
+               // On permanent error or max retries, log and continue
+               citations[index] = { pid: packageIds[index], error: error || "Request failed" };
+               --callsRemaining;
+               if (callsRemaining <= 0) {
+                  var html = buildHtml(citations, abstracts);
+                  document.getElementById("searchResults").innerHTML = html;
+                  showLoading(false);
+               } else {
+                  setTimeout(function() {
+                     processNext(index + 1);
+                  }, BASE_DELAY);
+               }
+            }
+         }
       );
    }
    if (packageIds.length > 0) {
