@@ -5,7 +5,6 @@
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
    "filter": '&fq=scope:knb-lter-ble', // Filter results on a unique keyword of a research group
-   "limit": 20, // Max number of results to retrieve per page
    "resultsElementId": "searchResults", // Element to contain results
    "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
    "countElementId": "resultCount", // Element showing number of results
@@ -16,6 +15,9 @@ const PASTA_CONFIG = {
    "showAbstracts": true, // true if we should show abstracts in search results
    "abstractLimit": 750 // Limit the number of characters in the abstract
 };
+
+// This feature is deprecated. Please do not functionally depend on it.
+PASTA_CONFIG.limit = 2000;  // Max number of results to retrieve per page
 
 /**
  * Get URL arguments by name
@@ -112,6 +114,12 @@ function getCitations(packageIds, abstracts) {
                var html = buildHtml(citations, abstracts);
                document.getElementById("searchResults").innerHTML = html;
                showLoading(false);
+               // Show result count after all CITE calls are done and results are rendered
+               var count = Object.keys(citations).length;
+               var currentStart = 0;
+               var limit = parseInt(PASTA_CONFIG["limit"]);
+               var query = getParameterByName("q");
+               showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
             } else {
                setTimeout(function() {
                   processNext(index + 1);
@@ -133,6 +141,12 @@ function getCitations(packageIds, abstracts) {
                   var html = buildHtml(citations, abstracts);
                   document.getElementById("searchResults").innerHTML = html;
                   showLoading(false);
+                  // Show result count after all CITE calls are done and results are rendered
+                  var count = Object.keys(citations).length;
+                  var currentStart = 0;
+                  var limit = parseInt(PASTA_CONFIG["limit"]);
+                  var query = getParameterByName("q");
+                  showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
                } else {
                   setTimeout(function() {
                      processNext(index + 1);
@@ -217,6 +231,7 @@ function successCallback(headers, response) {
    showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
    showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
    var query = getParameterByName("q");
+   // Moved showResultCount here to ensure it runs after all CITE calls are complete
    showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
 }
 
