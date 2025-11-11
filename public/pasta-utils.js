@@ -155,23 +155,19 @@ function reformatXMLDocument(xmlDoc) {
     const documents = xmlDoc.getElementsByTagName('document');
     for (let i = 0; i < documents.length; i++) {
         const doc = documents[i];
-        // --- Author transformation ---
-        const individualNames = Array.from(doc.getElementsByTagName('individualName'));
+        // --- Author transformation from <creator> ---
+        const creatorElems = Array.from(doc.getElementsByTagName('creator'));
         let authorNames = [];
-        individualNames.forEach(indNode => {
-            const surNames = Array.from(indNode.getElementsByTagName('surName')).map(e => e.textContent.trim());
-            const givenNames = Array.from(indNode.getElementsByTagName('givenName')).map(e => e.textContent.trim());
-            let fullName = '';
-            if (surNames.length && givenNames.length) {
-                fullName = surNames.join(', ') + ', ' + givenNames.join(' ');
-            } else if (surNames.length) {
-                fullName = surNames.join(', ');
-            } else if (givenNames.length) {
-                fullName = givenNames.join(' ');
-            }
-            if (fullName) authorNames.push(fullName);
-            if (indNode.parentNode) {
-                indNode.parentNode.removeChild(indNode);
+        creatorElems.forEach(creatorElem => {
+            const individualNameElem = creatorElem.getElementsByTagName('individualName')[0];
+            if (individualNameElem) {
+                const surName = individualNameElem.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+                const givenNameNodes = individualNameElem.getElementsByTagName('givenName');
+                const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
+                authorNames.push(`${surName}, ${givenNames.join(' ')}`.trim());
+            } else {
+                const orgNameElem = creatorElem.getElementsByTagName('organizationName')[0];
+                if (orgNameElem) authorNames.push(orgNameElem.textContent.trim());
             }
         });
         if (authorNames.length) {

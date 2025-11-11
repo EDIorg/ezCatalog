@@ -4,7 +4,7 @@
 
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
-   "filter": '&fq=scope:knb-lter-ble', // Filter results on a unique keyword of a research group
+   "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "resultsElementId": "searchResults", // Element to contain results
    "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
    "countElementId": "resultCount", // Element showing number of results
@@ -168,19 +168,23 @@ function buildCitationsFromCite(pastaDocs) {
    var abstracts = [];
    for (var i = 0; i < pastaDocs.length; i++) {
       var doc = pastaDocs[i];
-      var packageidNode = doc.getElementsByTagName("packageid")[0];
-      var abstractNode = doc.getElementsByTagName("abstract")[0];
-      var titleNode = doc.getElementsByTagName("title")[0];
-      var pubYearNode = doc.getElementsByTagName("pub_year")[0];
-      var doiNode = doc.getElementsByTagName("doi")[0];
-      // Get creators from parsed object (assume doc.creators exists)
-      var creators = doc.creators || [];
-      var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : "";
-      var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : "";
-      var title = titleNode && titleNode.childNodes.length > 0 ? titleNode.childNodes[0].nodeValue : "";
-      var pub_year = pubYearNode && pubYearNode.childNodes.length > 0 ? pubYearNode.childNodes[0].nodeValue : "";
-      var doi = doiNode && doiNode.childNodes.length > 0 ? doiNode.childNodes[0].nodeValue : "";
-      var authors = creators.join(", ");
+      var packageidNode = doc.getElementsByTagName && doc.getElementsByTagName("packageid")[0];
+      var abstractNode = doc.getElementsByTagName && doc.getElementsByTagName("abstract")[0];
+      var titleNode = doc.getElementsByTagName && doc.getElementsByTagName("title")[0];
+      var pubYearNode = doc.getElementsByTagName && doc.getElementsByTagName("pub_year")[0];
+      var doiNode = doc.getElementsByTagName && doc.getElementsByTagName("doi")[0];
+      // Extract authors from <authors> node
+      var authorsNode = doc.getElementsByTagName && doc.getElementsByTagName("authors")[0];
+      var authors = "";
+      if (authorsNode) {
+         var authorElems = authorsNode.getElementsByTagName("author");
+         authors = Array.from(authorElems).map(function(n) { return n.textContent; }).join(", ");
+      }
+      var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : doc.packageid || "";
+      var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : doc.abstract || "";
+      var title = titleNode && titleNode.childNodes.length > 0 ? titleNode.childNodes[0].nodeValue : doc.title || "";
+      var pub_year = pubYearNode && pubYearNode.childNodes.length > 0 ? pubYearNode.childNodes[0].nodeValue : doc.pub_year || "";
+      var doi = doiNode && doiNode.childNodes.length > 0 ? doiNode.childNodes[0].nodeValue : doc.doi || "";
       citations[i] = {
          pid: packageid,
          title: title,
