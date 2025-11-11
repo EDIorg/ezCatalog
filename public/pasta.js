@@ -173,12 +173,25 @@ function buildCitationsFromCite(pastaDocs) {
       var titleNode = doc.getElementsByTagName && doc.getElementsByTagName("title")[0];
       var pubYearNode = doc.getElementsByTagName && doc.getElementsByTagName("pub_year")[0];
       var doiNode = doc.getElementsByTagName && doc.getElementsByTagName("doi")[0];
-      // Extract authors from <authors> node
+      // Extract authors from <authors> node and reformat for citation
       var authorsNode = doc.getElementsByTagName && doc.getElementsByTagName("authors")[0];
       var authors = "";
       if (authorsNode) {
          var authorElems = authorsNode.getElementsByTagName("author");
-         authors = Array.from(authorElems).map(function(n) { return n.textContent; }).join(", ");
+         authors = Array.from(authorElems).map(function(n) {
+            var name = n.textContent.trim();
+            // If name contains a comma, treat as individual: "Last, First Middle"
+            if (name.includes(",")) {
+               var parts = name.split(",");
+               var last = parts[0].trim();
+               var given = parts[1]?.trim() || "";
+               var initial = given.length > 0 ? given[0].toUpperCase() + "." : "";
+               return initial ? initial + " " + last : last;
+            } else {
+               // Organization name, display as is
+               return name;
+            }
+         }).join(", ");
       }
       var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : doc.packageid || "";
       var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : doc.abstract || "";
