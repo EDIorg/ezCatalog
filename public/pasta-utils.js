@@ -112,6 +112,17 @@ function parseRidareXmlResponse(xmlText) {
         // Title
         const titleNode = documentNode.getElementsByTagName('title')[0];
         const title = titleNode ? titleNode.textContent.trim() : '';
+        // Authors: only individualName nodes with parent 'creator'
+        const authorNodes = Array.from(documentNode.getElementsByTagName('individualName'));
+        const authors = authorNodes
+            .filter(indNode => indNode.parentNode && indNode.parentNode.nodeName.toLowerCase() === 'creator')
+            .map(indNode => {
+                const surName = indNode.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+                const givenNameNodes = indNode.getElementsByTagName('givenName');
+                const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
+                return `${surName}, ${givenNames.join(' ')}`.trim();
+            })
+            .filter(a => a !== ',');
         // Strip any XML tags from abstract
         abstract = abstract.replace(/<[^>]+>/g, '');
         return {
@@ -121,7 +132,8 @@ function parseRidareXmlResponse(xmlText) {
             projectTitles,
             taxonRankValues,
             commonNames,
-            personnel: personnel.join('\n'), // <-- Renamed from authors
+            personnel: personnel.join('\n'),
+            authors: authors.join(', '), // <-- Add authors field for citation
             abstract,
             title
         };

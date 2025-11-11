@@ -171,19 +171,24 @@ function buildCitationsFromCite(pastaDocs) {
       var packageidNode = doc.getElementsByTagName("packageid")[0];
       var abstractNode = doc.getElementsByTagName("abstract")[0];
       var titleNode = doc.getElementsByTagName("title")[0];
-      var personnelNodes = doc.getElementsByTagName("author");
       var pubYearNode = doc.getElementsByTagName("pub_year")[0];
       var doiNode = doc.getElementsByTagName("doi")[0];
+      var authorsNode = doc.getElementsByTagName("authors")[0];
       var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : "";
       var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : "";
       var title = titleNode && titleNode.childNodes.length > 0 ? titleNode.childNodes[0].nodeValue : "";
-      var personnel = Array.from(personnelNodes).map(function(n) { return n.innerHTML; }).join(", ");
       var pub_year = pubYearNode && pubYearNode.childNodes.length > 0 ? pubYearNode.childNodes[0].nodeValue : "";
       var doi = doiNode && doiNode.childNodes.length > 0 ? doiNode.childNodes[0].nodeValue : "";
+      // Build authors from <authors> node if present
+      var authors = "";
+      if (authorsNode) {
+         var authorElems = authorsNode.getElementsByTagName("author");
+         authors = Array.from(authorElems).map(function(n) { return n.innerHTML; }).join(", ");
+      }
       citations[i] = {
          pid: packageid,
          title: title,
-         personnel: personnel,
+         authors: authors,
          pub_year: pub_year,
          doi: doi
       };
