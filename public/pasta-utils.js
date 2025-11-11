@@ -87,14 +87,14 @@ function parseRidareXmlResponse(xmlText) {
         // Common Names
         const commonNameNodes = documentNode.getElementsByTagName('commonName');
         const commonNames = Array.from(commonNameNodes).map(cn => cn.textContent.trim());
-        // Authors
+        // Personnel
         const individualNameNodes = documentNode.getElementsByTagName('individualName');
-        const authors = Array.from(individualNameNodes).map(indNode => {
+        const personnel = Array.from(individualNameNodes).map(indNode => {
             const surName = indNode.getElementsByTagName('surName')[0]?.textContent.trim() || '';
             const givenNameNodes = indNode.getElementsByTagName('givenName');
             const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
             return `${surName}, ${givenNames.join(' ')}`.trim();
-        }).filter(a => a !== ',');
+        }).filter(p => p !== ',');
         // Abstract
         const abstractNode = documentNode.getElementsByTagName('abstract')[0];
         let abstract = '';
@@ -121,9 +121,9 @@ function parseRidareXmlResponse(xmlText) {
             projectTitles,
             taxonRankValues,
             commonNames,
-            authors: authors.join('\n'),
+            personnel: personnel.join('\n'), // <-- Renamed from authors
             abstract,
-            title // <-- Add title to returned object
+            title
         };
     });
     return documents;

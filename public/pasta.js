@@ -171,19 +171,19 @@ function buildCitationsFromCite(pastaDocs) {
       var packageidNode = doc.getElementsByTagName("packageid")[0];
       var abstractNode = doc.getElementsByTagName("abstract")[0];
       var titleNode = doc.getElementsByTagName("title")[0];
-      var authorNodes = doc.getElementsByTagName("author");
+      var personnelNodes = doc.getElementsByTagName("author");
       var pubYearNode = doc.getElementsByTagName("pub_year")[0];
       var doiNode = doc.getElementsByTagName("doi")[0];
       var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : "";
       var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : "";
       var title = titleNode && titleNode.childNodes.length > 0 ? titleNode.childNodes[0].nodeValue : "";
-      var authors = Array.from(authorNodes).map(function(n) { return n.innerHTML; }).join(", ");
+      var personnel = Array.from(personnelNodes).map(function(n) { return n.innerHTML; }).join(", ");
       var pub_year = pubYearNode && pubYearNode.childNodes.length > 0 ? pubYearNode.childNodes[0].nodeValue : "";
       var doi = doiNode && doiNode.childNodes.length > 0 ? doiNode.childNodes[0].nodeValue : "";
       citations[i] = {
          pid: packageid,
          title: title,
-         authors: authors,
+         personnel: personnel,
          pub_year: pub_year,
          doi: doi
       };
@@ -283,34 +283,34 @@ function getSelectedCreators() {
 }
 
 function populateCreatorFacetOptions(docs, selected) {
-   var creatorSet = new Set();
-   var creatorCounts = {};
+   var personnelSet = new Set();
+   var personnelCounts = {};
    for (var i = 0; i < docs.length; i++) {
-      var authorNodes = docs[i].getElementsByTagName("author");
-      var uniqueCreators = new Set();
-      for (var j = 0; j < authorNodes.length; j++) {
-         var creator = authorNodes[j].innerHTML;
-         if (creator) {
-            uniqueCreators.add(creator);
+      var personnelNodes = docs[i].getElementsByTagName("author");
+      var uniquePersonnel = new Set();
+      for (var j = 0; j < personnelNodes.length; j++) {
+         var person = personnelNodes[j].innerHTML;
+         if (person) {
+            uniquePersonnel.add(person);
          }
       }
-      uniqueCreators.forEach(function(creator) {
-         creatorSet.add(creator);
-         creatorCounts[creator] = (creatorCounts[creator] || 0) + 1;
+      uniquePersonnel.forEach(function(person) {
+         personnelSet.add(person);
+         personnelCounts[person] = (personnelCounts[person] || 0) + 1;
       });
    }
    var creatorDropdown = document.getElementById("creator-dropdown");
-   var creators = Array.from(creatorSet).sort();
-   creatorDropdown.innerHTML = renderCreatorCheckboxes(creators, selected || [], creatorCounts);
+   var personnel = Array.from(personnelSet).sort();
+   creatorDropdown.innerHTML = renderCreatorCheckboxes(personnel, selected || [], personnelCounts);
    bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
-function filterDocsByCreators(docs, selectedCreators) {
-   if (!selectedCreators.length) return docs;
+function filterDocsByCreators(docs, selectedPersonnel) {
+   if (!selectedPersonnel.length) return docs;
    return docs.filter(function(doc) {
-      var authorNodes = doc.getElementsByTagName("author");
-      var authors = Array.from(authorNodes).map(function(n) { return n.innerHTML; });
-      return selectedCreators.some(function(sel) { return authors.includes(sel); });
+      var personnelNodes = doc.getElementsByTagName("author");
+      var personnel = Array.from(personnelNodes).map(function(n) { return n.innerHTML; });
+      return selectedPersonnel.some(function(sel) { return personnel.includes(sel); });
    });
 }
 
