@@ -162,25 +162,41 @@ function getCitations(packageIds, abstracts) {
    }
 }
 
-// Build dataset citations using Cite service, with package IDs from PASTA
+// Build dataset citations directly from Ridare XML response
 function buildCitationsFromCite(pastaDocs) {
-   var packageIds = [];
+   var citations = {};
    var abstracts = [];
    for (var i = 0; i < pastaDocs.length; i++) {
       var doc = pastaDocs[i];
       var packageidNode = doc.getElementsByTagName("packageid")[0];
       var abstractNode = doc.getElementsByTagName("abstract")[0];
+      var titleNode = doc.getElementsByTagName("title")[0];
+      var authorNodes = doc.getElementsByTagName("author");
+      var pubYearNode = doc.getElementsByTagName("pub_year")[0];
+      var doiNode = doc.getElementsByTagName("doi")[0];
       var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : "";
       var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : "";
-      packageIds.push(packageid);
+      var title = titleNode && titleNode.childNodes.length > 0 ? titleNode.childNodes[0].nodeValue : "";
+      var authors = Array.from(authorNodes).map(function(n) { return n.innerHTML; }).join(", ");
+      var pub_year = pubYearNode && pubYearNode.childNodes.length > 0 ? pubYearNode.childNodes[0].nodeValue : "";
+      var doi = doiNode && doiNode.childNodes.length > 0 ? doiNode.childNodes[0].nodeValue : "";
+      citations[i] = {
+         pid: packageid,
+         title: title,
+         authors: authors,
+         pub_year: pub_year,
+         doi: doi
+      };
       abstracts.push(abstract);
    }
-   if (packageIds.length) {
-      getCitations(packageIds, abstracts);
-   } else {
-      document.getElementById("searchResults").innerHTML = "<p>Your search returned no results.</p>";
-      showLoading(false);
-   }
+   var html = Object.keys(citations).length ? buildHtml(citations, abstracts) : "<p>Your search returned no results.</p>";
+   document.getElementById("searchResults").innerHTML = html;
+   showLoading(false);
+   var count = Object.keys(citations).length;
+   var currentStart = 0;
+   var limit = parseInt(PASTA_CONFIG["limit"]);
+   var query = getParameterByName("q");
+   showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
 }
 
 function showLoading(isLoading) {
