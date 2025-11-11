@@ -74,8 +74,11 @@ function buildHtml(citations, abstracts) {
       if (abstract.length > PASTA_CONFIG.abstractLimit) {
          abstract = abstract.substring(0, PASTA_CONFIG.abstractLimit) + "...";
       }
-      const authors = citation.authors;
-      const date = citation.pub_year ? ` Published ${citation.pub_year}` : "";
+      let authors = citation.authors;
+      if (authors && !authors.endsWith(".")) {
+         authors += ".";
+      }
+      let date = citation.pub_year ? ` Published ${citation.pub_year}.` : "";
       const link = citation.doi ? citation.doi.slice(0, -1) : `https://portal.edirepository.org/nis/mapbrowse?packageid=${citation.pid}`;
       const row = `<div class='dataset-row'><div class='dataset-info'>${titleHtml(citation.title)}${authorHtml(authors, date)}${PASTA_CONFIG.showAbstracts ? abstractHtml(abstract) : ""}<div class='dataset-actions'>${exploreLink(link)}${relatedStoriesLink(citation.pid, citation.title)}</div></div>${imgHtml(citation.pid)}</div>`;
       html.push(row);
