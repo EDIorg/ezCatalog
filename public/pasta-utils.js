@@ -34,7 +34,8 @@ function buildRidarePayload(pids) {
             { relatedProjectTitle: "//relatedProject" },
             "//dataset/abstract",
             "//taxonRankValue",
-            "//commonName"
+            "//commonName",
+            "//dataset/title" // <-- Added for title extraction
         ]
     };
 }
@@ -108,6 +109,9 @@ function parseRidareXmlResponse(xmlText) {
                 abstract = abstractNode.textContent.trim();
             }
         }
+        // Title
+        const titleNode = documentNode.getElementsByTagName('title')[0];
+        const title = titleNode ? titleNode.textContent.trim() : '';
         // Strip any XML tags from abstract
         abstract = abstract.replace(/<[^>]+>/g, '');
         return {
@@ -118,7 +122,8 @@ function parseRidareXmlResponse(xmlText) {
             taxonRankValues,
             commonNames,
             authors: authors.join('\n'),
-            abstract
+            abstract,
+            title // <-- Add title to returned object
         };
     });
     return documents;
@@ -233,4 +238,3 @@ window.buildRidarePayload = buildRidarePayload;
 window.postToRidareEndpoint = postToRidareEndpoint;
 window.parseRidareXmlResponse = parseRidareXmlResponse;
 window.reformatXMLDocument = reformatXMLDocument;
-
