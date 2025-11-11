@@ -4,7 +4,7 @@
 
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
-   "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
+   "filter": '&fq=scope:knb-lter-ble', // Filter results on a unique keyword of a research group
    "resultsElementId": "searchResults", // Element to contain results
    "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
    "countElementId": "resultCount", // Element showing number of results
@@ -291,12 +291,13 @@ function populateCreatorFacetOptions(docs, selected) {
    var personnelSet = new Set();
    var personnelCounts = {};
    for (var i = 0; i < docs.length; i++) {
-      var personnelNodes = docs[i].getElementsByTagName("author");
+      var personnelNodes = docs[i].getElementsByTagName("personnel")[0];
       var uniquePersonnel = new Set();
-      for (var j = 0; j < personnelNodes.length; j++) {
-         var person = personnelNodes[j].innerHTML;
-         if (person) {
-            uniquePersonnel.add(person);
+      if (personnelNodes) {
+         var personElems = personnelNodes.getElementsByTagName("person");
+         for (var j = 0; j < personElems.length; j++) {
+            var person = personElems[j].textContent;
+            if (person) uniquePersonnel.add(person);
          }
       }
       uniquePersonnel.forEach(function(person) {
@@ -313,8 +314,12 @@ function populateCreatorFacetOptions(docs, selected) {
 function filterDocsByCreators(docs, selectedPersonnel) {
    if (!selectedPersonnel.length) return docs;
    return docs.filter(function(doc) {
-      var personnelNodes = doc.getElementsByTagName("author");
-      var personnel = Array.from(personnelNodes).map(function(n) { return n.innerHTML; });
+      var personnelNodes = doc.getElementsByTagName("personnel")[0];
+      var personnel = [];
+      if (personnelNodes) {
+         var personElems = personnelNodes.getElementsByTagName("person");
+         personnel = Array.from(personElems).map(function(n) { return n.textContent; });
+      }
       return selectedPersonnel.some(function(sel) { return personnel.includes(sel); });
    });
 }

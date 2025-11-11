@@ -155,7 +155,27 @@ function reformatXMLDocument(xmlDoc) {
     const documents = xmlDoc.getElementsByTagName('document');
     for (let i = 0; i < documents.length; i++) {
         const doc = documents[i];
-        // --- Author transformation from <creator> ---
+        // --- Personnel extraction logic ---
+        const individualNameNodes = doc.getElementsByTagName('individualName');
+        let personnelNames = [];
+        for (let j = 0; j < individualNameNodes.length; j++) {
+            const indNode = individualNameNodes[j];
+            const surName = indNode.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+            const givenNameNodes = indNode.getElementsByTagName('givenName');
+            const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
+            const person = `${surName}, ${givenNames.join(' ')}`.trim();
+            if (person && person !== ',') personnelNames.push(person);
+        }
+        if (personnelNames.length) {
+            const personnelElem = xmlDoc.createElement('personnel');
+            personnelNames.forEach(name => {
+                const personElem = xmlDoc.createElement('person');
+                personElem.textContent = name;
+                personnelElem.appendChild(personElem);
+            });
+            doc.appendChild(personnelElem);
+        }
+        // --- Authors extraction logic (unchanged) ---
         const creatorElems = Array.from(doc.getElementsByTagName('creator'));
         let authorNames = [];
         creatorElems.forEach(creatorElem => {
@@ -164,10 +184,14 @@ function reformatXMLDocument(xmlDoc) {
                 const surName = individualNameElem.getElementsByTagName('surName')[0]?.textContent.trim() || '';
                 const givenNameNodes = individualNameElem.getElementsByTagName('givenName');
                 const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
-                authorNames.push(`${surName}, ${givenNames.join(' ')}`.trim());
+                const person = `${surName}, ${givenNames.join(' ')}`.trim();
+                if (person && person !== ',') authorNames.push(person);
             } else {
                 const orgNameElem = creatorElem.getElementsByTagName('organizationName')[0];
-                if (orgNameElem) authorNames.push(orgNameElem.textContent.trim());
+                if (orgNameElem) {
+                    const org = orgNameElem.textContent.trim();
+                    if (org) authorNames.push(org);
+                }
             }
         });
         if (authorNames.length) {
