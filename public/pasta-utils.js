@@ -25,6 +25,7 @@ function buildRidarePayload(pids) {
     return {
         pid: pids,
         query: [
+            { creators: "//creator" }, // <-- Refactored to get all creator nodes
             { keywords: "//keywordSet/keyword" },
             "//creator/individualName",
             "//contact/individualName",
@@ -35,7 +36,7 @@ function buildRidarePayload(pids) {
             "//dataset/abstract",
             "//taxonRankValue",
             "//commonName",
-            "//dataset/title" // <-- Added for title extraction
+            "//dataset/title"
         ]
     };
 }
@@ -112,17 +113,20 @@ function parseRidareXmlResponse(xmlText) {
         // Title
         const titleNode = documentNode.getElementsByTagName('title')[0];
         const title = titleNode ? titleNode.textContent.trim() : '';
-        // Authors: only individualName nodes with parent 'creator'
-        const authorNodes = Array.from(documentNode.getElementsByTagName('individualName'));
-        const authors = authorNodes
-            .filter(indNode => indNode.parentNode && indNode.parentNode.nodeName.toLowerCase() === 'creator')
-            .map(indNode => {
-                const surName = indNode.getElementsByTagName('surName')[0]?.textContent.trim() || '';
-                const givenNameNodes = indNode.getElementsByTagName('givenName');
+        // Creators: preserve order, use individualName or organizationName
+        const creatorElems = Array.from(documentNode.getElementsByTagName('creator'));
+        const creators = creatorElems.map(creatorElem => {
+            const individualNameElem = creatorElem.getElementsByTagName('individualName')[0];
+            if (individualNameElem) {
+                const surName = individualNameElem.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+                const givenNameNodes = individualNameElem.getElementsByTagName('givenName');
                 const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
                 return `${surName}, ${givenNames.join(' ')}`.trim();
-            })
-            .filter(a => a !== ',');
+            } else {
+                const orgNameElem = creatorElem.getElementsByTagName('organizationName')[0];
+                return orgNameElem ? orgNameElem.textContent.trim() : '';
+            }
+        }).filter(c => c);
         // Strip any XML tags from abstract
         abstract = abstract.replace(/<[^>]+>/g, '');
         return {
@@ -133,7 +137,7 @@ function parseRidareXmlResponse(xmlText) {
             taxonRankValues,
             commonNames,
             personnel: personnel.join('\n'),
-            authors: authors.join(', '), // <-- Add authors field for citation
+            creators, // <-- Use creators array for citation
             abstract,
             title
         };

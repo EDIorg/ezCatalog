@@ -173,18 +173,14 @@ function buildCitationsFromCite(pastaDocs) {
       var titleNode = doc.getElementsByTagName("title")[0];
       var pubYearNode = doc.getElementsByTagName("pub_year")[0];
       var doiNode = doc.getElementsByTagName("doi")[0];
-      var authorsNode = doc.getElementsByTagName("authors")[0];
+      // Get creators from parsed object (assume doc.creators exists)
+      var creators = doc.creators || [];
       var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : "";
       var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : "";
       var title = titleNode && titleNode.childNodes.length > 0 ? titleNode.childNodes[0].nodeValue : "";
       var pub_year = pubYearNode && pubYearNode.childNodes.length > 0 ? pubYearNode.childNodes[0].nodeValue : "";
       var doi = doiNode && doiNode.childNodes.length > 0 ? doiNode.childNodes[0].nodeValue : "";
-      // Build authors from <authors> node if present
-      var authors = "";
-      if (authorsNode) {
-         var authorElems = authorsNode.getElementsByTagName("author");
-         authors = Array.from(authorElems).map(function(n) { return n.innerHTML; }).join(", ");
-      }
+      var authors = creators.join(", ");
       citations[i] = {
          pid: packageid,
          title: title,
