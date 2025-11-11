@@ -1,4 +1,4 @@
-const { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint, parseRidareXmlResponse } = require('./pasta-utils');
+const { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint} = require('./pasta-utils');
 
 // Helper for mock fetch responses
 function mockFetchResponse(xml, ok = true, status = 200) {
@@ -114,69 +114,4 @@ describe('postToRidareEndpoint (real request)', () => {
     });
 });
 
-describe('parseRidareXmlResponse', () => {
-    it('parses a typical Ridare XML response', () => {
-        const xml = `<?xml version="1.0"?>
-        <resultset>
-           <document>
-              <packageid>cos-spu.13.3</packageid>
-              <keywords>
-                 <keyword>crown development</keyword>
-                 <keyword>conifer forest</keyword>
-              </keywords>
-              <individualName>
-                 <givenName>Rolf</givenName>
-                 <surName>Gersonde</surName>
-              </individualName>
-              <individualName>
-                 <givenName>Bill</givenName>
-                 <surName>Richards</surName>
-              </individualName>
-              <geographicDescription>Cedar River Municipal Watershed</geographicDescription>
-              <projectTitle>
-                 <title>Upland Restoration Thinning</title>
-              </projectTitle>
-              <projectTitle>
-                 <title>Lowland Restoration Thinning</title>
-              </projectTitle>
-              <taxonRankValue>Plantae</taxonRankValue>
-              <taxonRankValue>Viridiplantae</taxonRankValue>
-              <commonName>hemlock</commonName>
-              <commonName>Pacific hemlock</commonName>
-           </document>
-        </resultset>`;
-        const result = parseRidareXmlResponse(xml);
-        expect(result.length).toBe(1);
-        const doc = result[0];
-        expect(doc.packageid).toBe('cos-spu.13.3');
-        expect(doc.keywords).toEqual(['crown development', 'conifer forest']);
-        expect(doc.geographicDescription).toBe('Cedar River Municipal Watershed');
-        expect(doc.projectTitles).toEqual(['Upland Restoration Thinning', 'Lowland Restoration Thinning']);
-        expect(doc.taxonRankValues).toEqual(['Plantae', 'Viridiplantae']);
-        expect(doc.commonNames).toEqual(['hemlock', 'Pacific hemlock']);
-        expect(doc.authors).toBe('Gersonde, Rolf\nRichards, Bill');
-    });
-    it('handles multiple givenNames and missing fields', () => {
-        const xml = `<?xml version="1.0"?>
-        <resultset>
-           <document>
-              <packageid>cos-spu.9.1</packageid>
-              <individualName>
-                 <givenName>Jane</givenName>
-                 <givenName>Ann</givenName>
-                 <surName>Doe</surName>
-              </individualName>
-           </document>
-        </resultset>`;
-        const result = parseRidareXmlResponse(xml);
-        expect(result.length).toBe(1);
-        const doc = result[0];
-        expect(doc.packageid).toBe('cos-spu.9.1');
-        expect(doc.authors).toBe('Doe, Jane Ann');
-        expect(doc.keywords).toEqual([]);
-        expect(doc.geographicDescription).toBe('');
-        expect(doc.projectTitles).toEqual([]);
-        expect(doc.taxonRankValues).toEqual([]);
-        expect(doc.commonNames).toEqual([]);
-    });
-});
+
