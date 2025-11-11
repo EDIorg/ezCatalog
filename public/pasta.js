@@ -180,7 +180,6 @@ function buildCitationsFromCite(pastaDocs) {
          var authorElems = authorsNode.getElementsByTagName("author");
          authors = Array.from(authorElems).map(function(n) {
             var name = n.textContent.trim();
-            // If name contains a comma, treat as individual: "Last, First Middle"
             if (name.includes(",")) {
                var parts = name.split(",");
                var last = parts[0].trim();
@@ -193,6 +192,8 @@ function buildCitationsFromCite(pastaDocs) {
             }
          }).join(", ");
       }
+      var pub_year = pubYearNode && pubYearNode.textContent ? pubYearNode.textContent.trim() : "";
+      var authorsWithYear = pub_year ? authors + " Published " + pub_year : authors;
       var packageid = packageidNode && packageidNode.childNodes.length > 0 ? packageidNode.childNodes[0].nodeValue : doc.packageid || "";
       var abstract = abstractNode && abstractNode.childNodes.length > 0 ? abstractNode.childNodes[0].nodeValue : doc.abstract || "";
       var title = titleNode && titleNode.childNodes.length > 0 ? titleNode.childNodes[0].nodeValue : doc.title || "";
@@ -201,7 +202,7 @@ function buildCitationsFromCite(pastaDocs) {
       citations[i] = {
          pid: packageid,
          title: title,
-         authors: authors,
+         authors: authorsWithYear,
          pub_year: pub_year,
          doi: doi
       };

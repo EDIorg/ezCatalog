@@ -36,7 +36,8 @@ function buildRidarePayload(pids) {
             "//dataset/abstract",
             "//taxonRankValue",
             "//commonName",
-            "//dataset/title"
+            "//dataset/title",
+            "//dataset/pubDate"
         ]
     };
 }
@@ -182,6 +183,19 @@ function reformatXMLDocument(xmlDoc) {
             }
             absElem.textContent = abstractText;
         });
+        // --- Publication Year extraction ---
+        const pubDateNode = doc.getElementsByTagName('pubDate')[0];
+        let pub_year = '';
+        if (pubDateNode) {
+            const dateStr = pubDateNode.textContent.trim();
+            const yearMatch = dateStr.match(/\d{4}/);
+            pub_year = yearMatch ? yearMatch[0] : '';
+        }
+        if (pub_year) {
+            const pubYearElem = xmlDoc.createElement('pub_year');
+            pubYearElem.textContent = pub_year;
+            doc.appendChild(pubYearElem);
+        }
     }
     return xmlDoc;
 }
