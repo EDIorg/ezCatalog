@@ -4,7 +4,7 @@
 
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
-   "filter": '&fq=scope:knb-lter-ble', // Filter results on a unique keyword of a research group
+   "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "resultsElementId": "searchResults", // Element to contain results
    "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
    "countElementId": "resultCount", // Element showing number of results
@@ -494,7 +494,7 @@ function filterDocsByLocations(docs, selectedLocations) {
    if (!selectedLocations.length) return docs;
    return docs.filter(function(doc) {
       // Use <geographicDescription> children of <geographicDescriptions> for filtering
-      var geoDescsElem = doc.getElementsByTagName("projectTitles")[0];
+      var geoDescsElem = doc.getElementsByTagName("geographicDescriptions")[0];
       var locations = [];
       if (geoDescsElem) {
          var geoDescNodes = geoDescsElem.getElementsByTagName("geographicDescription");
