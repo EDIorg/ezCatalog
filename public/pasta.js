@@ -140,7 +140,7 @@ function getCitations(packageIds, abstracts) {
 
    function updateCitationsUI() {
       var html = buildHtml(citations, abstracts);
-      document.getElementById(PASTA_CONFIG.resultsElementId).innerHTML = html;
+      updateElementHtml(PASTA_CONFIG.resultsElementId, html);
       showLoading(false);
       // Show result count after all CITE calls are done and results are rendered
       var count = Object.keys(citations).length;
@@ -150,7 +150,7 @@ function getCitations(packageIds, abstracts) {
       showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
    }
 
-   function handleCitationSuccess(index, response) {
+   function handleSuccess(index, response) {
       var citation = JSON.parse(response);
       citation["pid"] = packageIds[index];
       citations[index] = citation;
@@ -160,7 +160,7 @@ function getCitations(packageIds, abstracts) {
       }
    }
 
-   function handleCitationError(index, status, error, attempt, retryFn) {
+   function handleError(index, status, error, attempt, retryFn) {
       if (isTransientError(status) && attempt < MAX_RETRIES) {
          // Exponential backoff with jitter
          var delay = Math.floor(PASTA_CONFIG.baseDelay * Math.pow(2, attempt) + Math.random() * 100);
@@ -177,7 +177,7 @@ function getCitations(packageIds, abstracts) {
       }
    }
 
-   function processNext(index, attempt = 0) {
+   function fetchCitationWithRetry(index, attempt = 0) {
       if (index >= packageIds.length) return;
       var pid = packageIds[index];
       var uri = baseUri + pid;
@@ -185,18 +185,18 @@ function getCitations(packageIds, abstracts) {
          uri,
          header,
          function (headers, response) {
-            handleCitationSuccess(index, response);
+            handleSuccess(index, response);
             if (callsRemaining > 0) {
                setTimeout(function() {
-                  processNext(index + 1);
+                  fetchCitationWithRetry(index + 1);
                }, PASTA_CONFIG.baseDelay); // Small delay between successful requests
             }
          },
          function (status, error) {
-            handleCitationError(index, status, error, attempt, function() { processNext(index, attempt + 1); });
+            handleError(index, status, error, attempt, function() { fetchCitationWithRetry(index, attempt + 1); });
             if (callsRemaining > 0 && (!isTransientError(status) || attempt >= MAX_RETRIES)) {
                setTimeout(function() {
-                  processNext(index + 1);
+                  fetchCitationWithRetry(index + 1);
                }, PASTA_CONFIG.baseDelay);
             }
          }
@@ -204,7 +204,7 @@ function getCitations(packageIds, abstracts) {
    }
    if (packageIds.length > 0) {
       showLoading(true);
-      processNext(0);
+      fetchCitationWithRetry(0);
    }
 }
 
@@ -274,14 +274,14 @@ function showLoading(isLoading) {
    }
 }
 
-function setHtml(elId, innerHtml) {
+function updateElementHtml(elId, innerHtml) {
    var el = document.getElementById(elId);
    if (el)
       el.innerHTML = innerHtml;
 }
 
 // Function to call if CORS request is successful
-function successCallback(headers, response) {
+function handleSuccess(headers, response) {
    function makeCsvLink(count) {
       if (!count) return "";
       var html = '<a href="" onclick="return downloadCsv(' + count + ');">' +
@@ -295,7 +295,7 @@ function successCallback(headers, response) {
    var docs = xmlDoc.getElementsByTagName("document");
    buildCitationsFromCite(docs);
    var count = parseInt(xmlDoc.getElementsByTagName("resultset")[0].getAttribute("numFound"));
-   setHtml(PASTA_CONFIG["csvElementId"], makeCsvLink(count));
+   updateElementHtml(PASTA_CONFIG["csvElementId"], makeCsvLink(count));
 
    // Add links to additional search result pages if necessary
    var currentStart = getParameterByName("start");
@@ -316,7 +316,7 @@ function successCallback(headers, response) {
 }
 
 // Function to call if CORS request fails
-function errorCallback() {
+function handleError() {
    showLoading(false);
    alert("There was an error making the request.");
 }
@@ -324,7 +324,7 @@ function errorCallback() {
 // Writes CORS request URL to the page so user can see it
 function showUrl(url) {
    var txt = '<a href="' + url + '" target="_blank">' + url + '</a>';
-   setHtml(PASTA_CONFIG["urlElementId"], txt);
+   updateElementHtml(PASTA_CONFIG["urlElementId"], txt);
 }
 
 // --- Faceted Creator Dropdown Logic ---
@@ -643,8 +643,8 @@ function filterDocsByFacet(docs, tagName, selected) {
 }
 
 // Patch successCallback to store all docs and update creator, keyword, projects, location, taxon, and common name facets
-var origSuccessCallback = successCallback;
-successCallback = function(headers, response) {
+var origHandleSuccess = handleSuccess;
+handleSuccess = function(headers, response) {
    var parser = new DOMParser();
    var xmlDoc = parser.parseFromString(response, "text/xml");
    var docs = Array.from(xmlDoc.getElementsByTagName("doc"));
@@ -774,7 +774,7 @@ function processFacetChange() {
     buildCitationsFromCite(filteredDocs);
   }
   var count = filteredDocs.length;
-  setHtml(PASTA_CONFIG["csvElementId"], '');
+  updateElementHtml(PASTA_CONFIG["csvElementId"], '');
   var currentStart = 0;
   var limit = parseInt(PASTA_CONFIG["limit"]);
   var showPages = parseInt(PASTA_CONFIG["showPages"]);
