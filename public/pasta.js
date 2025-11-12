@@ -120,6 +120,45 @@ function getCitations(packageIds, abstracts) {
       return status === 429 || status === 503 || status === 0; // 0 for network error
    }
 
+   function updateCitationsUI() {
+      var html = buildHtml(citations, abstracts);
+      document.getElementById("searchResults").innerHTML = html;
+      showLoading(false);
+      // Show result count after all CITE calls are done and results are rendered
+      var count = Object.keys(citations).length;
+      var currentStart = 0;
+      var limit = parseInt(PASTA_CONFIG["limit"]);
+      var query = getParameterByName("q");
+      showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+   }
+
+   function handleCitationSuccess(index, response) {
+      var citation = JSON.parse(response);
+      citation["pid"] = packageIds[index];
+      citations[index] = citation;
+      --callsRemaining;
+      if (callsRemaining <= 0) {
+         updateCitationsUI();
+      }
+   }
+
+   function handleCitationError(index, status, error, attempt, retryFn) {
+      if (isTransientError(status) && attempt < MAX_RETRIES) {
+         // Exponential backoff with jitter
+         var delay = Math.floor(BASE_DELAY * Math.pow(2, attempt) + Math.random() * 100);
+         setTimeout(function() {
+            retryFn();
+         }, delay);
+      } else {
+         // On permanent error or max retries, log and continue
+         citations[index] = { pid: packageIds[index], error: error || "Request failed" };
+         --callsRemaining;
+         if (callsRemaining <= 0) {
+            updateCitationsUI();
+         }
+      }
+   }
+
    function processNext(index, attempt = 0) {
       if (index >= packageIds.length) return;
       var pid = packageIds[index];
@@ -128,52 +167,19 @@ function getCitations(packageIds, abstracts) {
          uri,
          header,
          function (headers, response) {
-            var citation = JSON.parse(response);
-            citation["pid"] = packageIds[index];
-            citations[index] = citation;
-            --callsRemaining;
-            if (callsRemaining <= 0) {
-               var html = buildHtml(citations, abstracts);
-               document.getElementById("searchResults").innerHTML = html;
-               showLoading(false);
-               // Show result count after all CITE calls are done and results are rendered
-               var count = Object.keys(citations).length;
-               var currentStart = 0;
-               var limit = parseInt(PASTA_CONFIG["limit"]);
-               var query = getParameterByName("q");
-               showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-            } else {
+            handleCitationSuccess(index, response);
+            if (callsRemaining > 0) {
                setTimeout(function() {
                   processNext(index + 1);
                }, BASE_DELAY); // Small delay between successful requests
             }
          },
          function (status, error) {
-            if (isTransientError(status) && attempt < MAX_RETRIES) {
-               // Exponential backoff with jitter
-               var delay = Math.floor(BASE_DELAY * Math.pow(2, attempt) + Math.random() * 100);
+            handleCitationError(index, status, error, attempt, function() { processNext(index, attempt + 1); });
+            if (callsRemaining > 0 && (!isTransientError(status) || attempt >= MAX_RETRIES)) {
                setTimeout(function() {
-                  processNext(index, attempt + 1);
-               }, delay);
-            } else {
-               // On permanent error or max retries, log and continue
-               citations[index] = { pid: packageIds[index], error: error || "Request failed" };
-               --callsRemaining;
-               if (callsRemaining <= 0) {
-                  var html = buildHtml(citations, abstracts);
-                  document.getElementById("searchResults").innerHTML = html;
-                  showLoading(false);
-                  // Show result count after all CITE calls are done and results are rendered
-                  var count = Object.keys(citations).length;
-                  var currentStart = 0;
-                  var limit = parseInt(PASTA_CONFIG["limit"]);
-                  var query = getParameterByName("q");
-                  showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-               } else {
-                  setTimeout(function() {
-                     processNext(index + 1);
-                  }, BASE_DELAY);
-               }
+                  processNext(index + 1);
+               }, BASE_DELAY);
             }
          }
       );
