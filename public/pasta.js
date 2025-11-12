@@ -32,11 +32,30 @@ const PASTA_CONFIG = {
    "pagesBotElementId": "paginationBot", // Element to display result page links below results
    "showPages": 5, // MUST BE ODD NUMBER! Max number of page links to show
    "showAbstracts": true, // true if we should show abstracts in search results
-   "abstractLimit": 750 // Limit the number of characters in the abstract
+   "abstractLimit": 750, // Limit the number of characters in the abstract
+   "limit": 2000,  // Max number of results to retrieve per page
+   // Centralized element IDs
+   "loadingDivId": "loading-div",
+   "creatorDropdownId": "creator-dropdown",
+   "keywordDropdownId": "keyword-dropdown",
+   "projectDropdownId": "project-dropdown",
+   "locationDropdownId": "location-dropdown",
+   "taxonDropdownId": "taxonRankValue-dropdown",
+   "commonNameDropdownId": "commonName-dropdown",
+   "activeFiltersId": "active-filters",
+   "brandingTextId": "branding-text",
+   // Centralized URLs
+   "imgBasePath": "images/",
+   "portalBaseUrl": "https://portal.edirepository.org/nis/mapbrowse?packageid=",
+   "citeBaseUrl": "https://cite.edirepository.org/cite/",
+   // Branding
+   "brandingText": "Seattle Public Utilities Data Catalog",
+   // Delays
+   "baseDelay": 200 // ms
 };
 
 // This feature is deprecated. Please do not functionally depend on it.
-PASTA_CONFIG.limit = 2000;  // Max number of results to retrieve per page
+// PASTA_CONFIG.limit = 2000;  // Max number of results to retrieve per page
 
 /**
  * Get URL arguments by name
@@ -66,7 +85,7 @@ function titleHtml(title) {
 }
 function imgHtml(pkgid) {
    const imgBase = pkgid.split(".").slice(0,2).join(".");
-   const imgSrc = `images/${imgBase}.png`;
+   const imgSrc = `${PASTA_CONFIG.imgBasePath}${imgBase}.png`;
    return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none'"></div>`;
 }
 function exploreLink(link) {
@@ -98,7 +117,7 @@ function buildHtml(citations, abstracts) {
          authors += ".";
       }
       let date = citation.pub_year ? ` Published ${citation.pub_year}.` : "";
-      const link = citation.doi ? citation.doi.slice(0, -1) : `https://portal.edirepository.org/nis/mapbrowse?packageid=${citation.pid}`;
+      const link = citation.doi ? citation.doi.slice(0, -1) : `${PASTA_CONFIG.portalBaseUrl}${citation.pid}`;
       const row = `<div class='dataset-row'><div class='dataset-info'>${titleHtml(citation.title)}${authorHtml(authors, date)}${PASTA_CONFIG.showAbstracts ? abstractHtml(abstract) : ""}<div class='dataset-actions'>${exploreLink(link)}${relatedStoriesLink(citation.pid, citation.title)}</div></div>${imgHtml(citation.pid)}</div>`;
       html.push(row);
    }
@@ -110,11 +129,10 @@ function getCitations(packageIds, abstracts) {
    var header = {
       "Accept": "application/json"
    };
-   var baseUri = "https://cite.edirepository.org/cite/";
+   var baseUri = PASTA_CONFIG.citeBaseUrl;
    var citations = {};
    var callsRemaining = packageIds.length;
    const MAX_RETRIES = 5;
-   const BASE_DELAY = 200; // ms
 
    function isTransientError(status) {
       return status === 429 || status === 503 || status === 0; // 0 for network error
@@ -122,7 +140,7 @@ function getCitations(packageIds, abstracts) {
 
    function updateCitationsUI() {
       var html = buildHtml(citations, abstracts);
-      document.getElementById("searchResults").innerHTML = html;
+      document.getElementById(PASTA_CONFIG.resultsElementId).innerHTML = html;
       showLoading(false);
       // Show result count after all CITE calls are done and results are rendered
       var count = Object.keys(citations).length;
@@ -145,7 +163,7 @@ function getCitations(packageIds, abstracts) {
    function handleCitationError(index, status, error, attempt, retryFn) {
       if (isTransientError(status) && attempt < MAX_RETRIES) {
          // Exponential backoff with jitter
-         var delay = Math.floor(BASE_DELAY * Math.pow(2, attempt) + Math.random() * 100);
+         var delay = Math.floor(PASTA_CONFIG.baseDelay * Math.pow(2, attempt) + Math.random() * 100);
          setTimeout(function() {
             retryFn();
          }, delay);
@@ -171,7 +189,7 @@ function getCitations(packageIds, abstracts) {
             if (callsRemaining > 0) {
                setTimeout(function() {
                   processNext(index + 1);
-               }, BASE_DELAY); // Small delay between successful requests
+               }, PASTA_CONFIG.baseDelay); // Small delay between successful requests
             }
          },
          function (status, error) {
@@ -179,7 +197,7 @@ function getCitations(packageIds, abstracts) {
             if (callsRemaining > 0 && (!isTransientError(status) || attempt >= MAX_RETRIES)) {
                setTimeout(function() {
                   processNext(index + 1);
-               }, BASE_DELAY);
+               }, PASTA_CONFIG.baseDelay);
             }
          }
       );
@@ -236,7 +254,7 @@ function buildCitationsFromCite(pastaDocs) {
       abstracts.push(abstract);
    }
    var html = Object.keys(citations).length ? buildHtml(citations, abstracts) : "<p>Your search returned no results.</p>";
-   document.getElementById("searchResults").innerHTML = html;
+   document.getElementById(PASTA_CONFIG.resultsElementId).innerHTML = html;
    showLoading(false);
    var count = Object.keys(citations).length;
    var currentStart = 0;
@@ -246,7 +264,7 @@ function buildCitationsFromCite(pastaDocs) {
 }
 
 function showLoading(isLoading) {
-   var x = document.getElementById("loading-div");
+   var x = document.getElementById(PASTA_CONFIG.loadingDivId);
    if (isLoading) {
       document.body.style.cursor = "wait";
       x.style.display = "block";
@@ -336,7 +354,7 @@ function populateCreatorFacetOptions(docs, selected) {
          personnelCounts[person] = (personnelCounts[person] || 0) + 1;
       });
    }
-   var creatorDropdown = document.getElementById("creator-dropdown");
+   var creatorDropdown = document.getElementById(PASTA_CONFIG.creatorDropdownId);
    var personnel = Array.from(personnelSet).sort();
    creatorDropdown.innerHTML = renderFacetCheckboxes(personnel, selected || [], personnelCounts, 'creator-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
@@ -378,7 +396,7 @@ function populateKeywordFacetOptions(docs, selected) {
          keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
       });
    }
-   var keywordDropdown = document.getElementById("keyword-dropdown");
+   var keywordDropdown = document.getElementById(PASTA_CONFIG.keywordDropdownId);
    var keywords = Array.from(keywordSet).sort();
    keywordDropdown.innerHTML = renderFacetCheckboxes(keywords, selected || [], keywordCounts, 'keyword-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
@@ -419,7 +437,7 @@ function populateProjectFacetOptions(docs, selected) {
          projectCounts[title] = (projectCounts[title] || 0) + 1;
       });
    }
-   var projectDropdown = document.getElementById("project-dropdown");
+   var projectDropdown = document.getElementById(PASTA_CONFIG.projectDropdownId);
    var projects = Array.from(projectSet).sort();
    projectDropdown.innerHTML = renderFacetCheckboxes(projects, selected || [], projectCounts, 'project-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
@@ -469,7 +487,7 @@ function populateLocationFacetOptions(docs, selected) {
          locationCounts[location] = (locationCounts[location] || 0) + 1;
       });
    }
-   var locationDropdown = document.getElementById("location-dropdown");
+   var locationDropdown = document.getElementById(PASTA_CONFIG.locationDropdownId);
    var locations = Array.from(locationSet).sort();
    locationDropdown.innerHTML = renderFacetCheckboxes(locations, selected || [], locationCounts, 'location-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
@@ -515,7 +533,7 @@ function populateTaxonFacetOptions(docs, selected) {
          taxonCounts[taxon] = (taxonCounts[taxon] || 0) + 1;
       });
    }
-   var taxonDropdown = document.getElementById("taxonRankValue-dropdown");
+   var taxonDropdown = document.getElementById(PASTA_CONFIG.taxonDropdownId);
    var taxa = Array.from(taxonSet).sort();
    if (taxa.length === 0) {
      taxonDropdown.innerHTML = '<span style="color:#888;">No scientific names found in data.</span>';
@@ -558,7 +576,7 @@ function populateCommonNameFacetOptions(docs, selected) {
          commonNameCounts[commonName] = (commonNameCounts[commonName] || 0) + 1;
       });
    }
-   var commonNameDropdown = document.getElementById("commonName-dropdown");
+   var commonNameDropdown = document.getElementById(PASTA_CONFIG.commonNameDropdownId);
    var commonNames = Array.from(commonNameSet).sort();
    if (commonNames.length === 0) {
      commonNameDropdown.innerHTML = '<span style="color:#888;">No common names found in data.</span>';
@@ -663,7 +681,7 @@ successCallback = function(headers, response) {
 
 // Update renderActiveFilters to include tags for selected scientific and common names
 function renderActiveFilters(selected) {
-  var container = document.getElementById('active-filters');
+  var container = document.getElementById(PASTA_CONFIG.activeFiltersId);
   if (!container) return;
   var tags = [];
   selected.creators.forEach(function(creator) {
@@ -889,8 +907,8 @@ function bindFilterEvents() {
 
 // Branding text for banner bar
 function setBrandingText() {
-  var brandingText = "Seattle Public Utilities Data Catalog"; // <-- Set this to your desired branding text
-  var brandingSpan = document.getElementById('branding-text');
+  var brandingText = PASTA_CONFIG.brandingText;
+  var brandingSpan = document.getElementById(PASTA_CONFIG.brandingTextId);
   if (brandingSpan) brandingSpan.textContent = brandingText;
 }
 
