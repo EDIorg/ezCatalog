@@ -200,8 +200,17 @@ function reformatXMLDocument(xmlDoc) {
     return xmlDoc;
 }
 
-// Remove Node.js module.exports and attach functions to window for browser use
-window.fetchDataPackageIdentifiers = fetchDataPackageIdentifiers;
-window.buildRidarePayload = buildRidarePayload;
-window.postToRidareEndpoint = postToRidareEndpoint;
-window.reformatXMLDocument = reformatXMLDocument;
+// Attach functions for browser or Node.js
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    fetchDataPackageIdentifiers,
+    buildRidarePayload,
+    postToRidareEndpoint,
+    reformatXMLDocument
+  };
+} else if (typeof window !== 'undefined') {
+  window.fetchDataPackageIdentifiers = fetchDataPackageIdentifiers;
+  window.buildRidarePayload = buildRidarePayload;
+  window.postToRidareEndpoint = postToRidareEndpoint;
+  window.reformatXMLDocument = reformatXMLDocument;
+}

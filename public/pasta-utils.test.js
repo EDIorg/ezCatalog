@@ -54,15 +54,19 @@ describe('buildRidarePayload', () => {
         expect(payload).toEqual({
             pid: ['cos-spu.13.3', 'cos-spu.9.1'],
             query: [
+                { creators: "//creator" },
                 { keywords: "//keywordSet/keyword" },
                 "//creator/individualName",
                 "//contact/individualName",
                 "//associatedParty/individualName",
-                "//geographicCoverage/geographicDescription",
+                { geographicDescriptions: "//geographicCoverage/geographicDescription" },
                 { projectTitle: "//project/title" },
                 { relatedProjectTitle: "//relatedProject" },
+                "//dataset/abstract",
                 "//taxonRankValue",
-                "//commonName"
+                "//commonName",
+                "//dataset/title",
+                "//dataset/pubDate"
             ]
         });
     });
@@ -113,5 +117,3 @@ describe('postToRidareEndpoint (real request)', () => {
         expect(xml.startsWith('<?xml')).toBe(true);
     });
 });
-
-

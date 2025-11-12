@@ -2,6 +2,25 @@
 
 "use strict";
 
+// Use Node.js imports for testing, otherwise use browser globals
+if (typeof module !== 'undefined' && module.exports) {
+  var fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint, reformatXMLDocument;
+  ({ fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint, reformatXMLDocument } = require('./pasta-utils'));
+} else if (typeof window !== 'undefined') {
+  if (typeof fetchDataPackageIdentifiers === 'undefined') {
+    var fetchDataPackageIdentifiers = window.fetchDataPackageIdentifiers;
+  }
+  if (typeof buildRidarePayload === 'undefined') {
+    var buildRidarePayload = window.buildRidarePayload;
+  }
+  if (typeof postToRidareEndpoint === 'undefined') {
+    var postToRidareEndpoint = window.postToRidareEndpoint;
+  }
+  if (typeof reformatXMLDocument === 'undefined') {
+    var reformatXMLDocument = window.reformatXMLDocument;
+  }
+}
+
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
    "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
@@ -933,6 +952,13 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 // Export for testing
-if (typeof module !== 'undefined') {
-    module.exports = { fetchDataPackageIdentifiers };
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        fetchDataPackageIdentifiers,
+        buildRidarePayload,
+        postToRidareEndpoint,
+        reformatXMLDocument,
+        initData,
+        setBrandingText
+    };
 }
