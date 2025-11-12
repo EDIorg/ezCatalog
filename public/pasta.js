@@ -807,33 +807,40 @@ function initFacetChangeListener(dropdownId, checkboxClass) {
   }
 }
 
+// --- Helper functions for initData refactor ---
+async function fetchPackageIds() {
+  const scope = PASTA_CONFIG.scope || 'edi';
+  const filter = PASTA_CONFIG.filter || '';
+  return await fetchDataPackageIdentifiers(scope, filter);
+}
+
+async function buildAndPostRidarePayload(pids) {
+  const payload = buildRidarePayload(pids);
+  return await postToRidareEndpoint(payload);
+}
+
+function updateDomWithDocs(response) {
+  var parser = new DOMParser();
+  var xmlDoc = parser.parseFromString(response, "text/xml");
+  xmlDoc = reformatXMLDocument(xmlDoc);
+  var docs = Array.from(xmlDoc.getElementsByTagName("document"));
+  ALL_PASTA_DOCS = docs;
+  populateCreatorFacetOptions(docs, []);
+  populateKeywordFacetOptions(docs, []);
+  populateProjectFacetOptions(docs, []);
+  populateLocationFacetOptions(docs, []);
+  populateTaxonFacetOptions(docs, []);
+  populateCommonNameFacetOptions(docs, []);
+  buildCitationsFromCite(docs);
+}
+
 // Main initialization split into focused functions
 async function initData() {
   showLoading(true);
   try {
-    // Step 1: Get package IDs from PASTA
-    const scope = PASTA_CONFIG.scope || 'edi'; // Adjust as needed
-    const filter = PASTA_CONFIG.filter || '';
-    const pids = await fetchDataPackageIdentifiers(scope, filter);
-    // Step 2: Build Ridare payload
-    const payload = buildRidarePayload(pids);
-    // Step 3: POST to Ridare endpoint and get XML response
-    const response = await postToRidareEndpoint(payload);
-    // Step 4: Parse returned XML
-    var parser = new DOMParser();
-    var xmlDoc = parser.parseFromString(response, "text/xml");
-    // Apply XML reformatting
-    xmlDoc = reformatXMLDocument(xmlDoc);
-    var docs = Array.from(xmlDoc.getElementsByTagName("document"));
-    ALL_PASTA_DOCS = docs;
-    // Step 5: Pass to facet population and filtering functions
-    populateCreatorFacetOptions(docs, []);
-    populateKeywordFacetOptions(docs, []);
-    populateProjectFacetOptions(docs, []);
-    populateLocationFacetOptions(docs, []);
-    populateTaxonFacetOptions(docs, []);
-    populateCommonNameFacetOptions(docs, []);
-    buildCitationsFromCite(docs);
+    const pids = await fetchPackageIds();
+    const response = await buildAndPostRidarePayload(pids);
+    updateDomWithDocs(response);
   } catch (err) {
     console.error('Error initializing data:', err);
     errorCallback(err);
