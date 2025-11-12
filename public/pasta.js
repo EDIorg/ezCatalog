@@ -307,16 +307,6 @@ function showUrl(url) {
 // Store all results for client-side filtering
 var ALL_PASTA_DOCS = [];
 
-function renderCreatorCheckboxes(creators, selected, creatorCounts) {
-  return creators.map(function(creator, i) {
-    var checked = selected.includes(creator) ? 'checked' : '';
-    var count = creatorCounts[creator] || 0;
-    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="creator-checkbox" value="${creator.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${creator} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
-    </label>`;
-  }).join('');
-}
-
 function getSelectedCreators() {
   var boxes = document.querySelectorAll('.creator-checkbox:checked');
   return Array.from(boxes).map(function(box) { return box.value; });
@@ -342,7 +332,7 @@ function populateCreatorFacetOptions(docs, selected) {
    }
    var creatorDropdown = document.getElementById("creator-dropdown");
    var personnel = Array.from(personnelSet).sort();
-   creatorDropdown.innerHTML = renderCreatorCheckboxes(personnel, selected || [], personnelCounts);
+   creatorDropdown.innerHTML = renderFacetCheckboxes(personnel, selected || [], personnelCounts, 'creator-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
@@ -360,16 +350,6 @@ function filterDocsByCreators(docs, selectedPersonnel) {
 }
 
 // --- Faceted Keyword Dropdown Logic ---
-function renderKeywordCheckboxes(keywords, selected, keywordCounts) {
-  return keywords.map(function(keyword, i) {
-    var checked = selected.includes(keyword) ? 'checked' : '';
-    var count = keywordCounts[keyword] || 0;
-    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="keyword-checkbox" value="${keyword.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${keyword} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
-    </label>`;
-  }).join('');
-}
-
 function getSelectedKeywords() {
   var boxes = document.querySelectorAll('.keyword-checkbox:checked');
   return Array.from(boxes).map(function(box) { return box.value; });
@@ -394,7 +374,7 @@ function populateKeywordFacetOptions(docs, selected) {
    }
    var keywordDropdown = document.getElementById("keyword-dropdown");
    var keywords = Array.from(keywordSet).sort();
-   keywordDropdown.innerHTML = renderKeywordCheckboxes(keywords, selected || [], keywordCounts);
+   keywordDropdown.innerHTML = renderFacetCheckboxes(keywords, selected || [], keywordCounts, 'keyword-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
@@ -408,16 +388,6 @@ function filterDocsByKeywords(docs, selectedKeywords) {
 }
 
 // --- Faceted Project Dropdown Logic ---
-function renderProjectCheckboxes(projects, selected, projectCounts) {
-  return projects.map(function(project, i) {
-    var checked = selected.includes(project) ? 'checked' : '';
-    var count = projectCounts[project] || 0;
-    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="project-checkbox" value="${project.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${project} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
-    </label>`;
-  }).join('');
-}
-
 function getSelectedProjects() {
   var boxes = document.querySelectorAll('.project-checkbox:checked');
   return Array.from(boxes).map(function(box) { return box.value; });
@@ -445,7 +415,7 @@ function populateProjectFacetOptions(docs, selected) {
    }
    var projectDropdown = document.getElementById("project-dropdown");
    var projects = Array.from(projectSet).sort();
-   projectDropdown.innerHTML = renderProjectCheckboxes(projects, selected || [], projectCounts);
+   projectDropdown.innerHTML = renderFacetCheckboxes(projects, selected || [], projectCounts, 'project-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
@@ -468,16 +438,6 @@ function filterDocsByProjects(docs, selectedProjects) {
 
 
 // --- Faceted Location Dropdown Logic ---
-function renderLocationCheckboxes(locations, selected, locationCounts) {
-  return locations.map(function(location, i) {
-    var checked = selected.includes(location) ? 'checked' : '';
-    var count = locationCounts[location] || 0;
-    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="location-checkbox" value="${location.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${location} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
-    </label>`;
-  }).join('');
-}
-
 function getSelectedLocations() {
   var boxes = document.querySelectorAll('.location-checkbox:checked');
   return Array.from(boxes).map(function(box) { return box.value; });
@@ -505,7 +465,7 @@ function populateLocationFacetOptions(docs, selected) {
    }
    var locationDropdown = document.getElementById("location-dropdown");
    var locations = Array.from(locationSet).sort();
-   locationDropdown.innerHTML = renderLocationCheckboxes(locations, selected || [], locationCounts);
+   locationDropdown.innerHTML = renderFacetCheckboxes(locations, selected || [], locationCounts, 'location-checkbox');
    bindFacetEvents(); // Ensure listeners are attached after rendering
 }
 
@@ -526,16 +486,6 @@ function filterDocsByLocations(docs, selectedLocations) {
 }
 
 // --- Faceted Taxon Dropdown Logic ---
-function renderTaxonCheckboxes(taxa, selected, taxonCounts) {
-  return taxa.map(function(taxon, i) {
-    var checked = selected.includes(taxon) ? 'checked' : '';
-    var count = taxonCounts[taxon] || 0;
-    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="taxon-checkbox" value="${taxon.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${taxon} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
-    </label>`;
-  }).join('');
-}
-
 function getSelectedTaxa() {
   var boxes = document.querySelectorAll('.taxon-checkbox:checked');
   return Array.from(boxes).map(function(box) { return box.value; });
@@ -564,7 +514,7 @@ function populateTaxonFacetOptions(docs, selected) {
    if (taxa.length === 0) {
      taxonDropdown.innerHTML = '<span style="color:#888;">No scientific names found in data.</span>';
    } else {
-     taxonDropdown.innerHTML = renderTaxonCheckboxes(taxa, selected || [], taxonCounts);
+     taxonDropdown.innerHTML = renderFacetCheckboxes(taxa, selected || [], taxonCounts, 'taxon-checkbox');
      bindFacetEvents(); // Ensure listeners are attached after rendering
    }
 }
@@ -579,16 +529,6 @@ function filterDocsByTaxa(docs, selectedTaxa) {
 }
 
 // --- Faceted Common Name Dropdown Logic ---
-function renderCommonNameCheckboxes(commonNames, selected, commonNameCounts) {
-  return commonNames.map(function(commonName, i) {
-    var checked = selected.includes(commonName) ? 'checked' : '';
-    var count = commonNameCounts[commonName] || 0;
-    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="commonname-checkbox" value="${commonName.replace(/&/g,'&amp;').replace(/\"/g,'&quot;')}" ${checked} style="margin-right:8px;">${commonName} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
-    </label>`;
-  }).join('');
-}
-
 function getSelectedCommonNames() {
   var boxes = document.querySelectorAll('.commonname-checkbox:checked');
   return Array.from(boxes).map(function(box) { return box.value; });
@@ -617,7 +557,7 @@ function populateCommonNameFacetOptions(docs, selected) {
    if (commonNames.length === 0) {
      commonNameDropdown.innerHTML = '<span style="color:#888;">No common names found in data.</span>';
    } else {
-     commonNameDropdown.innerHTML = renderCommonNameCheckboxes(commonNames, selected || [], commonNameCounts);
+     commonNameDropdown.innerHTML = renderFacetCheckboxes(commonNames, selected || [], commonNameCounts, 'commonname-checkbox');
      bindFacetEvents(); // Ensure listeners are attached after rendering
    }
 }
