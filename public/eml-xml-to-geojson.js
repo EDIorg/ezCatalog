@@ -16,7 +16,6 @@ function emlXmlToGeoJSON(xmlDoc) {
             const description = descElem ? descElem.textContent.trim() : '';
             // Extract bounding coordinates
             const boundsElem = geoCovElem.getElementsByTagName('boundingCoordinates')[0];
-            let geometry = null;
             if (boundsElem) {
                 const west = parseFloat(boundsElem.getElementsByTagName('westBoundingCoordinate')[0]?.textContent);
                 const east = parseFloat(boundsElem.getElementsByTagName('eastBoundingCoordinate')[0]?.textContent);
@@ -24,35 +23,28 @@ function emlXmlToGeoJSON(xmlDoc) {
                 const south = parseFloat(boundsElem.getElementsByTagName('southBoundingCoordinate')[0]?.textContent);
                 if (!isNaN(west) && !isNaN(east) && !isNaN(north) && !isNaN(south)) {
                     if (north === south && east === west) {
-                        // Point
-                        geometry = {
-                            type: 'Point',
-                            coordinates: [west, north]
-                        };
+                        // True point
+                        features.push({
+                            type: 'Feature',
+                            properties: { description, docIndex: i },
+                            geometry: { type: 'Point', coordinates: [west, north] }
+                        });
                     } else {
                         // Polygon (bounding box)
-                        geometry = {
-                            type: 'Polygon',
-                            coordinates: [[
-                                [west, north],
-                                [east, north],
-                                [east, south],
-                                [west, south],
-                                [west, north]
-                            ]]
-                        };
+                        const polyCoords = [
+                            [west, north],
+                            [east, north],
+                            [east, south],
+                            [west, south],
+                            [west, north]
+                        ];
+                        features.push({
+                            type: 'Feature',
+                            properties: { description, docIndex: i },
+                            geometry: { type: 'Polygon', coordinates: [polyCoords] }
+                        });
                     }
                 }
-            }
-            if (geometry) {
-                features.push({
-                    type: 'Feature',
-                    properties: {
-                        description,
-                        docIndex: i
-                    },
-                    geometry
-                });
             }
         }
     }

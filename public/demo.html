@@ -117,8 +117,10 @@
        }
        // Force map to resize and update
        setTimeout(function() {
-         if (window.L && mapContainer && mapContainer._leaflet_id) {
-           window.L.Map._instances[mapContainer._leaflet_id].invalidateSize();
+         if (window.map && typeof window.map.invalidateSize === 'function') {
+           window.map.invalidateSize();
+         } else if (typeof map !== 'undefined' && map && typeof map.invalidateSize === 'function') {
+           map.invalidateSize();
          }
        }, 300);
      });
