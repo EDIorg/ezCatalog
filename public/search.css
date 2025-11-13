@@ -271,7 +271,9 @@ input[type='checkbox'].collapse-toggle {
 .keyword-dropdown,
 .creator-dropdown,
 .location-dropdown,
-.project-dropdown {
+.project-dropdown,
+.taxon-dropdown,
+.commonName-dropdown {
   display: block !important;
   position: static !important;
   margin-top: 8px;
@@ -388,7 +390,7 @@ input[type='checkbox'].collapse-toggle {
   }
 }
 
-p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-query, .filter-tag, .clear-all-filters-link, .pagination a, .pagination a.active, .pagination a:hover:not(.active), .keyword-dropdown, .creator-dropdown, .location-dropdown, .project-dropdown {
+p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-query, .filter-tag, .clear-all-filters-link, .pagination a, .pagination a.active, .pagination a:hover:not(.active), .keyword-dropdown, .creator-dropdown, .location-dropdown, .project-dropdown, .taxon-dropdown, .commonName-dropdown {
   color: #333333;
   font-size: 14px;
 }
@@ -397,7 +399,9 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
 .keyword-dropdown label:hover,
 .creator-dropdown label:hover,
 .location-dropdown label:hover,
-.project-dropdown label:hover {
+.project-dropdown label:hover,
+.taxon-dropdown label:hover,
+.commonName-dropdown label:hover {
   text-decoration: underline;
   text-decoration-color: #0d3760;
   text-underline-offset: 2px;
@@ -405,7 +409,9 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
 .keyword-dropdown label:hover input[type="checkbox"],
 .creator-dropdown label:hover input[type="checkbox"],
 .location-dropdown label:hover input[type="checkbox"],
-.project-dropdown label:hover input[type="checkbox"] {
+.project-dropdown label:hover input[type="checkbox"],
+.taxon-dropdown label:hover input[type="checkbox"],
+.commonName-dropdown label:hover input[type="checkbox"] {
   outline: 2px solid #0d3760;
   box-shadow: 0 0 0 2px #b5d6f7;
 }
