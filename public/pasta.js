@@ -501,6 +501,8 @@ function populateTaxonFacetOptions(docs, selected) {
       });
    }
    var taxonDropdown = document.getElementById(PASTA_CONFIG.taxonDropdownId);
+   // Ensure the correct class is set for styling
+   taxonDropdown.classList.add('taxon-dropdown');
    var taxa = Array.from(taxonSet).sort();
    var searchTerm = facetSearchTerms[PASTA_CONFIG.taxonDropdownId] || '';
    if (taxa.length === 0) {
