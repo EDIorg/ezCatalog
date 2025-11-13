@@ -458,10 +458,10 @@ function populateLocationFacetOptions(docs, selected) {
    var locationSet = new Set();
    var locationCounts = {};
    for (var i = 0; i < docs.length; i++) {
-      var geoDescsElem = docs[i].getElementsByTagName("geographicDescriptions")[0];
+      var geoCovElem = docs[i].getElementsByTagName("geographicCoverage")[0];
       var uniqueLocations = new Set();
-      if (geoDescsElem) {
-         var geoDescNodes = geoDescsElem.getElementsByTagName("geographicDescription");
+      if (geoCovElem) {
+         var geoDescNodes = geoCovElem.getElementsByTagName("geographicDescription");
          for (var j = 0; j < geoDescNodes.length; j++) {
             var location = geoDescNodes[j].innerHTML;
             if (location) {
@@ -656,11 +656,11 @@ function getSelectedLocations() {
 function filterDocsByLocations(docs, selectedLocations) {
    if (!selectedLocations.length) return docs;
    return docs.filter(function(doc) {
-      // Use <geographicDescription> children of <geographicDescriptions> for filtering
-      var geoDescsElem = doc.getElementsByTagName("geographicDescriptions")[0];
+      // Use <geographicDescription> children of <geographicCoverage> for filtering
+      var geoCovElem = doc.getElementsByTagName("geographicCoverage")[0];
       var locations = [];
-      if (geoDescsElem) {
-         var geoDescNodes = geoDescsElem.getElementsByTagName("geographicDescription");
+      if (geoCovElem) {
+         var geoDescNodes = geoCovElem.getElementsByTagName("geographicDescription");
          for (var j = 0; j < geoDescNodes.length; j++) {
             locations.push(geoDescNodes[j].innerHTML);
          }

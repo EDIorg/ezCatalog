@@ -59,7 +59,7 @@ describe('buildRidarePayload', () => {
                 "//creator/individualName",
                 "//contact/individualName",
                 "//associatedParty/individualName",
-                { geographicDescriptions: "//geographicCoverage/geographicDescription" },
+                { geographicCoverage: "//geographicCoverage" },
                 { projectTitle: "//project/title" },
                 { relatedProjectTitle: "//relatedProject" },
                 "//dataset/abstract",
