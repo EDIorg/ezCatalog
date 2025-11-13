@@ -21,6 +21,16 @@ if (typeof module !== 'undefined' && module.exports) {
   }
 }
 
+// Import GeoJSON transformer and map view component
+if (typeof require !== 'undefined') {
+  var emlXmlToGeoJSON = require('./eml-xml-to-geojson');
+  var { renderMapData, initMap } = require('./leaflet-map-view');
+} else {
+  var emlXmlToGeoJSON = window.emlXmlToGeoJSON;
+  var renderMapData = window.renderMapData;
+  var initMap = window.initMap;
+}
+
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
    "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
@@ -888,6 +898,21 @@ function processFacetChange() {
   showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
   var query = getParameterByName("q");
   showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+
+  // --- Map update wiring ---
+  // If map tab is visible, update map with filtered docs
+  var mapTab = document.getElementById('map-tab');
+  var mapContainer = document.getElementById('map-container');
+  if (mapTab && mapContainer && mapTab.style.display !== 'none') {
+    // Create a temporary XML doc containing only filteredDocs
+    var tempXmlDoc = document.implementation.createDocument('', 'resultset', null);
+    filteredDocs.forEach(function(doc) {
+      tempXmlDoc.documentElement.appendChild(doc.cloneNode(true));
+    });
+    // Convert to GeoJSON and render
+    var geojson = emlXmlToGeoJSON(tempXmlDoc);
+    renderMapData(geojson);
+  }
 }
 
 // Helper to initialise a dropdown (toggle + blur collapse)
