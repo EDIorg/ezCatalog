@@ -530,25 +530,43 @@ function populateCommonNameFacetOptions(docs, selected) {
    }
 }
 
-// Add event listener for facet search input
+// Helper: get docs filtered by all facets except the one being rendered
+function getDocsFilteredByAllExcept(facet) {
+  let docs = ALL_PASTA_DOCS;
+  if (facet !== 'creator') docs = filterDocsByCreators(docs, getSelectedCreators());
+  if (facet !== 'keyword') docs = filterDocsByKeywords(docs, getSelectedKeywords());
+  if (facet !== 'project') docs = filterDocsByProjects(docs, getSelectedProjects());
+  if (facet !== 'location') docs = filterDocsByLocations(docs, getSelectedLocations());
+  if (facet !== 'taxon') docs = filterDocsByTaxa(docs, getSelectedTaxa());
+  if (facet !== 'commonName') docs = filterDocsByCommonNames(docs, getSelectedCommonNames());
+  return docs;
+}
+
+// Update facet search event handler to use filtered docs
 if (typeof window !== 'undefined') {
   document.addEventListener('input', function(e) {
     if (e.target.classList && e.target.classList.contains('facet-search')) {
       var dropdownId = e.target.getAttribute('data-dropdown-id');
       facetSearchTerms[dropdownId] = e.target.value;
-      // Call the correct populator for each facet
+      // Determine which facet is being searched
       if (dropdownId === PASTA_CONFIG.creatorDropdownId) {
-        populateCreatorFacetOptions(window.allDocs || ALL_PASTA_DOCS, getSelectedCreators());
+        const docs = getDocsFilteredByAllExcept('creator');
+        populateCreatorFacetOptions(docs, getSelectedCreators());
       } else if (dropdownId === PASTA_CONFIG.keywordDropdownId) {
-        populateKeywordFacetOptions(window.allDocs || ALL_PASTA_DOCS, getSelectedKeywords());
+        const docs = getDocsFilteredByAllExcept('keyword');
+        populateKeywordFacetOptions(docs, getSelectedKeywords());
       } else if (dropdownId === PASTA_CONFIG.projectDropdownId) {
-        populateProjectFacetOptions(window.allDocs || ALL_PASTA_DOCS, getSelectedProjects());
+        const docs = getDocsFilteredByAllExcept('project');
+        populateProjectFacetOptions(docs, getSelectedProjects());
       } else if (dropdownId === PASTA_CONFIG.locationDropdownId) {
-        populateLocationFacetOptions(window.allDocs || ALL_PASTA_DOCS, getSelectedLocations());
+        const docs = getDocsFilteredByAllExcept('location');
+        populateLocationFacetOptions(docs, getSelectedLocations());
       } else if (dropdownId === PASTA_CONFIG.taxonDropdownId) {
-        populateTaxonFacetOptions(window.allDocs || ALL_PASTA_DOCS, getSelectedTaxa());
+        const docs = getDocsFilteredByAllExcept('taxon');
+        populateTaxonFacetOptions(docs, getSelectedTaxa());
       } else if (dropdownId === PASTA_CONFIG.commonNameDropdownId) {
-        populateCommonNameFacetOptions(window.allDocs || ALL_PASTA_DOCS, getSelectedCommonNames());
+        const docs = getDocsFilteredByAllExcept('commonName');
+        populateCommonNameFacetOptions(docs, getSelectedCommonNames());
       }
     }
   });
