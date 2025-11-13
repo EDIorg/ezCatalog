@@ -12,6 +12,10 @@
    <script src="ucsv-1.2.0.min.js"></script>
    <script src="pasta-utils.js"></script>
    <script src="pasta.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+   <script src="eml-xml-to-geojson.js"></script>
+   <script src="leaflet-map-view.js"></script>
 </head>
 
 <body>
@@ -19,8 +23,12 @@
      <img src="images/logo.png" alt="Logo" class="banner-logo" />
      <span id="branding-text" class="branding-text"></span>
    </div>
+   <div class="tab-bar">
+     <button id="search-tab-btn" class="tab-btn active">Search</button>
+     <button id="map-tab-btn" class="tab-btn">Map</button>
+   </div>
    <div class="main-layout">
-     <aside class="sidebar">
+     <aside class="sidebar" id="search-tab">
         <form id="dataSearchForm" name="dataSearchForm">
               <!-- Only new faceted search fields remain -->
               <div id="active-filters"></div>
@@ -64,7 +72,7 @@
               </div>
            </form>
      </aside>
-     <main class="content">
+     <main class="content" id="search-content">
        <div class="loading" id="loading-div">
          <i class="fas fa-spinner fa-pulse fa-3x fa-fw"></i>
          <span class="sr-only">Loading...</span>
@@ -74,7 +82,48 @@
        <div id="searchResults"></div>
        <div class="pagination" id="paginationBot"></div>
      </main>
+     <main class="content" id="map-tab" style="display:none;">
+       <div id="map-container" style="width:100%;height:600px;"></div>
+     </main>
    </div>
+   <script>
+   // Tab switching logic
+   document.addEventListener('DOMContentLoaded', function() {
+     var searchTabBtn = document.getElementById('search-tab-btn');
+     var mapTabBtn = document.getElementById('map-tab-btn');
+     var searchTab = document.getElementById('search-tab');
+     var searchContent = document.getElementById('search-content');
+     var mapTab = document.getElementById('map-tab');
+     var mapContainer = document.getElementById('map-container');
+     var mapInitialized = false;
+     searchTabBtn.addEventListener('click', function() {
+       searchTabBtn.classList.add('active');
+       mapTabBtn.classList.remove('active');
+       searchTab.style.display = '';
+       searchContent.style.display = '';
+       mapTab.style.display = 'none';
+     });
+     mapTabBtn.addEventListener('click', function() {
+       searchTabBtn.classList.remove('active');
+       mapTabBtn.classList.add('active');
+       searchTab.style.display = 'none';
+       searchContent.style.display = 'none';
+       mapTab.style.display = '';
+       if (!mapInitialized) {
+         if (typeof initMap === 'function') {
+           initMap('map-container');
+           mapInitialized = true;
+         }
+       }
+       // Force map to resize and update
+       setTimeout(function() {
+         if (window.L && mapContainer && mapContainer._leaflet_id) {
+           window.L.Map._instances[mapContainer._leaflet_id].invalidateSize();
+         }
+       }, 300);
+     });
+   });
+   </script>
 </body>
 
 
