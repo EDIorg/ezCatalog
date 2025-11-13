@@ -443,3 +443,12 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
   font-size: 0.95em;
   color: #888;
 }
+
+/* Ensure facet search input fits its container exactly */
+.facet-search {
+  width: 100% !important;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0;
+  display: block;
+}
