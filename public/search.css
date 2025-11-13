@@ -277,6 +277,23 @@ input[type='checkbox'].collapse-toggle {
   display: block !important;
   position: static !important;
   margin-top: 8px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.keyword-dropdown label,
+.creator-dropdown label,
+.location-dropdown label,
+.project-dropdown label,
+.taxon-dropdown label,
+.commonName-dropdown label {
+  white-space: normal;
+  word-break: break-word;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 .group-label {
   color: #000000;
@@ -414,4 +431,15 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
 .commonName-dropdown label:hover input[type="checkbox"] {
   outline: 2px solid #0d3760;
   box-shadow: 0 0 0 2px #b5d6f7;
+}
+.keyword-dropdown label span,
+.creator-dropdown label span,
+.location-dropdown label span,
+.project-dropdown label span,
+.taxon-dropdown label span,
+.commonName-dropdown label span {
+  white-space: nowrap;
+  margin-left: 6px;
+  font-size: 0.95em;
+  color: #888;
 }
