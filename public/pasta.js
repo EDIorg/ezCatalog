@@ -411,7 +411,7 @@ function populateCreatorFacetOptions(docs, selected) {
    var searchTerm = facetSearchTerms[PASTA_CONFIG.creatorDropdownId] || '';
    creatorDropdown.innerHTML = renderFacetDropdown(personnel, selected || [], personnelCounts, 'creator-checkbox', searchTerm, PASTA_CONFIG.creatorDropdownId);
    bindFacetEvents();
-   restoreFacetSearchFocus(PASTA_CONFIG.creatorDropdownId);
+   // Do NOT call restoreFacetSearchFocus here
 }
 
 function populateKeywordFacetOptions(docs, selected) {
@@ -436,7 +436,7 @@ function populateKeywordFacetOptions(docs, selected) {
    var searchTerm = facetSearchTerms[PASTA_CONFIG.keywordDropdownId] || '';
    keywordDropdown.innerHTML = renderFacetDropdown(keywords, selected || [], keywordCounts, 'keyword-checkbox', searchTerm, PASTA_CONFIG.keywordDropdownId);
    bindFacetEvents();
-   restoreFacetSearchFocus(PASTA_CONFIG.keywordDropdownId);
+   // Do NOT call restoreFacetSearchFocus here
 }
 
 function populateProjectFacetOptions(docs, selected) {
@@ -464,7 +464,7 @@ function populateProjectFacetOptions(docs, selected) {
    var searchTerm = facetSearchTerms[PASTA_CONFIG.projectDropdownId] || '';
    projectDropdown.innerHTML = renderFacetDropdown(projects, selected || [], projectCounts, 'project-checkbox', searchTerm, PASTA_CONFIG.projectDropdownId);
    bindFacetEvents();
-   restoreFacetSearchFocus(PASTA_CONFIG.projectDropdownId);
+   // Do NOT call restoreFacetSearchFocus here
 }
 
 function populateLocationFacetOptions(docs, selected) {
@@ -492,7 +492,7 @@ function populateLocationFacetOptions(docs, selected) {
    var searchTerm = facetSearchTerms[PASTA_CONFIG.locationDropdownId] || '';
    locationDropdown.innerHTML = renderFacetDropdown(locations, selected || [], locationCounts, 'location-checkbox', searchTerm, PASTA_CONFIG.locationDropdownId);
    bindFacetEvents();
-   restoreFacetSearchFocus(PASTA_CONFIG.locationDropdownId);
+   // Do NOT call restoreFacetSearchFocus here
 }
 
 function populateTaxonFacetOptions(docs, selected) {
@@ -523,7 +523,7 @@ function populateTaxonFacetOptions(docs, selected) {
    } else {
      taxonDropdown.innerHTML = renderFacetDropdown(taxa, selected || [], taxonCounts, 'taxon-checkbox', searchTerm, PASTA_CONFIG.taxonDropdownId);
      bindFacetEvents();
-     restoreFacetSearchFocus(PASTA_CONFIG.taxonDropdownId);
+     // Do NOT call restoreFacetSearchFocus here
    }
 }
 
@@ -553,7 +553,7 @@ function populateCommonNameFacetOptions(docs, selected) {
    } else {
      commonNameDropdown.innerHTML = renderFacetDropdown(commonNames, selected || [], commonNameCounts, 'commonname-checkbox', searchTerm, PASTA_CONFIG.commonNameDropdownId);
      bindFacetEvents();
-     restoreFacetSearchFocus(PASTA_CONFIG.commonNameDropdownId);
+     // Do NOT call restoreFacetSearchFocus here
    }
 }
 
@@ -579,21 +579,27 @@ if (typeof window !== 'undefined') {
       if (dropdownId === PASTA_CONFIG.creatorDropdownId) {
         const docs = getDocsFilteredByAllExcept('creator');
         populateCreatorFacetOptions(docs, getSelectedCreators());
+        restoreFacetSearchFocus(PASTA_CONFIG.creatorDropdownId);
       } else if (dropdownId === PASTA_CONFIG.keywordDropdownId) {
         const docs = getDocsFilteredByAllExcept('keyword');
         populateKeywordFacetOptions(docs, getSelectedKeywords());
+        restoreFacetSearchFocus(PASTA_CONFIG.keywordDropdownId);
       } else if (dropdownId === PASTA_CONFIG.projectDropdownId) {
         const docs = getDocsFilteredByAllExcept('project');
         populateProjectFacetOptions(docs, getSelectedProjects());
+        restoreFacetSearchFocus(PASTA_CONFIG.projectDropdownId);
       } else if (dropdownId === PASTA_CONFIG.locationDropdownId) {
         const docs = getDocsFilteredByAllExcept('location');
         populateLocationFacetOptions(docs, getSelectedLocations());
+        restoreFacetSearchFocus(PASTA_CONFIG.locationDropdownId);
       } else if (dropdownId === PASTA_CONFIG.taxonDropdownId) {
         const docs = getDocsFilteredByAllExcept('taxon');
         populateTaxonFacetOptions(docs, getSelectedTaxa());
+        restoreFacetSearchFocus(PASTA_CONFIG.taxonDropdownId);
       } else if (dropdownId === PASTA_CONFIG.commonNameDropdownId) {
         const docs = getDocsFilteredByAllExcept('commonName');
         populateCommonNameFacetOptions(docs, getSelectedCommonNames());
+        restoreFacetSearchFocus(PASTA_CONFIG.commonNameDropdownId);
       }
     }
   });
@@ -854,6 +860,7 @@ function clearAllFacets() {
     var boxes = document.querySelectorAll(selector);
     boxes.forEach(function(box) { box.checked = false; });
   });
+  focusTopOfPage(); // Ensure top-of-page focus after clearing filters
 }
 
 // Move processFacetChange to top-level scope so it can be called from anywhere
@@ -1041,6 +1048,7 @@ async function initData() {
     const pids = await fetchPackageIds();
     const response = await buildAndPostRidarePayload(pids);
     updateDomWithDocs(response);
+    focusTopOfPage(); // Ensure top-of-page focus after catalogue refresh
   } catch (err) {
     console.error('Error initializing data:', err);
     errorCallback(err);
@@ -1094,6 +1102,16 @@ function setBrandingText() {
   if (brandingSpan) brandingSpan.textContent = brandingText;
 }
 
+// Focus top of page
+function focusTopOfPage() {
+  var topEl = document.getElementById('branding-text') || document.body;
+  if (topEl && typeof topEl.focus === 'function') {
+    topEl.focus();
+  } else {
+    window.scrollTo(0, 0);
+  }
+}
+
 // Refactored DOMContentLoaded
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -1102,6 +1120,7 @@ document.addEventListener("DOMContentLoaded", function() {
   bindFacetEvents();
   bindFilterEvents();
   setBrandingText();
+  focusTopOfPage(); // Ensure top-of-page focus after load
 });
 
 // Export for testing
