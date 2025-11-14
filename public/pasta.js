@@ -919,11 +919,7 @@ function processFacetChange() {
 
 // Hook: When map tab is activated, enable drawing and handle filter
 function onMapTabActivated() {
-    console.log('onMapTabActivated called');
     enableMapDrawing(window.leafletMap, function(drawnGeojson) {
-        console.log('Drawing callback triggered');
-        console.log('window.geojson:', window.geojson);
-        console.log('window.geojson.features:', window.geojson ? window.geojson.features : undefined);
         var featuresInShape = [];
         if (window.geojson && window.geojson.features) {
             var drawnLayer = L.geoJSON(drawnGeojson);
@@ -939,7 +935,6 @@ function onMapTabActivated() {
         var descriptions = featuresInShape.map(function(feature) {
             return feature.properties && feature.properties.description ? feature.properties.description : null;
         }).filter(Boolean);
-        console.log('Selected geographic descriptions:', descriptions);
         // Update location facet filter with selected descriptions
         var locationDropdown = document.getElementById(PASTA_CONFIG.locationDropdownId);
         if (locationDropdown) {
