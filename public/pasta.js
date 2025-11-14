@@ -107,7 +107,7 @@ function exploreLink(link) {
 function relatedStoriesLink(pkgid, title) {
    const pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
    const encodedTitle = encodeURIComponent(title);
-   return `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+   return `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' target='_blank' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 
 /**
