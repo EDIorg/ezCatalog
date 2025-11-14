@@ -940,7 +940,22 @@ function onMapTabActivated() {
             return feature.properties && feature.properties.description ? feature.properties.description : null;
         }).filter(Boolean);
         console.log('Selected geographic descriptions:', descriptions);
-        // (No XML or facet update yet)
+        // Update location facet filter with selected descriptions
+        var locationDropdown = document.getElementById(PASTA_CONFIG.locationDropdownId);
+        if (locationDropdown) {
+            // Uncheck all first
+            locationDropdown.querySelectorAll('.location-checkbox').forEach(function(box) {
+                box.checked = false;
+            });
+            // Check only those matching selected descriptions
+            locationDropdown.querySelectorAll('.location-checkbox').forEach(function(box) {
+                if (descriptions.includes(box.value)) {
+                    box.checked = true;
+                }
+            });
+        }
+        // Trigger facet update
+        processFacetChange();
     });
 }
 
