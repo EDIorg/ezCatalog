@@ -65,10 +65,34 @@ function renderMapData(geojson) {
     }
 }
 
+// Add Leaflet.draw plugin and event listener for drawing features
+function enableMapDrawing(map, onDrawCallback) {
+    if (!window.L || !map) return;
+    if (!window.L.Control.Draw) {
+        console.error('Leaflet.draw plugin not loaded');
+        return;
+    }
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+    const drawControl = new L.Control.Draw({
+        edit: { featureGroup: drawnItems },
+        draw: { polygon: true, rectangle: true, marker: false, circle: false, polyline: false }
+    });
+    map.addControl(drawControl);
+    map.on(L.Draw.Event.CREATED, function (e) {
+        drawnItems.clearLayers(); // Only one filter at a time
+        drawnItems.addLayer(e.layer);
+        if (onDrawCallback) {
+            onDrawCallback(e.layer.toGeoJSON());
+        }
+    });
+}
+
 // Export for browser and Node.js
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { initMap, renderMapData };
+    module.exports = { initMap, renderMapData, enableMapDrawing };
 } else if (typeof window !== 'undefined') {
     window.initMap = initMap;
     window.renderMapData = renderMapData;
+    window.enableMapDrawing = enableMapDrawing;
 }

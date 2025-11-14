@@ -24,11 +24,14 @@ if (typeof module !== 'undefined' && module.exports) {
 // Import GeoJSON transformer and map view component
 if (typeof require !== 'undefined') {
   var emlXmlToGeoJSON = require('./eml-xml-to-geojson');
-  var { renderMapData, initMap } = require('./leaflet-map-view');
+  var { renderMapData, initMap, enableMapDrawing } = require('./leaflet-map-view');
+  var { geojsonToMapFilterXML } = require('./geojson-to-xml');
 } else {
   var emlXmlToGeoJSON = window.emlXmlToGeoJSON;
   var renderMapData = window.renderMapData;
   var initMap = window.initMap;
+  var enableMapDrawing = window.enableMapDrawing;
+  var geojsonToMapFilterXML = window.geojsonToMapFilterXML;
 }
 
 const PASTA_CONFIG = {
@@ -912,6 +915,33 @@ function processFacetChange() {
     window.geojson = geojson; // Expose for debugging
     renderMapData(geojson);
   }
+}
+
+// Hook: When map tab is activated, enable drawing and handle filter
+function onMapTabActivated() {
+    // ...existing code to initialize map...
+    enableMapDrawing(window.leafletMap, function(geojson) {
+        // Convert drawn geometry to XML
+        const mapFilterXML = geojsonToMapFilterXML(geojson);
+        // Update shared XML state with map filter
+        updateXMLStateWithMapFilter(mapFilterXML);
+        // Trigger central controller update
+        triggerFacetAndMapUpdate();
+    });
+}
+
+// Update shared XML state with map filter
+function updateXMLStateWithMapFilter(mapFilterXML) {
+    // Assume xmlState is a global/shared variable
+    // Remove any previous <mapFilter> element
+    xmlState = xmlState.replace(/<mapFilter>[\s\S]*?<\/mapFilter>/, '');
+    // Insert new mapFilter before closing root
+    xmlState = xmlState.replace(/<\/\w+>$/, mapFilterXML + '$&');
+}
+
+// Central controller update function
+function triggerFacetAndMapUpdate() {
+    // ...existing code to update facet list, search results, and map...
 }
 
 // Helper to initialise a dropdown (toggle + blur collapse)

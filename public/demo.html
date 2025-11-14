@@ -16,6 +16,8 @@
    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
    <script src="eml-xml-to-geojson.js"></script>
    <script src="leaflet-map-view.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+   <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 </head>
 
 <body>
@@ -113,17 +115,34 @@
          if (typeof initMap === 'function') {
            initMap('map-container');
            mapInitialized = true;
+           window.leafletMap = map || window.map;
+           // Only call enableMapDrawing once, after map is initialized
+           if (typeof enableMapDrawing === 'function' && window.leafletMap) {
+             enableMapDrawing(window.leafletMap, function(geojson) {
+               // Convert drawn geometry to XML and update filter
+               if (typeof geojsonToMapFilterXML === 'function') {
+                 var mapFilterXML = geojsonToMapFilterXML(geojson);
+                 if (typeof updateXMLStateWithMapFilter === 'function') {
+                   updateXMLStateWithMapFilter(mapFilterXML);
+                 }
+                 if (typeof processFacetChange === 'function') {
+                   processFacetChange();
+                 }
+               }
+             });
+           }
          }
        }
+       // Do NOT call enableMapDrawing again here to avoid duplicates
        // Trigger facet filter and map update when map tab is opened
        if (typeof processFacetChange === 'function') {
          processFacetChange();
        }
        setTimeout(function() {
-         if (window.map && typeof window.map.invalidateSize === 'function') {
+         if (window.leafletMap && typeof window.leafletMap.invalidateSize === 'function') {
+           window.leafletMap.invalidateSize();
+         } else if (window.map && typeof window.map.invalidateSize === 'function') {
            window.map.invalidateSize();
-         } else if (typeof map !== 'undefined' && map && typeof map.invalidateSize === 'function') {
-           map.invalidateSize();
          }
        }, 300);
      });
