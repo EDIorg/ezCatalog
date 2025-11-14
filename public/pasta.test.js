@@ -62,6 +62,17 @@ describe('UI/Event Logic', () => {
   // Add more tests for event handlers and DOM updates as needed
 });
 
+describe('UI: setBrandingText', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `<span id="branding-text"></span>`;
+  });
+  it('sets the branding text in the DOM', () => {
+    const { setBrandingText } = require('./pasta');
+    setBrandingText();
+    expect(document.getElementById('branding-text').textContent).toBe('Seattle Public Utilities Data Catalog');
+  });
+});
+
 // Instructions:
 // - Mock network requests for fetchDataPackageIdentifiers.
 // - Expand UI tests to cover event handlers and DOM updates.
