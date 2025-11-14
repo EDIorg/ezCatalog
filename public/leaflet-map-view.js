@@ -72,13 +72,25 @@ function enableMapDrawing(map, onDrawCallback) {
     if (!window.L.Control.Draw) {
         return;
     }
+    // Remove existing draw controls if present
+    if (map._drawControl) {
+        map.removeControl(map._drawControl);
+        map._drawControl = null;
+    }
+    // Remove existing drawnItems layer if present
+    if (map._drawnItems) {
+        map.removeLayer(map._drawnItems);
+        map._drawnItems = null;
+    }
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
+    map._drawnItems = drawnItems;
     const drawControl = new L.Control.Draw({
         edit: { featureGroup: drawnItems },
         draw: { polygon: true, rectangle: true, marker: false, circle: false, polyline: false }
     });
     map.addControl(drawControl);
+    map._drawControl = drawControl;
     // When a shape is drawn, call the callback
     map.on('draw:created', function(e) {
         drawnItems.clearLayers(); // Only one filter at a time
