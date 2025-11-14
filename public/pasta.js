@@ -904,13 +904,13 @@ function processFacetChange() {
   var mapTab = document.getElementById('map-tab');
   var mapContainer = document.getElementById('map-container');
   if (mapTab && mapContainer && mapTab.style.display !== 'none') {
-    // Create a temporary XML doc containing only filteredDocs
     var tempXmlDoc = document.implementation.createDocument('', 'resultset', null);
     filteredDocs.forEach(function(doc) {
       tempXmlDoc.documentElement.appendChild(doc.cloneNode(true));
     });
-    // Convert to GeoJSON and render
     var geojson = emlXmlToGeoJSON(tempXmlDoc);
+    window.geojson = geojson; // Expose for debugging
+    console.log('Real GeoJSON passed to map:', geojson);
     renderMapData(geojson);
   }
 }

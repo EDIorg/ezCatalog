@@ -109,13 +109,18 @@
        searchTab.style.display = 'none';
        searchContent.style.display = 'none';
        mapTab.style.display = '';
+       console.log('Map tab activated');
+       alert('Map tab activated');
        if (!mapInitialized) {
          if (typeof initMap === 'function') {
            initMap('map-container');
            mapInitialized = true;
          }
        }
-       // Force map to resize and update
+       // Trigger facet filter and map update when map tab is opened
+       if (typeof processFacetChange === 'function') {
+         processFacetChange();
+       }
        setTimeout(function() {
          if (window.map && typeof window.map.invalidateSize === 'function') {
            window.map.invalidateSize();

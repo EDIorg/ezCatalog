@@ -43,11 +43,12 @@ function renderMapData(geojson) {
         },
         style: function(feature) {
             if (feature.geometry.type === 'Polygon') {
+                // Ensure polygons are visible with outline and fill
                 return {
-                    color: '#27ae60',
-                    weight: 2,
-                    fillColor: '#2ecc71',
-                    fillOpacity: 0.2
+                    color: '#e67e22',
+                    weight: 3,
+                    fillColor: '#f1c40f',
+                    fillOpacity: 0.4
                 };
             }
         },
@@ -57,14 +58,17 @@ function renderMapData(geojson) {
             }
         }
     }).addTo(map);
-    // Fit map to data
+    // Debug: log bounds
     try {
         const bounds = geoJsonLayer.getBounds();
+        console.log('Map bounds:', bounds);
         if (bounds.isValid()) {
             map.fitBounds(bounds, { maxZoom: 14 });
+        } else {
+            map.setView([0, 0], 2);
         }
     } catch (e) {
-        // If no valid bounds, reset view
+        console.error('Error fitting bounds:', e);
         map.setView([0, 0], 2);
     }
 }
