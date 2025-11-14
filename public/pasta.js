@@ -910,7 +910,6 @@ function processFacetChange() {
     });
     var geojson = emlXmlToGeoJSON(tempXmlDoc);
     window.geojson = geojson; // Expose for debugging
-    console.log('Real GeoJSON passed to map:', geojson);
     renderMapData(geojson);
   }
 }

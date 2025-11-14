@@ -22,17 +22,13 @@ function initMap(containerId) {
  */
 function renderMapData(geojson) {
     if (!map) return;
-    // Debug: log geojson to verify features
-    console.log('GeoJSON passed to map:', geojson);
     // Remove previous layer
     if (geoJsonLayer) {
         map.removeLayer(geoJsonLayer);
         geoJsonLayer = null;
     }
-    // Add new GeoJSON layer with custom styling
     geoJsonLayer = L.geoJSON(geojson, {
         pointToLayer: function(feature, latlng) {
-            console.log('Rendering point feature:', feature);
             return L.circleMarker(latlng, {
                 radius: 6,
                 color: '#2980b9',
@@ -43,7 +39,6 @@ function renderMapData(geojson) {
         },
         style: function(feature) {
             if (feature.geometry.type === 'Polygon') {
-                // Ensure polygons are visible with outline and fill
                 return {
                     color: '#e67e22',
                     weight: 3,
@@ -58,17 +53,14 @@ function renderMapData(geojson) {
             }
         }
     }).addTo(map);
-    // Debug: log bounds
     try {
         const bounds = geoJsonLayer.getBounds();
-        console.log('Map bounds:', bounds);
         if (bounds.isValid()) {
             map.fitBounds(bounds, { maxZoom: 14 });
         } else {
             map.setView([0, 0], 2);
         }
     } catch (e) {
-        console.error('Error fitting bounds:', e);
         map.setView([0, 0], 2);
     }
 }
