@@ -68,10 +68,8 @@ function renderMapData(geojson) {
 
 // Add Leaflet.draw plugin and event listener for drawing features
 function enableMapDrawing(map, onDrawCallback) {
-    console.log('enableMapDrawing called');
     if (!window.L || !map) return;
     if (!window.L.Control.Draw) {
-        console.error('Leaflet.draw plugin not loaded');
         return;
     }
     const drawnItems = new L.FeatureGroup();
@@ -83,7 +81,6 @@ function enableMapDrawing(map, onDrawCallback) {
     map.addControl(drawControl);
     // When a shape is drawn, call the callback
     map.on('draw:created', function(e) {
-        console.log('Leaflet draw:created event triggered');
         drawnItems.clearLayers(); // Only one filter at a time
         drawnItems.addLayer(e.layer);
         if (onDrawCallback) {
