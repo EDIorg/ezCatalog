@@ -20,6 +20,16 @@ describe('fetchDataPackageIdentifiers', () => {
     await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow('Network error');
     expect(global.fetch).toHaveBeenCalled();
   });
+
+  it('should return an empty array if no packageid elements are present', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: async () => `<?xml version="1.0"?><resultset></resultset>`
+    });
+    const result = await fetchDataPackageIdentifiers('cos-spu');
+    expect(result).toEqual([]);
+    expect(global.fetch).toHaveBeenCalled();
+  });
 });
 
 // UI/Event logic test scaffolding
