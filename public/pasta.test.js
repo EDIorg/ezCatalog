@@ -15,9 +15,10 @@ describe('fetchDataPackageIdentifiers', () => {
     expect(global.fetch).toHaveBeenCalled();
   });
 
-  it('should handle errors gracefully', async () => {
-    // TODO: Mock fetch to throw and test error handling
-    // Example: await expect(fetchDataPackageIdentifiers('bad-scope')).rejects.toThrow();
+  it('should reject if fetch throws an error', async () => {
+    global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+    await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow('Network error');
+    expect(global.fetch).toHaveBeenCalled();
   });
 });
 
