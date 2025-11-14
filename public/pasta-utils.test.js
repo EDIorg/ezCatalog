@@ -117,3 +117,30 @@ describe('postToRidareEndpoint (real request)', () => {
         expect(xml.startsWith('<?xml')).toBe(true);
     });
 });
+
+describe('Integration: fetchDataPackageIdentifiers + buildRidarePayload + postToRidareEndpoint', () => {
+    beforeAll(() => {
+        global.fetch = jest.fn();
+    });
+    afterEach(() => {
+        fetch.mockClear();
+    });
+    it('chains identifier fetch, payload build, and POST correctly', async () => {
+        // Step 1: Mock fetch for identifier GET
+        const xmlResponse = `<?xml version="1.0"?><resultset><document><packageid>cos-spu.12.1</packageid></document><document><packageid>cos-spu.13.1</packageid></document></resultset>`;
+        fetch.mockResolvedValueOnce({ ok: true, text: async () => xmlResponse });
+        // Step 2: Call fetchDataPackageIdentifiers
+        const pids = await fetchDataPackageIdentifiers('cos-spu');
+        expect(pids).toEqual(['cos-spu.12.1', 'cos-spu.13.1']);
+        // Step 3: Build payload
+        const payload = buildRidarePayload(pids);
+        expect(payload.pid).toEqual(['cos-spu.12.1', 'cos-spu.13.1']);
+        // Step 4: Mock fetch for POST
+        const postXmlResponse = `<?xml version="1.0"?><resultset><document><packageid>cos-spu.12.1</packageid></document></resultset>`;
+        fetch.mockResolvedValueOnce({ ok: true, text: async () => postXmlResponse });
+        // Step 5: Call postToRidareEndpoint
+        const result = await postToRidareEndpoint(payload, 'http://127.0.0.1:5000/multi');
+        expect(result).toBe(postXmlResponse);
+        expect(fetch).toHaveBeenCalledTimes(2);
+    });
+});
