@@ -51,6 +51,7 @@ function renderMapData(geojson) {
             if (feature.properties && feature.properties.description) {
                 layer.bindPopup(feature.properties.description);
             }
+            // Removed click event for selection; only drawing triggers selection
         }
     }).addTo(map);
     try {
@@ -67,6 +68,7 @@ function renderMapData(geojson) {
 
 // Add Leaflet.draw plugin and event listener for drawing features
 function enableMapDrawing(map, onDrawCallback) {
+    console.log('enableMapDrawing called');
     if (!window.L || !map) return;
     if (!window.L.Control.Draw) {
         console.error('Leaflet.draw plugin not loaded');
@@ -79,7 +81,9 @@ function enableMapDrawing(map, onDrawCallback) {
         draw: { polygon: true, rectangle: true, marker: false, circle: false, polyline: false }
     });
     map.addControl(drawControl);
-    map.on(L.Draw.Event.CREATED, function (e) {
+    // When a shape is drawn, call the callback
+    map.on('draw:created', function(e) {
+        console.log('Leaflet draw:created event triggered');
         drawnItems.clearLayers(); // Only one filter at a time
         drawnItems.addLayer(e.layer);
         if (onDrawCallback) {

@@ -1,24 +1,34 @@
-// Converts a GeoJSON geometry (Polygon or Rectangle) to an XML fragment for map filtering
+// public/geojson-to-xml.js
+
+/**
+ * Convert GeoJSON features to XML map filter containing only geographic descriptions.
+ * @param {object} geojson - GeoJSON FeatureCollection
+ * @returns {string} - XML string with <mapFilter> and <geographicDescription> elements
+ */
 export function geojsonToMapFilterXML(geojson) {
-    if (!geojson || !geojson.geometry) return '';
-    const { geometry } = geojson;
+    if (!geojson || !geojson.features) return '<mapFilter></mapFilter>';
     let xml = '<mapFilter>';
-    if (geometry.type === 'Polygon' && geometry.coordinates && geometry.coordinates[0]) {
-        // Find bounding box from polygon coordinates
-        let lats = geometry.coordinates[0].map(c => c[1]);
-        let lngs = geometry.coordinates[0].map(c => c[0]);
-        const north = Math.max(...lats);
-        const south = Math.min(...lats);
-        const east = Math.max(...lngs);
-        const west = Math.min(...lngs);
-        xml += `<boundingCoordinates>`;
-        xml += `<westBoundingCoordinate>${west}</westBoundingCoordinate>`;
-        xml += `<eastBoundingCoordinate>${east}</eastBoundingCoordinate>`;
-        xml += `<northBoundingCoordinate>${north}</northBoundingCoordinate>`;
-        xml += `<southBoundingCoordinate>${south}</southBoundingCoordinate>`;
-        xml += `</boundingCoordinates>`;
-    }
+    geojson.features.forEach(feature => {
+        const desc = feature.properties && feature.properties.description
+            ? feature.properties.description
+            : '';
+        if (desc) {
+            xml += `<geographicDescription>${escapeXml(desc)}</geographicDescription>`;
+        }
+    });
     xml += '</mapFilter>';
     return xml;
 }
 
+// Helper to escape XML special characters
+function escapeXml(str) {
+    return str.replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
+    });
+}

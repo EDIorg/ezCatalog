@@ -919,14 +919,28 @@ function processFacetChange() {
 
 // Hook: When map tab is activated, enable drawing and handle filter
 function onMapTabActivated() {
-    // ...existing code to initialize map...
-    enableMapDrawing(window.leafletMap, function(geojson) {
-        // Convert drawn geometry to XML
-        const mapFilterXML = geojsonToMapFilterXML(geojson);
-        // Update shared XML state with map filter
-        updateXMLStateWithMapFilter(mapFilterXML);
-        // Trigger central controller update
-        triggerFacetAndMapUpdate();
+    console.log('onMapTabActivated called');
+    enableMapDrawing(window.leafletMap, function(drawnGeojson) {
+        console.log('Drawing callback triggered');
+        console.log('window.geojson:', window.geojson);
+        console.log('window.geojson.features:', window.geojson ? window.geojson.features : undefined);
+        var featuresInShape = [];
+        if (window.geojson && window.geojson.features) {
+            var drawnLayer = L.geoJSON(drawnGeojson);
+            var drawnBounds = drawnLayer.getBounds();
+            window.geojson.features.forEach(function(feature) {
+                var featureLayer = L.geoJSON(feature);
+                var featureBounds = featureLayer.getBounds();
+                if (drawnBounds.intersects(featureBounds)) {
+                    featuresInShape.push(feature);
+                }
+            });
+        }
+        var descriptions = featuresInShape.map(function(feature) {
+            return feature.properties && feature.properties.description ? feature.properties.description : null;
+        }).filter(Boolean);
+        console.log('Selected geographic descriptions:', descriptions);
+        // (No XML or facet update yet)
     });
 }
 

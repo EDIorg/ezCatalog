@@ -116,24 +116,12 @@
            initMap('map-container');
            mapInitialized = true;
            window.leafletMap = map || window.map;
-           // Only call enableMapDrawing once, after map is initialized
-           if (typeof enableMapDrawing === 'function' && window.leafletMap) {
-             enableMapDrawing(window.leafletMap, function(geojson) {
-               // Convert drawn geometry to XML and update filter
-               if (typeof geojsonToMapFilterXML === 'function') {
-                 var mapFilterXML = geojsonToMapFilterXML(geojson);
-                 if (typeof updateXMLStateWithMapFilter === 'function') {
-                   updateXMLStateWithMapFilter(mapFilterXML);
-                 }
-                 if (typeof processFacetChange === 'function') {
-                   processFacetChange();
-                 }
-               }
-             });
-           }
          }
        }
-       // Do NOT call enableMapDrawing again here to avoid duplicates
+       // Call onMapTabActivated to enable drawing and logging
+       if (typeof onMapTabActivated === 'function') {
+         onMapTabActivated();
+       }
        // Trigger facet filter and map update when map tab is opened
        if (typeof processFacetChange === 'function') {
          processFacetChange();
