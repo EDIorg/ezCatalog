@@ -5,7 +5,7 @@
  * @param {object} geojson - GeoJSON FeatureCollection
  * @returns {string} - XML string with <mapFilter> and <geographicDescription> elements
  */
-export function geojsonToMapFilterXML(geojson) {
+function geojsonToMapFilterXML(geojson) {
     if (!geojson || !geojson.features) return '<mapFilter></mapFilter>';
     let xml = '<mapFilter>';
     geojson.features.forEach(feature => {
@@ -32,3 +32,5 @@ function escapeXml(str) {
         }
     });
 }
+
+module.exports = { geojsonToMapFilterXML };
