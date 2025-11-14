@@ -7,6 +7,10 @@ async function fetchDataPackageIdentifiers(scope, filter = `&fq=scope:${scope}`)
     }
     const xmlText = await response.text();
     const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+    // Check for parsererror in the document
+    if (doc.getElementsByTagName('parsererror').length > 0) {
+        throw new Error('Malformed XML response');
+    }
     const packageidNodes = doc.getElementsByTagName('packageid');
     const pids = [];
     for (let i = 0; i < packageidNodes.length; i++) {

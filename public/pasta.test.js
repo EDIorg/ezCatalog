@@ -30,6 +30,15 @@ describe('fetchDataPackageIdentifiers', () => {
     expect(result).toEqual([]);
     expect(global.fetch).toHaveBeenCalled();
   });
+
+  it('should throw an error if response XML is malformed', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: async () => `<resultset><packageid>cos-spu.10.1<packageid>cos-spu.12.1</resultset>` // missing closing tag for first packageid
+    });
+    await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow();
+    expect(global.fetch).toHaveBeenCalled();
+  });
 });
 
 // UI/Event logic test scaffolding
