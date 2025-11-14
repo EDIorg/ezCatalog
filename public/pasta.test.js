@@ -5,9 +5,14 @@ const { fetchDataPackageIdentifiers } = require('./pasta');
 
 describe('fetchDataPackageIdentifiers', () => {
   it('should fetch identifiers for a valid scope', async () => {
-    // TODO: Mock fetch and test expected output
-    expect(typeof fetchDataPackageIdentifiers).toBe('function');
-    // Example: await expect(fetchDataPackageIdentifiers('cos-spu')).resolves.toBeInstanceOf(Array);
+    // Mock fetch to return a valid XML response
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: async () => `<?xml version="1.0"?><resultset><packageid>cos-spu.10.1</packageid><packageid>cos-spu.12.1</packageid></resultset>`
+    });
+    const result = await fetchDataPackageIdentifiers('cos-spu');
+    expect(result).toEqual(['cos-spu.10.1', 'cos-spu.12.1']);
+    expect(global.fetch).toHaveBeenCalled();
   });
 
   it('should handle errors gracefully', async () => {
