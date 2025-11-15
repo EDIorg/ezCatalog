@@ -13,6 +13,12 @@ body {
   padding: 0;
   box-sizing: border-box;
 }
+body.no-banner {
+  margin-top: 24px !important; /* Only the gap, not the banner height */
+}
+body.no-banner .banner-bar {
+  display: none !important;
+}
 
 .loading {
 	display: none;

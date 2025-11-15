@@ -47,6 +47,9 @@ const PASTA_CONFIG = {
    "showAbstracts": true, // true if we should show abstracts in search results
    "abstractLimit": 750, // Limit the number of characters in the abstract
    "limit": 2000,  // Max number of results to retrieve per page
+   // Branding
+   "brandingText": "Seattle Public Utilities Data Catalog",
+   "showBanner": true, // If false, the top banner will not be displayed
    // Centralized element IDs
    "loadingDivId": "loading-div",
    "creatorDropdownId": "creator-dropdown",
@@ -61,8 +64,6 @@ const PASTA_CONFIG = {
    "imgBasePath": "images/",
    "portalBaseUrl": "https://portal.edirepository.org/nis/mapbrowse?packageid=",
    "citeBaseUrl": "https://cite.edirepository.org/cite/",
-   // Branding
-   "brandingText": "Seattle Public Utilities Data Catalog",
    // Delays
    "baseDelay": 200 // ms
 };
@@ -1097,6 +1098,11 @@ function bindFilterEvents() {
 
 // Branding text for banner bar
 function setBrandingText() {
+  if (!PASTA_CONFIG.showBanner) {
+    var brandingSpan = document.getElementById(PASTA_CONFIG.brandingTextId);
+    if (brandingSpan) brandingSpan.style.display = "none";
+    return;
+  }
   var brandingText = PASTA_CONFIG.brandingText;
   var brandingSpan = document.getElementById(PASTA_CONFIG.brandingTextId);
   if (brandingSpan) brandingSpan.textContent = brandingText;
@@ -1115,6 +1121,14 @@ function focusTopOfPage() {
 // Refactored DOMContentLoaded
 
 document.addEventListener("DOMContentLoaded", function() {
+  var bannerBar = document.querySelector('.banner-bar');
+  if (PASTA_CONFIG.showBanner) {
+    if (bannerBar) bannerBar.style.display = '';
+    document.body.classList.remove('no-banner');
+  } else {
+    if (bannerBar) bannerBar.style.display = 'none';
+    document.body.classList.add('no-banner');
+  }
   initData();
   initDropdowns();
   bindFacetEvents();
