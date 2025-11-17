@@ -36,17 +36,48 @@ html, body {
    STRUCTURAL / NON-CONFIGURABLE
    ============================= */
 
-/* Layout, positioning, grid, flex, etc. */
-
-.container {
+/* --- Layout & Containers --- */
+.container, .main-layout {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2em;
   display: flex;
   flex-direction: column;
   gap: 2em;
+  width: 100%;
+  min-height: 100vh;
 }
 
+.sidebar {
+  min-width: 280px;
+  max-width: 340px;
+  padding: 16px 8px 0 0;
+  background: #fff;
+  border-right: 1px solid #e0e7ef;
+  height: 100%;
+}
+
+.content {
+  flex: 1;
+  padding: 16px 0 0 0;
+  min-width: 0;
+  background: #fff;
+}
+
+@media (max-width: 900px) {
+  .main-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    max-width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid #e0e7ef;
+    padding-right: 0;
+  }
+}
+
+/* --- Components --- */
 .header {
   display: flex;
   align-items: center;
@@ -80,177 +111,146 @@ html, body {
   display: flex;
   justify-content: center;
   gap: 0.5em;
-  margin-top: 2em;
+  margin: 16px 8px 16px 8px;
 }
-
-/* Utility classes */
-.hide {
-  display: none !important;
+.pagination a {
+  color: #333;
+  padding: 8px 16px;
+  text-decoration: none;
 }
-
-.show {
-  display: block !important;
+.pagination a.active {
+  background-color: #0d3760;
+  color: #fff;
 }
-
-/* =============================
-   GLOBAL STYLES
-   ============================= */
-
-/* Remove font import and font-family from here, now controlled above */
-
-body {
-  margin: 24px;
-  margin-top: 88px; /* 64px banner + 24px gap */
-  padding: 0;
-  box-sizing: border-box;
-}
-body.no-banner {
-  margin-top: 24px !important; /* Only the gap, not the banner height */
-}
-body.no-banner .banner-bar {
-  display: none !important;
+.pagination a:hover:not(.active) {
+  background-color: #ddd;
 }
 
 .loading {
-	display: none;
-    width: 100px;
-    height: 100px;
-
-    position: absolute;
-    top:0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    margin: auto;
+  display: none;
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  margin: auto;
 }
 
+/* --- Dataset Display --- */
 .dataset-title {
-  color: #000000;
+  color: #000;
   font-weight: bold;
   font-size: 20px;
-  margin-bottom: 8px; /* Add space below title */
+  margin-bottom: 8px;
 }
 .dataset-title a {
-    font-size: 1.2em;
-    text-decoration: none;
-    color: #0046AD;
+  font-size: 1.2em;
+  text-decoration: none;
+  color: #0046AD;
 }
 .dataset-title a:visited {
-    color: #4C2C92;
+  color: #4C2C92;
 }
-
 .dataset-title a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
-
 .dataset-author {
-    color: #333333;
-    margin-bottom: 8px; /* Add space below author */
+  color: #333;
+  margin-bottom: 8px;
 }
-
 .dataset-abstract {
-    display: block;
-    margin-bottom: 8px; /* Add space below description/abstract */
+  display: block;
+  margin-bottom: 8px;
 }
-
-.search-input {
-    width: 250px;
-    margin-bottom: 10px;
+.dataset-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 38px;
 }
-
-.resultCount {
-    color: #333333;
+.dataset-info {
+  flex: 1;
 }
-
-.result-query {
-    font-weight: bold;
-    color: #333333;
+.dataset-thumb-container {
+  width: 320px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 18px;
+  background: #f7f7f7;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
-
-.pagination {
-	margin: 16px 8px 16px 8px;
-}
-.pagination a {
-	color: #333333;
-	padding: 8px 16px;
-	text-decoration: none;
-}
-.pagination a.active {
-	background-color: #0d3760;
-	color: white;
-}
-.pagination a:hover:not(.active) {
-	background-color: #ddd;
-}
-
-/* collapsible */
-input[type='checkbox'].collapse-toggle {
-   display: none;
-}
-
-.lbl-toggle {
-   cursor: pointer;
-   transition: all 0.25s ease-out;
-}
- 
-.lbl-toggle::before {
-   content: ' ';
-   display: inline-block;
- 
-   border-top: 5px solid transparent;
-   border-bottom: 5px solid transparent;
-   border-left: 5px solid currentColor;
- 
-   vertical-align: middle;
-   margin-right: .1rem;
-   transform: translateY(-2px);
- 
-   transition: transform .2s ease-out;
-}
-
-.collapse-toggle:checked + .lbl-toggle::before {
-   transform: rotate(90deg) translateX(-3px);
-}
- 
-.collapse-toggle:checked + .lbl-toggle {
-   border-bottom-right-radius: 0;
-   border-bottom-left-radius: 0;
-}
-
-.collapsible {
-   padding: 0 11px;
-   max-height: 0;
-   overflow: hidden;
-   transition: max-height .25s ease-in-out;
-}
-
-.yearbox {
-   width: 50px;
-}
-
-.yeardiv {
-   display: inline-block;
-   margin-left: 10px;
-   margin-bottom: 5px;
-}
-
-.input-block {
-   margin-bottom: 20px;
-   max-width: 256px;
-   position: relative;
-}
-
-#creator {
-  min-width: unset;
-  max-width: unset;
+.dataset-thumb {
   width: 100%;
-  position: static;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 16/9;
+  border-radius: 6px;
+  background: #eee;
+}
+@media (max-width: 600px) {
+  .dataset-thumb-container {
+    width: 160px;
+    height: 90px;
+    margin-left: 10px;
+  }
+}
+
+/* --- Banner --- */
+.banner-bar {
+  width: 100%;
+  height: 64px;
+  background: var(--banner-color, #0046AD);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+}
+.banner-logo {
+  height: 100%;
+  max-height: 64px;
+  width: auto;
+  margin-right: 4px;
+  display: block;
+}
+.branding-text {
+  font-size: 2em;
+  font-weight: bold;
+  color: #fff;
+  margin-left: 4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .banner-bar {
+    height: 48px;
+    padding: 0 10px;
+  }
+  .banner-logo {
+    height: 32px;
+    margin-right: 10px;
+  }
+}
+
+/* --- Filters & Inputs --- */
+.input-block {
+  margin-bottom: 20px;
+  max-width: 256px;
+  position: relative;
+}
+.search-input {
+  width: 250px;
+  margin-bottom: 10px;
+}
+#creator {
+  width: 100%;
   background: #fff;
-  box-shadow: none;
   border: 1px solid #ccc;
   display: block;
-  margin-left: 0;
   margin-bottom: 10px;
   font-size: 1em;
   padding: 4px 8px;
@@ -261,25 +261,15 @@ input[type='checkbox'].collapse-toggle {
 #creator[multiple] {
   height: 120px;
   overflow-y: auto;
-  display: block;
-  margin-left: 0;
 }
 #creator.show {
   display: block !important;
 }
-#creator-expand-btn {
-  /* already styled inline, but can add more here if needed */
-}
-#creator-expand-btn.active #creator-expand-icon {
-  transform: rotate(90deg);
-}
 @media (max-width: 600px) {
   #creator {
     min-width: 200px;
-    margin-left: 0;
   }
 }
-
 .filter-tag {
   display: inline-block;
   background: #e0e7ef;
@@ -319,7 +309,6 @@ input[type='checkbox'].collapse-toggle {
 }
 .clear-all-filters-link:hover {
   color: #1976d2;
-  background: none;
   text-decoration: underline;
 }
 #active-filters {
@@ -329,42 +318,8 @@ input[type='checkbox'].collapse-toggle {
   flex-wrap: wrap;
   margin-bottom: 1em;
 }
-.main-layout {
-  display: flex;
-  align-items: flex-start;
-  gap: 32px;
-  width: 100%;
-  min-height: 100vh;
-}
 
-.sidebar {
-  min-width: 280px;
-  max-width: 340px;
-  padding: 16px 8px 0 0;
-  background: #fff;
-  border-right: 1px solid #e0e7ef;
-  height: 100%;
-}
-
-.content {
-  flex: 1;
-  padding: 16px 0 0 0;
-  min-width: 0;
-  background: #fff;
-}
-
-@media (max-width: 900px) {
-  .main-layout {
-    flex-direction: column;
-  }
-  .sidebar {
-    max-width: 100%;
-    min-width: 0;
-    border-right: none;
-    border-bottom: 1px solid #e0e7ef;
-    padding-right: 0;
-  }
-}
+/* --- Dropdowns --- */
 .keyword-dropdown,
 .creator-dropdown,
 .location-dropdown,
@@ -379,7 +334,6 @@ input[type='checkbox'].collapse-toggle {
   box-sizing: border-box;
   overflow-x: hidden;
 }
-
 .keyword-dropdown label,
 .creator-dropdown label,
 .location-dropdown label,
@@ -388,67 +342,70 @@ input[type='checkbox'].collapse-toggle {
 .commonName-dropdown label {
   white-space: normal;
   word-break: break-word;
-  overflow-x: hidden;
   width: 100%;
   box-sizing: border-box;
 }
+
+/* --- Collapsible --- */
+input[type='checkbox'].collapse-toggle {
+  display: none;
+}
+.lbl-toggle {
+  cursor: pointer;
+  transition: all 0.25s ease-out;
+}
+.lbl-toggle::before {
+  content: ' ';
+  display: inline-block;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid currentColor;
+  vertical-align: middle;
+  margin-right: .1rem;
+  transform: translateY(-2px);
+  transition: transform .2s ease-out;
+}
+.collapse-toggle:checked + .lbl-toggle::before {
+  transform: rotate(90deg) translateX(-3px);
+}
+.collapse-toggle:checked + .lbl-toggle {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.collapsible {
+  padding: 0 11px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .25s ease-in-out;
+}
+
+/* --- Utility Classes --- */
+.hide {
+  display: none !important;
+}
+.show {
+  display: block !important;
+}
 .group-label {
-  color: #000000;
+  color: #000;
   font-weight: bold;
   font-size: 1.2em;
   margin-left: 6px;
 }
 .input-block i {
-  color: #000000;
+  color: #000;
   font-size: 1.2em;
   margin-right: 6px;
   vertical-align: middle;
 }
-
-.dataset-row {
-  display: flex;
-  align-items: flex-start;
-  margin-bottom: 38px; /* Increased vertical separation */
+.yearbox {
+  width: 50px;
 }
-.dataset-info {
-  flex: 1;
+.yeardiv {
+  display: inline-block;
+  margin-left: 10px;
+  margin-bottom: 5px;
 }
-.dataset-thumb-container {
-  width: 320px;
-  height: 180px;
-  min-width: 320px;
-  min-height: 180px;
-  max-width: 320px;
-  max-height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 18px;
-  background: #f7f7f7;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-}
-.dataset-thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  aspect-ratio: 16/9;
-  border-radius: 6px;
-  background: #eee;
-}
-@media (max-width: 600px) {
-  .dataset-thumb-container {
-    width: 160px;
-    height: 90px;
-    min-width: 160px;
-    min-height: 90px;
-    max-width: 160px;
-    max-height: 90px;
-    margin-left: 10px;
-  }
-}
-
 .explore-link {
   color: #0046AD !important;
   text-decoration: none;
@@ -463,53 +420,11 @@ input[type='checkbox'].collapse-toggle {
   text-decoration: underline;
 }
 
-/* Banner bar styles */
-.banner-bar {
-  width: 100%;
-  height: 64px;
-  background: var(--banner-color, #0046AD); /* Easily configurable */
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  box-sizing: border-box;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-}
-.banner-logo {
-  height: 100%;
-  max-height: 64px;
-  width: auto;
-  margin-right: 4px;
-  display: block;
-}
-.branding-text {
-  font-size: 2em;
-  font-weight: bold;
-  color: #FFFFFF;
-  margin-left: 4px;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-@media (max-width: 600px) {
-  .banner-bar {
-    height: 48px;
-    padding: 0 10px;
-  }
-  .banner-logo {
-    height: 32px;
-    margin-right: 10px;
-  }
-}
-
+/* --- Facet Styles --- */
 p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-query, .filter-tag, .clear-all-filters-link, .pagination a, .pagination a.active, .pagination a:hover:not(.active), .keyword-dropdown, .creator-dropdown, .location-dropdown, .project-dropdown, .taxon-dropdown, .commonName-dropdown {
-  color: #333333;
+  color: #333;
   font-size: 14px;
 }
-
-/* Facet filter label hover underline and checkbox highlight */
 .keyword-dropdown label:hover,
 .creator-dropdown label:hover,
 .location-dropdown label:hover,
@@ -540,12 +455,24 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
   font-size: 0.95em;
   color: #888;
 }
-
-/* Ensure facet search input fits its container exactly */
 .facet-search {
   width: 100% !important;
   box-sizing: border-box;
   max-width: 100%;
   margin: 0;
   display: block;
+}
+
+/* --- Miscellaneous --- */
+body {
+  margin: 24px;
+  margin-top: 88px; /* 64px banner + 24px gap */
+  padding: 0;
+  box-sizing: border-box;
+}
+body.no-banner {
+  margin-top: 24px !important;
+}
+body.no-banner .banner-bar {
+  display: none !important;
 }
