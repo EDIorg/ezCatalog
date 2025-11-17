@@ -22,6 +22,7 @@
   --dataset-title-link-color: #0046AD;
   --dataset-title-link-visited: #4C2C92;
   --dataset-title-link-hover: underline;
+  --dataset-author-color: #333333;
 }
 
 body {
@@ -170,7 +171,7 @@ html, body {
   text-decoration: var(--dataset-title-link-hover);
 }
 .dataset-author {
-  color: #333;
+  color: var(--dataset-author-color);
   margin-bottom: 8px;
 }
 .dataset-abstract {
