@@ -36,7 +36,7 @@ if (typeof require !== 'undefined') {
 
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
-   "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
+       "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "resultsElementId": "searchResults", // Element to contain results
    "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
    "countElementId": "resultCount", // Element showing number of results
@@ -49,6 +49,15 @@ const PASTA_CONFIG = {
    "limit": 2000,  // Max number of results to retrieve per page
    "showUserStoriesLink": true, // If false, do not display the user stories link for datasets
    "showThumbnails": true, // If false, do not display dataset thumbnail images
+   // Facet visibility toggles
+   "facetVisibility": {
+      "creator": true,
+      "keyword": true,
+      "project": true,
+      "location": true,  // Must be true to enable location-based map filtering
+      "taxon": true,
+      "commonName": true
+   },
    // Branding
    "brandingText": "Seattle Public Utilities Data Catalog",
    "showBanner": true, // If false, the top banner will not be displayed
@@ -393,7 +402,22 @@ function restoreFacetSearchFocus(dropdownId) {
   }, 0);
 }
 
+function setFacetBlockVisibility(facet, visible) {
+  var blockId = {
+    creator: 'creator-block',
+    keyword: 'keyword-block',
+    project: 'project-block',
+    location: 'location-block',
+    taxon: 'taxon-block',
+    commonName: 'commonName-block'
+  }[facet];
+  var block = document.getElementById(blockId);
+  if (block) block.style.display = visible ? '' : 'none';
+}
+
 function populateCreatorFacetOptions(docs, selected) {
+   setFacetBlockVisibility('creator', PASTA_CONFIG.facetVisibility.creator);
+   if (!PASTA_CONFIG.facetVisibility.creator) return;
    var personnelSet = new Set();
    var personnelCounts = {};
    for (var i = 0; i < docs.length; i++) {
@@ -420,6 +444,8 @@ function populateCreatorFacetOptions(docs, selected) {
 }
 
 function populateKeywordFacetOptions(docs, selected) {
+   setFacetBlockVisibility('keyword', PASTA_CONFIG.facetVisibility.keyword);
+   if (!PASTA_CONFIG.facetVisibility.keyword) return;
    var keywordSet = new Set();
    var keywordCounts = {};
    for (var i = 0; i < docs.length; i++) {
@@ -445,6 +471,8 @@ function populateKeywordFacetOptions(docs, selected) {
 }
 
 function populateProjectFacetOptions(docs, selected) {
+   setFacetBlockVisibility('project', PASTA_CONFIG.facetVisibility.project);
+   if (!PASTA_CONFIG.facetVisibility.project) return;
    var projectSet = new Set();
    var projectCounts = {};
    for (var i = 0; i < docs.length; i++) {
@@ -473,6 +501,8 @@ function populateProjectFacetOptions(docs, selected) {
 }
 
 function populateLocationFacetOptions(docs, selected) {
+   setFacetBlockVisibility('location', PASTA_CONFIG.facetVisibility.location);
+   if (!PASTA_CONFIG.facetVisibility.location) return;
    var locationSet = new Set();
    var locationCounts = {};
    for (var i = 0; i < docs.length; i++) {
@@ -501,6 +531,8 @@ function populateLocationFacetOptions(docs, selected) {
 }
 
 function populateTaxonFacetOptions(docs, selected) {
+   setFacetBlockVisibility('taxon', PASTA_CONFIG.facetVisibility.taxon);
+   if (!PASTA_CONFIG.facetVisibility.taxon) return;
    var taxonSet = new Set();
    var taxonCounts = {};
    for (var i = 0; i < docs.length; i++) {
@@ -533,6 +565,8 @@ function populateTaxonFacetOptions(docs, selected) {
 }
 
 function populateCommonNameFacetOptions(docs, selected) {
+   setFacetBlockVisibility('commonName', PASTA_CONFIG.facetVisibility.commonName);
+   if (!PASTA_CONFIG.facetVisibility.commonName) return;
    var commonNameSet = new Set();
    var commonNameCounts = {};
    for (var i = 0; i < docs.length; i++) {
