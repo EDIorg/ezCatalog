@@ -973,7 +973,7 @@ function onMapTabActivated() {
             window.geojson.features.forEach(function(feature) {
                 var featureLayer = L.geoJSON(feature);
                 var featureBounds = featureLayer.getBounds();
-                if (drawnBounds.intersects(featureBounds)) {
+                if (drawnBounds.contains(featureBounds)) {
                     featuresInShape.push(feature);
                 }
             });
