@@ -69,6 +69,7 @@ html, body {
   padding: 16px 0 0 0;
   min-width: 0;
   background: #fff;
+  margin-right: 24px; /* Add margin to right of results */
 }
 
 @media (max-width: 900px) {
