@@ -47,6 +47,7 @@ const PASTA_CONFIG = {
    "showAbstracts": true, // true if we should show abstracts in search results
    "abstractLimit": 750, // Limit the number of characters in the abstract
    "limit": 2000,  // Max number of results to retrieve per page
+   "showUserStoriesLink": true, // If false, do not display the user stories link for datasets
    // Branding
    "brandingText": "Seattle Public Utilities Data Catalog",
    "showBanner": true, // If false, the top banner will not be displayed
@@ -106,6 +107,7 @@ function exploreLink(link) {
    return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 function relatedStoriesLink(pkgid, title) {
+   if (!PASTA_CONFIG.showUserStoriesLink) return "";
    const pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
    const encodedTitle = encodeURIComponent(title);
    return `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' target='_blank' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
