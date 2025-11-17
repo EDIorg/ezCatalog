@@ -37,15 +37,21 @@ html, body {
    ============================= */
 
 /* --- Layout & Containers --- */
-.container, .main-layout {
+.main-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+  min-height: 100vh;
+  margin-left: 24px;
+  margin-right: 24px;
+}
+.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2em;
-  display: flex;
-  flex-direction: column;
-  gap: 2em;
   width: 100%;
-  min-height: 100vh;
 }
 
 .sidebar {
@@ -55,6 +61,7 @@ html, body {
   background: #fff;
   border-right: 1px solid #e0e7ef;
   height: 100%;
+  flex-shrink: 0;
 }
 
 .content {
@@ -67,6 +74,8 @@ html, body {
 @media (max-width: 900px) {
   .main-layout {
     flex-direction: column;
+    margin-left: 0;
+    margin-right: 0;
   }
   .sidebar {
     max-width: 100%;
