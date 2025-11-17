@@ -16,6 +16,12 @@
   --box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   --input-padding: 0.5em 1em;
   --transition-speed: 0.2s;
+  --dataset-title-color: #000000;
+  --dataset-title-font-size: 20px;
+  --dataset-title-font-weight: bold;
+  --dataset-title-link-color: #0046AD;
+  --dataset-title-link-visited: #4C2C92;
+  --dataset-title-link-hover: underline;
 }
 
 body {
@@ -147,21 +153,21 @@ html, body {
 
 /* --- Dataset Display --- */
 .dataset-title {
-  color: #000;
-  font-weight: bold;
-  font-size: 20px;
+  color: var(--dataset-title-color);
+  font-weight: var(--dataset-title-font-weight);
+  font-size: var(--dataset-title-font-size);
   margin-bottom: 8px;
 }
 .dataset-title a {
   font-size: 1.2em;
   text-decoration: none;
-  color: #0046AD;
+  color: var(--dataset-title-link-color);
 }
 .dataset-title a:visited {
-  color: #4C2C92;
+  color: var(--dataset-title-link-visited);
 }
 .dataset-title a:hover {
-  text-decoration: underline;
+  text-decoration: var(--dataset-title-link-hover);
 }
 .dataset-author {
   color: #333;
