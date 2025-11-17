@@ -48,6 +48,7 @@ const PASTA_CONFIG = {
    "abstractLimit": 750, // Limit the number of characters in the abstract
    "limit": 2000,  // Max number of results to retrieve per page
    "showUserStoriesLink": true, // If false, do not display the user stories link for datasets
+   "showThumbnails": true, // If false, do not display dataset thumbnail images
    // Branding
    "brandingText": "Seattle Public Utilities Data Catalog",
    "showBanner": true, // If false, the top banner will not be displayed
@@ -99,6 +100,7 @@ function titleHtml(title) {
    return `<div class='dataset-title'><strong>${title}</strong></div>`;
 }
 function imgHtml(pkgid) {
+   if (!PASTA_CONFIG.showThumbnails) return "";
    const imgBase = pkgid.split(".").slice(0,2).join(".");
    const imgSrc = `${PASTA_CONFIG.imgBasePath}${imgBase}.png`;
    return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none'"></div>`;
