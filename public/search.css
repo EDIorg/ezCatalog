@@ -23,6 +23,9 @@
   --dataset-title-link-visited: #4C2C92;
   --dataset-title-link-hover: underline;
   --dataset-author-color: #333333;
+  --banner-bar-background: #0046AD;
+  --branding-text-font-weight: bold;
+  --branding-text-color: #FFFFFF;
 }
 
 body {
@@ -218,7 +221,7 @@ html, body {
 .banner-bar {
   width: 100%;
   height: 64px;
-  background: var(--banner-color, #0046AD);
+  background: var(--banner-bar-background);
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -236,8 +239,8 @@ html, body {
 }
 .branding-text {
   font-size: 2em;
-  font-weight: bold;
-  color: #fff;
+  font-weight: var(--branding-text-font-weight);
+  color: var(--branding-text-color);
   margin-left: 4px;
   letter-spacing: 0.5px;
   white-space: nowrap;
