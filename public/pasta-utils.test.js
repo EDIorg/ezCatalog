@@ -95,9 +95,9 @@ describe('postToRidareEndpoint', () => {
         const payload = { pid: ['cos-spu.13.3'], query: ['//creator/individualName'] };
         const xmlResponse = `<?xml version="1.0"?><resultset><document><packageid>cos-spu.13.3</packageid></document></resultset>`;
         fetch.mockResolvedValue({ ok: true, text: async () => xmlResponse });
-        const result = await postToRidareEndpoint(payload, 'http://127.0.0.1:5000/multi');
+        const result = await postToRidareEndpoint(payload, 'https://ridare-d.edirepository.org/multi');
         expect(result).toBe(xmlResponse);
-        expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:5000/multi', expect.objectContaining({
+        expect(fetch).toHaveBeenCalledWith('https://ridare-d.edirepository.org/multi', expect.objectContaining({
             method: 'POST',
             headers: expect.objectContaining({
                 'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ describe('postToRidareEndpoint (real request)', () => {
     it('sends real POST request and receives XML', async () => {
         global.fetch = require('node-fetch');
         const payload = { pid: ['cos-spu.13.3'], query: ['//creator/individualName'] };
-        const xml = await postToRidareEndpoint(payload, 'http://127.0.0.1:5000/multi');
+        const xml = await postToRidareEndpoint(payload, 'https://ridare-d.edirepository.org/multi');
         expect(typeof xml).toBe('string');
         expect(xml.startsWith('<?xml')).toBe(true);
     });
@@ -139,7 +139,7 @@ describe('Integration: fetchDataPackageIdentifiers + buildRidarePayload + postTo
         const postXmlResponse = `<?xml version="1.0"?><resultset><document><packageid>cos-spu.12.1</packageid></document></resultset>`;
         fetch.mockResolvedValueOnce({ ok: true, text: async () => postXmlResponse });
         // Step 5: Call postToRidareEndpoint
-        const result = await postToRidareEndpoint(payload, 'http://127.0.0.1:5000/multi');
+        const result = await postToRidareEndpoint(payload, 'https://ridare-d.edirepository.org/multi');
         expect(result).toBe(postXmlResponse);
         expect(fetch).toHaveBeenCalledTimes(2);
     });

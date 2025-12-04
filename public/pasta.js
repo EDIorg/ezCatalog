@@ -36,7 +36,7 @@ if (typeof require !== 'undefined') {
 
 const PASTA_CONFIG = {
    "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
-       "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
+   "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "resultsElementId": "searchResults", // Element to contain results
    "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
    "countElementId": "resultCount", // Element showing number of results
