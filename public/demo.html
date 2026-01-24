@@ -26,8 +26,8 @@
      <span id="branding-text" class="branding-text"></span>
    </div>
    <div class="tab-bar">
-     <button id="search-tab-btn" class="tab-btn active">Search</button>
-     <button id="map-tab-btn" class="tab-btn">Map</button>
+     <button id="search-tab-btn" class="tab-btn active" style="display: none;">Go to Filter</button>
+     <button id="map-tab-btn" class="tab-btn">Go to Map</button>
    </div>
    <div class="main-layout">
      <aside class="sidebar" id="search-tab">
@@ -90,6 +90,7 @@
    </div>
    <script>
    // Tab switching logic
+   // Updated to toggle visibility of buttons
    document.addEventListener('DOMContentLoaded', function() {
      var searchTabBtn = document.getElementById('search-tab-btn');
      var mapTabBtn = document.getElementById('map-tab-btn');
@@ -104,6 +105,8 @@
        searchTab.style.display = '';
        searchContent.style.display = '';
        mapTab.style.display = 'none';
+       searchTabBtn.style.display = 'none';
+       mapTabBtn.style.display = '';
      });
      mapTabBtn.addEventListener('click', function() {
        searchTabBtn.classList.remove('active');
@@ -111,6 +114,8 @@
        searchTab.style.display = 'none';
        searchContent.style.display = 'none';
        mapTab.style.display = '';
+       mapTabBtn.style.display = 'none';
+       searchTabBtn.style.display = '';
        if (!mapInitialized) {
          if (typeof initMap === 'function') {
            initMap('map-container');
