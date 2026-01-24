@@ -141,6 +141,15 @@
      });
    });
    </script>
+   <script>
+  // Ensure the "Go to Map" button visibility is controlled by PASTA_CONFIG
+  document.addEventListener('DOMContentLoaded', function() {
+    const mapTabBtn = document.getElementById('map-tab-btn');
+    if (typeof PASTA_CONFIG !== 'undefined' && PASTA_CONFIG.hideMapView && mapTabBtn) {
+      mapTabBtn.style.display = 'none';
+    }
+  });
+</script>
 </body>
 
 

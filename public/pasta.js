@@ -76,7 +76,8 @@ const PASTA_CONFIG = {
    "portalBaseUrl": "https://portal.edirepository.org/nis/mapbrowse?packageid=",
    "citeBaseUrl": "https://cite.edirepository.org/cite/",
    // Delays
-   "baseDelay": 200 // ms
+   "baseDelay": 200, // ms
+   "hideMapView": false // true to hide the map view
 };
 
 // This feature is deprecated. Please do not functionally depend on it.
@@ -1167,6 +1168,10 @@ document.addEventListener("DOMContentLoaded", function() {
   } else {
     if (bannerBar) bannerBar.style.display = 'none';
     document.body.classList.add('no-banner');
+  }
+  const mapTabBtn = document.getElementById('map-tab-btn');
+  if (PASTA_CONFIG.hideMapView && mapTabBtn) {
+    mapTabBtn.style.display = 'none';
   }
   initData();
   initDropdowns();
