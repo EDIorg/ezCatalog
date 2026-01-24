@@ -1196,7 +1196,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Ensure initData is called only after related stories are loaded
 function loadRelatedStories(callback) {
-    fetch('related_stories.csv')
+    fetch('related_content.csv')
         .then(response => response.text())
         .then(csvText => {
             const rows = csvText.split('\n').slice(1); // Skip header row

@@ -60,7 +60,7 @@ function uCSV(url, success, error) {
       console.error('uCSV is not defined!');
     } else {
       // --- DEBUG: Try loading the CSV directly ---
-      uCSV('related_stories.csv', function(data) {
+      uCSV('related_content.csv', function(data) {
         console.log('[DEBUG] Test uCSV load:', data);
       }, function(error) {
         console.error('[DEBUG] Test uCSV error:', error);
@@ -91,7 +91,7 @@ function uCSV(url, success, error) {
     }
     function loadStories(packageId) {
       console.log('Checking uCSV:', typeof uCSV);
-      uCSV('related_stories.csv', function(data) {
+      uCSV('related_content.csv', function(data) {
         console.log('uCSV success, data:', data);
         var stories = data.filter(function(row) {
           return row.package_id === packageId;
