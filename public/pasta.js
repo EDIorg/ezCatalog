@@ -121,7 +121,7 @@ function relatedStoriesLink(pkgid, title) {
    if (!PASTA_CONFIG.showUserStoriesLink) return "";
    const pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
    const encodedTitle = encodeURIComponent(title);
-   return `<a class='explore-link' href='related_stories.html?package_id=${pkgidNoRev}&title=${encodedTitle}' target='_blank' rel='noopener noreferrer' style='margin-left:18px;'>Related Stories <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+   return `<a class='explore-link' href='related_content.html?package_id=${pkgidNoRev}&title=${encodedTitle}' target='_blank' rel='noopener noreferrer' style='margin-left:18px;'>Related Content <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 
 /**

@@ -78,7 +78,7 @@ function uCSV(url, success, error) {
     function renderStories(stories) {
       var container = document.getElementById('story-list');
       if (!stories.length) {
-        container.innerHTML = '<div class="no-stories">No related stories found for this dataset.</div>';
+        container.innerHTML = '<div class="no-stories">No related content found for this dataset.</div>';
         return;
       }
       container.innerHTML = stories.map(function(story) {
