@@ -372,17 +372,11 @@ function renderFacetDropdown(items, selected, counts, className, searchTerm, dro
   // Search box with icon, rectangular borders
   const searchBox = `
     <div style="position:relative;margin:6px 0 8px 0;">
-      <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:0.6;">
-        <svg width='16' height='16' viewBox='0 0 20 20' fill='none' style='display:block;' xmlns='http://www.w3.org/2000/svg'>
-          <circle cx='9' cy='9' r='7' stroke='#888' stroke-width='2'/>
-          <line x1='14.2' y1='14.2' x2='18' y2='18' stroke='#888' stroke-width='2' stroke-linecap='round'/>
-        </svg>
-      </span>
-      <input type="text" class="facet-search" placeholder="Search..." value="${searchTerm || ''}"
-        style="width:95%;padding:7px 10px 7px 34px;border:1.5px solid #c2c7d0;border-radius:0;background:#f7f8fa;box-shadow:0 1px 2px rgba(0,0,0,0.03);font-size:1em;transition:border 0.2s;outline:none;"
+      <input type="text" class="facet-search" placeholder="Select..." value="${searchTerm || ''}"
+        style="width:95%;padding:7px 10px;border:1.5px solid #c2c7d0;border-radius:0;background:#f7f8fa;box-shadow:0 1px 2px rgba(0,0,0,0.03);font-size:1em;transition:border 0.2s;outline:none;"
         data-dropdown-id="${dropdownId}"
         onfocus="this.style.borderColor='#4a90e2'" onblur="this.style.borderColor='#c2c7d0'"
-        aria-label="Search within this facet category"
+        aria-label="Select within this facet category"
       >
     </div>
   `;
