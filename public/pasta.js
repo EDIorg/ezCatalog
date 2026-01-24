@@ -119,7 +119,14 @@ function exploreLink(link) {
 }
 function relatedStoriesLink(pkgid, title) {
    if (!PASTA_CONFIG.showUserStoriesLink) return "";
+
+   // Check if the dataset exists in related_stories.csv
+   const relatedStories = window.relatedStories || [];
    const pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
+   const existsInCsv = relatedStories.includes(pkgidNoRev);
+
+   if (!existsInCsv) return "";
+
    const encodedTitle = encodeURIComponent(title);
    return `<a class='explore-link' href='related_content.html?package_id=${pkgidNoRev}&title=${encodedTitle}' target='_blank' rel='noopener noreferrer' style='margin-left:18px;'>Related Content <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
@@ -1186,3 +1193,33 @@ if (typeof module !== 'undefined' && module.exports) {
         setBrandingText
     };
 }
+
+// Ensure initData is called only after related stories are loaded
+function loadRelatedStories(callback) {
+    fetch('related_stories.csv')
+        .then(response => response.text())
+        .then(csvText => {
+            const rows = csvText.split('\n').slice(1); // Skip header row
+            const relatedStories = new Set();
+            rows.forEach(row => {
+                const columns = row.split(',');
+                if (columns.length > 0) {
+                    const packageId = columns[0].trim();
+                    if (packageId) {
+                        relatedStories.add(packageId);
+                    }
+                }
+            });
+            window.relatedStories = Array.from(relatedStories); // Store as array in global scope
+            if (callback) callback();
+        })
+        .catch(error => {
+            console.error('Error loading related stories:', error);
+            if (callback) callback();
+        });
+}
+
+// Preload related stories and then initialize the catalog
+loadRelatedStories(function() {
+    initData();
+});
