@@ -59,7 +59,7 @@ const PASTA_CONFIG = {
       "commonName": true
    },
    // Branding
-   "brandingText": "Seattle Public Utilities Data Catalog",
+   "brandingText": "Seattle Public Utilities EDI Data Catalog",
    "showBanner": true, // If false, the top banner will not be displayed
    // Centralized element IDs
    "loadingDivId": "loading-div",
