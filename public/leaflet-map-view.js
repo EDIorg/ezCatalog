@@ -11,8 +11,10 @@ let geoJsonLayer = null;
 function initMap(containerId) {
     if (map) return; // Prevent re-initialization
     map = L.map(containerId).setView([0, 0], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+//    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//        attribution: '&copy; OpenStreetMap contributors'
+    L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://opentopomap.org/">OpenTopoMap</a> contributors'
     }).addTo(map);
 }
 
