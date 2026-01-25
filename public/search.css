@@ -496,3 +496,14 @@ body.no-banner {
 body.no-banner .banner-bar {
   display: none !important;
 }
+
+/* --- Help Text --- */
+.help-text {
+  font-size: 14px;
+  color: #333;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
