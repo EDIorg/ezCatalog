@@ -85,12 +85,26 @@ function enableMapDrawing(map, onDrawCallback) {
     const drawnItems = new L.FeatureGroup();
     map.addLayer(drawnItems);
     map._drawnItems = drawnItems;
+
+    // Updated draw control configuration to disable specific buttons
     const drawControl = new L.Control.Draw({
-        edit: { featureGroup: drawnItems },
-        draw: { polygon: true, rectangle: true, marker: false, circle: false, polyline: false }
+        edit: {
+            featureGroup: drawnItems,
+            edit: false, // Disable "Edit layers"
+            remove: false // Disable "Delete layers"
+        },
+        draw: {
+            polygon: false, // Disable "Draw a polygon"
+            circlemarker: false, // Disable "Draw a circlemarker"
+            rectangle: true, // Keep "Draw a rectangle" enabled
+            marker: false,
+            circle: false,
+            polyline: false
+        }
     });
     map.addControl(drawControl);
     map._drawControl = drawControl;
+
     // When a shape is drawn, call the callback
     map.on('draw:created', function(e) {
         drawnItems.clearLayers(); // Only one filter at a time
