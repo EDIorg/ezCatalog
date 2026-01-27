@@ -4,7 +4,7 @@ A customizable data catalog for users of the EDI Data Repository
 
 [Live demo](https://clnsmth.github.io/ezCatalog/public/demo.html)
 
-_ezCatalog is based on the [PASTA-JavaScript-Search-Client](https://github.com/BLE-LTER/PASTA-JavaScript-Search-Client) developed by Tim Whiteaker for the Long-Term Ecological Research Network (LTER)._
+_ezCatalog is inspired by the [PASTA-JavaScript-Search-Client](https://github.com/BLE-LTER/PASTA-JavaScript-Search-Client) developed by Tim Whiteaker for the Long-Term Ecological Research Network (LTER)._
 
 ## Motivation
 
@@ -25,25 +25,10 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
 ```
 <iframe loading="lazy" src="https://EDIorg.github.io/ezCatalog/public/demo.html" scrolling="no" allow="fullscreen" width="100%" height="2700px"></iframe>
 ```
-8. If you would like your catalog to reference data packages in the EDI staging environment, search for the string `pasta.lternet` and replace with `pasta-s.lternet` in the files:
-   - `/harvester/pasta_harvester.mjs`
-   - `/public/pasta.js`
-    
-   Additionally, in `/public/pasta.js` replace the line `var uri = baseUri + pid;` with `var uri = baseUri + pid + "?env=staging";`.
 
-
-
-   Finally, in `/public/pasta.js` replace the line `var link = (citation["doi"]) ? citation["doi"].slice(0, -1) : "https://portal.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];`, with the line `var link = "https://portal-s.edirepository.org/nis/mapbrowse?packageid=" + citation["pid"];`
-
-9. Additional configuration can be done in `/public/pasta.js`. For example the abstract visibility can be toggled by changing the value of `showAbstracts`, and the length of the abstract can be set by changing the value of `abstractLimit`. 
+8. Additional configuration can be done in `/public/pasta.js`. For example the abstract visibility can be toggled by changing the value of `showAbstracts`, and the length of the abstract can be set by changing the value of `abstractLimit`. 
 
 To see an example of how to embed the catalog in a web page `<iframe>`, view the page source code of the [Jornada Basin LTER Data Catalog](https://lter.jornada.nmsu.edu/data-catalog/) or experiment using the W3Schools [HTML Tryit editor](https://www.w3schools.com/html/tryit.asp?filename=tryhtml_intro).
-
-## Features
-
-### Pagination
-
-ezCatalog allows you to limit the number of results returned per page. If you do not wish to use pagination, set the `limit` parameter in `config.txt` to a number higher than the number of datasets available for your group.
 
 ## Caveats
 
@@ -56,11 +41,6 @@ Please contact support@edirepository.org for help setting up your catalog or res
 ## Scope
    
 ezCatalog is a basic data catalog. If interested in developing a more feature rich catalog, we recommend checking out the video on [Using the PASTA+ Search API to Create a Local Data Catalog](https://www.youtube.com/watch?v=LwCI9TKi-Pg&t=361s).
-   
-## Acknowledgments
-
-CSV export uses uselesscode's JS CSV serializer (MIT Licensed):
-http://www.uselesscode.org/javascript/csv/
 
 ## Running Unit Tests
 
