@@ -20,7 +20,15 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
    - **Unique Keyword** - A unique keyword identifying your research group and published in the metadata of each of your EDI data packages can be used as a filter. For example, the research lab of Cayelan Carey publishes data with the keyword "Carey Lab" and the filter query `'&fq=keyword:"Carey Lab"'` returns all their data.
    - **Data Package Identifiers** - A list of data package identifiers in the form _id:scope.identifier_. For example, `'&q=id:edi.23+id:edi.101+id:edi.845'`returns the newest versions of data packages: `edi.23`, `edi.101`, and `edi.845`.
    - **Scope** - For LTER only. The scope identifying your LTER site. For example, `'&fq=scope:knb-lter-cap'` returns all data of the Central Arizona-Phoenix LTER. 
-6. Add the filter query to `config.txt` and commit the changes to your custom branch.
+6. Add the filter query directly to `/public/pasta.js` by editing the `filter` property in the `PASTA_CONFIG` object. For example:
+
+   ```javascript
+   const PASTA_CONFIG = {
+      "filter": '&fq=keyword:"Carey Lab"', // Replace with your filter query
+      ...
+   };
+   ```
+
 7. Use GitHub **Actions** to build your catalog with the [build_catalog](https://github.com/EDIorg/ezCatalog/blob/master/.github/workflows/build_catalog.yml) workflow. Go to **Actions** and under **Workflows** select **Build catalog**, then **Run workflow**. Wait for the workflow to complete, then click the **Live demo** page to see your catalog (it may take a few minutes to update). Subsequent pushes to your fork will automatically rerun the `build_catalog` workflow.  
 8. Copy the HTML snippet below and paste it into the body of your webpage.
 

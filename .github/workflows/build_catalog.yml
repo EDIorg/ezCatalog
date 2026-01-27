@@ -1,4 +1,4 @@
-# Builds a users catalog based on the filter query provided in config.txt
+# Builds a users catalog
 
 name: Build catalog
 
@@ -25,7 +25,6 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.8"
-      # Builds the filter query from config.txt and inserts it into public/pasta.js and harvester/pasta_harvester.mjs
       - name: Construct query and add to JavaScript
         run: |
           python main.py
