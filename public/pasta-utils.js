@@ -49,10 +49,10 @@ function buildRidarePayload(pids) {
 /**
  * Send a POST request to the Ridare endpoint with the constructed payload.
  * @param {object} payload - JSON payload for Ridare.
- * @param {string} [url] - Optional endpoint URL (default: 'https://ridare-d.edirepository.org/multi').
+ * @param {string} [url] - Optional endpoint URL (default: 'https://ridare.edirepository.org/multi').
  * @returns {Promise<string>} - XML response from Ridare as a string.
  */
-async function postToRidareEndpoint(payload, url = 'https://ridare-d.edirepository.org/multi') {
+async function postToRidareEndpoint(payload, url = 'https://ridare.edirepository.org/multi') {
     const fetchImpl = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
     const response = await fetchImpl(url, {
         method: 'POST',
