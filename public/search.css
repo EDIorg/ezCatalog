@@ -487,6 +487,15 @@ p, .dataset-author, .explore-link, .dataset-abstract, .resultCount, .result-quer
   margin: 0;
   display: block;
 }
+.facet-search-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f7f8fa;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  box-shadow: 0 2px 4px -2px rgba(0,0,0,0.04);
+}
 
 /* --- Miscellaneous --- */
 body {

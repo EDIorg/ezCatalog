@@ -373,7 +373,7 @@ function renderFacetDropdown(items, selected, counts, className, searchTerm, dro
   );
   // Search box with icon, rectangular borders
   const searchBox = `
-    <div style="position:relative;margin:6px 0 8px 0;">
+    <div class="facet-search-bar" style="position:sticky;top:0;z-index:1;background:#f7f8fa;">
       <input type="text" class="facet-search" placeholder="Select..." value="${searchTerm || ''}"
         style="width:95%;padding:7px 10px;border:1.5px solid #c2c7d0;border-radius:0;background:#f7f8fa;box-shadow:0 1px 2px rgba(0,0,0,0.03);font-size:1em;transition:border 0.2s;outline:none;"
         data-dropdown-id="${dropdownId}"
