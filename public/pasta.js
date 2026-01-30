@@ -113,7 +113,8 @@ function imgHtml(pkgid) {
    if (!PASTA_CONFIG.showThumbnails) return "";
    const imgBase = pkgid.split(".").slice(0,2).join(".");
    const imgSrc = `${PASTA_CONFIG.imgBasePath}${imgBase}.png`;
-   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none'"></div>`;
+   // Add onerror to set parent class to 'no-image' if image fails to load
+   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');"></div>`;
 }
 function exploreLink(link) {
    return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;

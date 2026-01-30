@@ -196,10 +196,15 @@ html, body {
   align-items: center;
   justify-content: center;
   margin-left: 18px;
-  background: #f7f7f7;
+  background: var(--background-color); /* Match catalog background */
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.dataset-thumb-container.no-image {
+  background: var(--background-color) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 .dataset-thumb {
   width: 100%;
