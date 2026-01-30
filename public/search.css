@@ -354,6 +354,7 @@ html, body {
   display: block !important;
   position: static !important;
   margin-top: 8px;
+  padding: 0 !important; /* Force override of inline padding */
   font-size: 14px;
   width: 100%;
   box-sizing: border-box;
