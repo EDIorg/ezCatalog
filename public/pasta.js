@@ -35,22 +35,16 @@ if (typeof require !== 'undefined') {
 }
 
 const PASTA_CONFIG = {
-   "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
+   // User configurable options --------------------------------------------------------------------------------
    "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
-   "resultsElementId": "searchResults", // Element to contain results
-   "urlElementId": "searchUrl", // Element to display search URL. Use "searchUrl" to display or "" to remove FIXME: Empty string does not turn off.
-   "countElementId": "resultCount", // Element showing number of results
-   "csvElementId": "csvDownload", // Element with link to download results as CSV
-   "pagesTopElementId": "paginationTop", // Element to display result page links above results
-   "pagesBotElementId": "paginationBot", // Element to display result page links below results
-   "showPages": 5, // MUST BE ODD NUMBER! Max number of page links to show
+   "brandingText": "Seattle Public Utilities EDI Data Catalog",
    "showAbstracts": true, // true if we should show abstracts in search results
    "abstractLimit": 750, // Limit the number of characters in the abstract
-   "limit": 2000,  // Max number of results to retrieve per page
    "showUserStoriesLink": true, // If false, do not display the user stories link for datasets
    "showThumbnails": true, // If false, do not display dataset thumbnail images
-   // Facet visibility toggles
-   "facetVisibility": {
+   "showBanner": true, // If false, the top banner will not be displayed
+   "hideMapView": false, // true to hide the map view
+   "facetVisibility": { // Facet visibility toggles
       "creator": true,
       "keyword": true,
       "project": true,
@@ -58,9 +52,11 @@ const PASTA_CONFIG = {
       "taxon": true,
       "commonName": true
    },
-   // Branding
-   "brandingText": "Seattle Public Utilities EDI Data Catalog",
-   "showBanner": true, // If false, the top banner will not be displayed
+   // Internal use only ---------------------------------------------------------------------------------------------
+   "server": "https://pasta.lternet.edu/package/search/eml?", // PASTA server
+   "countElementId": "resultCount", // Element showing number of results
+   "limit": 2000,  // Max number of results to retrieve per page
+   "resultsElementId": "searchResults", // Element to contain results
    // Centralized element IDs
    "loadingDivId": "loading-div",
    "creatorDropdownId": "creator-dropdown",
@@ -76,8 +72,8 @@ const PASTA_CONFIG = {
    "portalBaseUrl": "https://portal.edirepository.org/nis/mapbrowse?packageid=",
    "citeBaseUrl": "https://cite.edirepository.org/cite/",
    // Delays
-   "baseDelay": 200, // ms
-   "hideMapView": false // true to hide the map view
+   "baseDelay": 200 // ms
+   // ----------------------------------------------------------------------------------------------------------------
 };
 
 /**
