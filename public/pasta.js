@@ -80,9 +80,6 @@ const PASTA_CONFIG = {
    "hideMapView": false // true to hide the map view
 };
 
-// This feature is deprecated. Please do not functionally depend on it.
-// PASTA_CONFIG.limit = 2000;  // Max number of results to retrieve per page
-
 /**
  * Get URL arguments by name
  * @param {string} name
@@ -217,26 +214,6 @@ function getCitations(packageIds, abstracts) {
       if (index >= packageIds.length) return;
       var pid = packageIds[index];
       var uri = baseUri + pid;
-      makeCorsRequest(
-         uri,
-         header,
-         function (headers, response) {
-            handleSuccess(index, response);
-            if (callsRemaining > 0) {
-               setTimeout(function() {
-                  fetchCitationWithRetry(index + 1);
-               }, PASTA_CONFIG.baseDelay); // Small delay between successful requests
-            }
-         },
-         function (status, error) {
-            handleError(index, status, error, attempt, function() { fetchCitationWithRetry(index, attempt + 1); });
-            if (callsRemaining > 0 && (!isTransientError(status) || attempt >= MAX_RETRIES)) {
-               setTimeout(function() {
-                  fetchCitationWithRetry(index + 1);
-               }, PASTA_CONFIG.baseDelay);
-            }
-         }
-      );
    }
    if (packageIds.length > 0) {
       showLoading(true);
@@ -344,8 +321,6 @@ function handleSuccess(headers, response) {
    var showPages = parseInt(PASTA_CONFIG["showPages"]);
    var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
    var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
-   showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
-   showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
    var query = getParameterByName("q");
    // Moved showResultCount here to ensure it runs after all CITE calls are complete
    showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
@@ -355,12 +330,6 @@ function handleSuccess(headers, response) {
 function handleError() {
    showLoading(false);
    alert("There was an error making the request.");
-}
-
-// Writes CORS request URL to the page so user can see it
-function showUrl(url) {
-   var txt = '<a href="' + url + '" target="_blank">' + url + '</a>';
-   updateElementHtml(PASTA_CONFIG["urlElementId"], txt);
 }
 
 // --- Faceted Creator Dropdown Logic ---
@@ -760,55 +729,8 @@ function filterDocsByCommonNames(docs, selectedCommonNames) {
    });
 }
 
-// --- Faceted Generic Logic ---
-/**
- * Generic facet checkbox renderer
- */
-function renderFacetCheckboxes(items, selected, counts, className) {
-  return items.map(function(item) {
-    const checked = selected.includes(item) ? 'checked' : '';
-    const count = counts[item] || 0;
-    return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="${className}" value="${item.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${checked} style="margin-right:8px;">${item} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
-    </label>`;
-  }).join('');
-}
-
-/**
- * Generic facet option populator
- */
-function populateFacetOptions(docs, tagName, dropdownId, selected, className) {
-   const set = new Set();
-   const counts = {};
-   for (let i = 0; i < docs.length; i++) {
-      const nodes = docs[i].getElementsByTagName(tagName);
-      for (let j = 0; j < nodes.length; j++) {
-         const value = nodes[j].innerHTML.trim();
-         if (value) {
-            set.add(value);
-            counts[value] = (counts[value] || 0) + 1;
-         }
-      }
-   }
-   const dropdown = document.getElementById(dropdownId);
-   const items = Array.from(set).sort();
-   dropdown.innerHTML = renderFacetCheckboxes(items, selected || [], counts, className);
-}
-
-/**
- * Generic facet filter
- */
-function filterDocsByFacet(docs, tagName, selected) {
-   if (!selected.length) return docs;
-   return docs.filter(function(doc) {
-      const nodes = doc.getElementsByTagName(tagName);
-      const values = Array.from(nodes).map(n => n.innerHTML.trim());
-      return selected.some(sel => values.includes(sel));
-   });
-}
 
 // Patch successCallback to store all docs and update creator, keyword, projects, location, taxon, and common name facets
-var origHandleSuccess = handleSuccess;
 handleSuccess = function(headers, response) {
    var parser = new DOMParser();
    var xmlDoc = parser.parseFromString(response, "text/xml");
@@ -946,8 +868,6 @@ function processFacetChange() {
   var showPages = parseInt(PASTA_CONFIG["showPages"]);
   var pageTopElementId = PASTA_CONFIG["pagesTopElementId"];
   var pageBotElementId = PASTA_CONFIG["pagesBotElementId"];
-  showPageLinks(count, limit, showPages, currentStart, pageTopElementId);
-  showPageLinks(count, limit, showPages, currentStart, pageBotElementId);
   var query = getParameterByName("q");
   showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
 
@@ -1003,20 +923,6 @@ function onMapTabActivated() {
     });
 }
 
-// Update shared XML state with map filter
-function updateXMLStateWithMapFilter(mapFilterXML) {
-    // Assume xmlState is a global/shared variable
-    // Remove any previous <mapFilter> element
-    xmlState = xmlState.replace(/<mapFilter>[\s\S]*?<\/mapFilter>/, '');
-    // Insert new mapFilter before closing root
-    xmlState = xmlState.replace(/<\/\w+>$/, mapFilterXML + '$&');
-}
-
-// Central controller update function
-function triggerFacetAndMapUpdate() {
-    // ...existing code to update facet list, search results, and map...
-}
-
 // Helper to initialise a dropdown (toggle + blur collapse)
 function initDropdown(toggleId, dropdownId, arrowId) {
   const toggleBtn = document.getElementById(toggleId);
@@ -1042,18 +948,6 @@ function initDropdown(toggleId, dropdownId, arrowId) {
       }
     }, 150);
   });
-}
-
-// Helper to initialise facet change listeners
-function initFacetChangeListener(dropdownId, checkboxClass) {
-  const dropdown = document.getElementById(dropdownId);
-  if (dropdown) {
-    dropdown.addEventListener('change', function(e) {
-      if (e.target.classList.contains(checkboxClass)) {
-        processFacetChange();
-      }
-    });
-  }
 }
 
 // --- Helper functions for initData refactor ---
