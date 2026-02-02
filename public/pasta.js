@@ -210,6 +210,11 @@ function buildCitationsFromCite(pastaDocs) {
 
 function showLoading(isLoading) {
    var x = document.getElementById(PASTA_CONFIG.loadingDivId);
+   if (!x) {
+      console.warn('showLoading: loading-div element not found in DOM');
+      document.body.style.cursor = isLoading ? "wait" : "default";
+      return;
+   }
    if (isLoading) {
       document.body.style.cursor = "wait";
       x.style.display = "block";
@@ -910,6 +915,11 @@ function updateDomWithDocs(response) {
 
 // Main initialization split into focused functions
 async function initData() {
+  // Guard: Wait for loading-div to exist before proceeding
+  if (!document.getElementById(PASTA_CONFIG.loadingDivId)) {
+    setTimeout(initData, 50);
+    return;
+  }
   showLoading(true);
   try {
     const pids = await fetchPackageIds();
@@ -999,12 +1009,15 @@ document.addEventListener("DOMContentLoaded", function() {
   if (PASTA_CONFIG.hideMapView && mapTabBtn) {
     mapTabBtn.style.display = 'none';
   }
-  initData();
+  // Only call loadRelatedStories, which will call initData after related stories are loaded
   initDropdowns();
   bindFacetEvents();
   bindFilterEvents();
   setBrandingText();
   focusTopOfPage(); // Ensure top-of-page focus after load
+  loadRelatedStories(function() {
+    initData();
+  });
 });
 
 // Export for testing
