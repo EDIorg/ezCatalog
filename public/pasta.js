@@ -157,70 +157,6 @@ function buildHtml(citations, abstracts) {
    return citationCount ? html.join("\n") : "<p>Your search returned no results.</p>";
 }
 
-// Download citations to a dictionary keyed by package ID
-function getCitations(packageIds, abstracts) {
-   var header = {
-      "Accept": "application/json"
-   };
-   var baseUri = PASTA_CONFIG.citeBaseUrl;
-   var citations = {};
-   var callsRemaining = packageIds.length;
-   const MAX_RETRIES = 5;
-
-   function isTransientError(status) {
-      return status === 429 || status === 503 || status === 0; // 0 for network error
-   }
-
-   function updateCitationsUI() {
-      var html = buildHtml(citations, abstracts);
-      updateElementHtml(PASTA_CONFIG.resultsElementId, html);
-      showLoading(false);
-      // Show result count after all CITE calls are done and results are rendered
-      var count = Object.keys(citations).length;
-      var currentStart = 0;
-      var limit = parseInt(PASTA_CONFIG["limit"]);
-      var query = getParameterByName("q");
-      showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
-   }
-
-   function handleSuccess(index, response) {
-      var citation = JSON.parse(response);
-      citation["pid"] = packageIds[index];
-      citations[index] = citation;
-      --callsRemaining;
-      if (callsRemaining <= 0) {
-         updateCitationsUI();
-      }
-   }
-
-   function handleError(index, status, error, attempt, retryFn) {
-      if (isTransientError(status) && attempt < MAX_RETRIES) {
-         // Exponential backoff with jitter
-         var delay = Math.floor(PASTA_CONFIG.baseDelay * Math.pow(2, attempt) + Math.random() * 100);
-         setTimeout(function() {
-            retryFn();
-         }, delay);
-      } else {
-         // On permanent error or max retries, log and continue
-         citations[index] = { pid: packageIds[index], error: error || "Request failed" };
-         --callsRemaining;
-         if (callsRemaining <= 0) {
-            updateCitationsUI();
-         }
-      }
-   }
-
-   function fetchCitationWithRetry(index, attempt = 0) {
-      if (index >= packageIds.length) return;
-      var pid = packageIds[index];
-      var uri = baseUri + pid;
-   }
-   if (packageIds.length > 0) {
-      showLoading(true);
-      fetchCitationWithRetry(0);
-   }
-}
-
 // Build dataset citations directly from Ridare XML response
 function buildCitationsFromCite(pastaDocs) {
    var citations = {};
@@ -735,7 +671,6 @@ handleSuccess = function(headers, response) {
    var parser = new DOMParser();
    var xmlDoc = parser.parseFromString(response, "text/xml");
    var docs = Array.from(xmlDoc.getElementsByTagName("doc"));
-   window.allDocs = docs;
    var selectedCreators = getSelectedCreators();
    var selectedKeywords = getSelectedKeywords();
    var selectedProjects = getSelectedProjects();
