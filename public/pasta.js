@@ -38,6 +38,7 @@ const PASTA_CONFIG = {
    // User configurable options --------------------------------------------------------------------------------
    "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "brandingText": "Seattle Public Utilities EDI Data Catalog",
+   "logoAltText": "The City of Seattle Logo. The logo is a stylized, circular emblem featuring the profile of Chief Seattle (Si'ahl), the Duwamish and Suquamish leader for whom the city is named.", //
    "showAbstracts": true, // true if we should show abstracts in search results
    "abstractLimit": 750, // Limit the number of characters in the abstract
    "showUserStoriesLink": true, // If false, do not display the user stories link for datasets
@@ -857,6 +858,14 @@ function onMapTabActivated() {
         // Trigger facet update
         processFacetChange();
     });
+}
+
+// Utility to get logo alt text from config
+function getLogoAltText() {
+    if (typeof PASTA_CONFIG.logoAltText === 'string' && PASTA_CONFIG.logoAltText.trim().length > 0) {
+        return PASTA_CONFIG.logoAltText;
+    }
+    return "ezCatalog logo.";
 }
 
 // Helper to initialise a dropdown (toggle + blur collapse)

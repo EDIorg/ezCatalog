@@ -20,7 +20,7 @@
 
 <body>
    <div class="banner-bar">
-     <img src="images/logo.png" alt="Logo" class="banner-logo" />
+     <img src="images/logo.png" alt="" class="banner-logo" id="banner-logo-img" />
      <span id="branding-text" class="branding-text"></span>
    </div>
    <div class="tab-bar">
@@ -151,6 +151,15 @@
     }
   });
 </script>
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+     // Set logo alt text from PASTA_CONFIG if available
+     var logoImg = document.getElementById('banner-logo-img');
+     if (logoImg && typeof getLogoAltText === 'function') {
+       logoImg.alt = getLogoAltText();
+     }
+   });
+   </script>
 </body>
 
 
