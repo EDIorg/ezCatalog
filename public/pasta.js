@@ -110,8 +110,8 @@ function imgHtml(pkgid) {
    // Add onerror to set parent class to 'no-image' if image fails to load
    return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');"></div>`;
 }
-function exploreLink(link) {
-   return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+function exploreLink(link, title) {
+   return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer' aria-label='Explore data package: ${title} in the Environmental Data Initiative repository'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 function relatedStoriesLink(pkgid, title) {
    if (!PASTA_CONFIG.showUserStoriesLink) return "";
@@ -148,7 +148,7 @@ function buildHtml(citations, abstracts) {
       }
       let date = citation.pub_year ? ` Published ${citation.pub_year}.` : "";
       const link = citation.doi ? citation.doi.slice(0, -1) : `${PASTA_CONFIG.portalBaseUrl}${citation.pid}`;
-      const row = `<div class='dataset-row'><div class='dataset-info'>${titleHtml(citation.title)}${authorHtml(authors, date)}${PASTA_CONFIG.showAbstracts ? abstractHtml(abstract) : ""}<div class='dataset-actions'>${exploreLink(link)}${relatedStoriesLink(citation.pid, citation.title)}</div></div>${imgHtml(citation.pid)}</div>`;
+      const row = `<div class='dataset-row'><div class='dataset-info'>${titleHtml(citation.title)}${authorHtml(authors, date)}${PASTA_CONFIG.showAbstracts ? abstractHtml(abstract) : ""}<div class='dataset-actions'>${exploreLink(link, citation.title)}${relatedStoriesLink(citation.pid, citation.title)}</div></div>${imgHtml(citation.pid)}</div>`;
       html.push(row);
    }
    return citationCount ? html.join("\n") : "<p>Your search returned no results.</p>";
