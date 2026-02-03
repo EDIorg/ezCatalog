@@ -45,7 +45,7 @@ function renderMapData(geojson) {
                     color: '#006699', // strong blue border
                     weight: 3,
                     fillColor: '#66b3e6', // light blue fill
-                    fillOpacity: 0.4
+                    fillOpacity: 0.18 // lighter alpha for better stacking visibility
                 };
             }
         },
