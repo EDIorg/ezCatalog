@@ -535,3 +535,8 @@ body.no-banner .banner-bar {
   white-space: nowrap !important;
   border: 0 !important;
 }
+
+/* --- Universal link hover color --- */
+a:hover, .explore-link:hover, .pagination a:hover, .dataset-title a:hover {
+  color: #006699 !important;
+}
