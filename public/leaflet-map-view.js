@@ -42,9 +42,9 @@ function renderMapData(geojson) {
         style: function(feature) {
             if (feature.geometry.type === 'Polygon') {
                 return {
-                    color: '#e67e22',
+                    color: '#006699', // strong blue border
                     weight: 3,
-                    fillColor: '#f1c40f',
+                    fillColor: '#66b3e6', // light blue fill
                     fillOpacity: 0.4
                 };
             }
