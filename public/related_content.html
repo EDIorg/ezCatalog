@@ -86,7 +86,7 @@ function uCSV(url, success, error) {
         return `<div class="story-item">
           <h3 class="story-title">${story.title}</h3>
           <div class="story-summary">${story.summary}</div>
-          <a class="explore-link" href="${story.url}" target="_blank" rel="noopener noreferrer">View Content <i class="fas fa-external-link-alt"></i></a>
+          <a class="explore-link" href="${story.url}" target="_blank" rel="noopener noreferrer" aria-label="View related resource: ${story.title}">View Content <i class="fas fa-external-link-alt"></i></a>
         </div>`;
       }).join('');
     }
