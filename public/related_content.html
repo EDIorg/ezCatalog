@@ -53,6 +53,7 @@ function uCSV(url, success, error) {
 }
   </script>
   <script src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" crossorigin="anonymous" defer></script>
+  <script src="pasta.js" defer></script>
   <script defer>
     // --- DEBUG: Check if uCSV is loaded ---
     if (typeof uCSV === 'undefined') {
@@ -113,6 +114,8 @@ function uCSV(url, success, error) {
       }
     }
     document.addEventListener('DOMContentLoaded', function() {
+      // Set branding text from PASTA_CONFIG
+      if (typeof setBrandingText === 'function') setBrandingText();
       var pkgId = getParameterByName('package_id');
       displayDatasetTitleFromQuery();
       if (!pkgId) {
