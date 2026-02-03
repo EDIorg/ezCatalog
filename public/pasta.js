@@ -990,7 +990,10 @@ function setBrandingText() {
   }
   var brandingText = PASTA_CONFIG.brandingText;
   var brandingSpan = document.getElementById(PASTA_CONFIG.brandingTextId);
-  if (brandingSpan) brandingSpan.textContent = brandingText;
+  if (brandingSpan) {
+    // Render as semantic <h1> for accessibility
+    brandingSpan.innerHTML = `<h1 style='display:inline; font-size:2rem; margin-left:10px; vertical-align:middle;'>${brandingText}</h1>`;
+  }
 }
 
 // Focus top of page
