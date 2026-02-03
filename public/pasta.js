@@ -101,7 +101,7 @@ function abstractHtml(abstract) {
    return `<div class='dataset-abstract'>${abstract}</div>`;
 }
 function titleHtml(title) {
-   return `<div class='dataset-title'><strong>${title}</strong></div>`;
+   return `<div class='dataset-title'><h3>${title}</h3></div>`;
 }
 function imgHtml(pkgid) {
    if (!PASTA_CONFIG.showThumbnails) return "";
