@@ -540,3 +540,14 @@ body.no-banner .banner-bar {
 a:hover, .explore-link:hover, .pagination a:hover, .dataset-title a:hover {
   color: #006699 !important;
 }
+
+/* .filter-title matches .group-label for now */
+.filter-title {
+  color: #000;
+  font-weight: bold;
+  font-size: 1.2em;
+  font-family: var(--font-family);
+  margin-top: 0;
+  margin-bottom: 0.7em;
+  letter-spacing: 0.5px;
+}
