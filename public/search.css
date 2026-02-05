@@ -417,6 +417,7 @@ input[type='checkbox'].collapse-toggle {
   font-weight: bold;
   font-size: 1.2em;
   margin-left: 6px;
+  margin: 0;
 }
 .input-block i {
   color: #000;
