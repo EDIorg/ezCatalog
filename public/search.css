@@ -53,14 +53,17 @@ body {
 }
 
 .banner-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  z-index: 1000;
   height: 64px;
   background: var(--banner-bar-background);
   display: flex;
   align-items: center;
   padding: 0 24px;
   box-sizing: border-box;
-  position: static;
 }
 
 .tab-bar {
@@ -89,6 +92,8 @@ body {
   min-height: 0;
   margin: 0;
   z-index: 1;
+  margin-top: 64px;
+  height: calc(100vh - 64px);
 }
 
 .container {
@@ -111,6 +116,7 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 2;
+  height: 100%;
 }
 
 .content {
@@ -125,6 +131,7 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 2;
+  height: 100%;
 }
 
 .tab-btn {
@@ -135,7 +142,6 @@ body {
   .banner-bar {
     height: 48px;
     padding: 0 10px;
-    position: static;
   }
   .tab-bar {
     height: 40px;
@@ -144,6 +150,8 @@ body {
     position: static;
   }
   .main-layout {
+    margin-top: 48px;
+    height: calc(100vh - 48px);
     margin: 0;
     align-items: stretch;
     min-height: 0;
@@ -161,6 +169,7 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 2;
+    height: 100%;
   }
   .content {
     margin-right: 0;
@@ -170,6 +179,7 @@ body {
     display: flex;
     flex-direction: column;
     z-index: 2;
+    height: 100%;
   }
 }
 
@@ -300,14 +310,17 @@ body {
 
 /* --- Banner --- */
 .banner-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  z-index: 1000;
   height: 64px;
   background: var(--banner-bar-background);
   display: flex;
   align-items: center;
   padding: 0 24px;
   box-sizing: border-box;
-  position: static;
 }
 .banner-logo {
   height: 100%;
