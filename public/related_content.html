@@ -20,6 +20,18 @@
       max-width: 700px;
       color: #000000;
     }
+    /* Override fixed banner for this page so it scrolls with content */
+    .banner-bar {
+      position: static !important;
+      top: unset !important;
+      left: unset !important;
+      width: 100%;
+      z-index: 1000;
+      height: 64px;
+    }
+    body {
+      margin-top: 0 !important;
+    }
   </style>
 </head>
 <body>
