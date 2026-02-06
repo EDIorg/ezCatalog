@@ -639,3 +639,10 @@ a:hover, .explore-link:hover, .pagination a:hover, .dataset-title a:hover {
   margin-bottom: 0.7em;
   letter-spacing: 0.5px;
 }
+
+#advancedInputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
