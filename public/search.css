@@ -127,6 +127,7 @@ body {
   min-height: 0;
   background: #fff;
   margin-right: 24px;
+  margin-left: 24px;
   height: 100%;
   overflow-y: auto;
   display: flex;
