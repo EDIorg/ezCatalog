@@ -64,6 +64,7 @@ body {
   align-items: center;
   padding: 0 24px;
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.32); /* Shorter, darker shadow for all pages */
 }
 
 .tab-bar {
@@ -323,6 +324,7 @@ body {
   align-items: center;
   padding: 0 24px;
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.32); /* Shorter, darker shadow for all pages */
 }
 .banner-logo {
   height: 100%;
