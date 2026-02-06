@@ -117,6 +117,7 @@ body {
   flex-direction: column;
   z-index: 2;
   height: 100%;
+  margin-left: 24px;
 }
 
 .content {
