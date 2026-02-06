@@ -119,6 +119,7 @@ body {
   z-index: 2;
   height: 100%;
   margin-left: 24px;
+  position: relative;
 }
 
 .content {
@@ -652,4 +653,24 @@ a:hover, .explore-link:hover, .pagination a:hover, .dataset-title a:hover {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+}
+
+/* Align .filter-title left edge with .input-block inside #advancedInputs */
+.sidebar {
+  position: relative;
+}
+.filter-title {
+  /* Remove default margin if any */
+  margin-left: 0;
+  /* Match left offset of .input-blocks in #advancedInputs */
+  /* .input-blocks are centered, so align .filter-title to their left edge */
+  /* Use the same max-width as .input-block for alignment */
+  display: block;
+  width: 100%;
+  max-width: 256px;
+  box-sizing: border-box;
+  /* Center horizontally in sidebar, but left-align text */
+  margin-right: auto;
+  margin-left: auto;
+  text-align: left;
 }
