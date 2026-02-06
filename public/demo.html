@@ -104,6 +104,8 @@
      var mapTab = document.getElementById('map-tab');
      var mapContainer = document.getElementById('map-container');
      var mapInitialized = false;
+     var tabBar = document.querySelector('.tab-bar');
+
      searchTabBtn.addEventListener('click', function() {
        searchTabBtn.classList.add('active');
        mapTabBtn.classList.remove('active');
@@ -112,7 +114,10 @@
        mapTab.style.display = 'none';
        searchTabBtn.style.display = 'none';
        mapTabBtn.style.display = '';
+       // Hide tab-bar on main filter page
+       if (tabBar) tabBar.style.display = 'none';
      });
+
      mapTabBtn.addEventListener('click', function() {
        searchTabBtn.classList.remove('active');
        mapTabBtn.classList.add('active');
@@ -121,6 +126,8 @@
        mapTab.style.display = '';
        mapTabBtn.style.display = 'none';
        searchTabBtn.style.display = '';
+       // Show tab-bar on mapview page
+       if (tabBar) tabBar.style.display = '';
        if (!mapInitialized) {
          if (typeof initMap === 'function') {
            initMap('map-container');
@@ -144,6 +151,9 @@
          }
        }, 300);
      });
+
+     // On initial load, hide tab-bar (main filter page is default)
+     if (tabBar) tabBar.style.display = 'none';
    });
    </script>
    <script>
