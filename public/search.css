@@ -64,7 +64,7 @@ body {
   align-items: center;
   padding: 0 24px;
   box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.32); /* Shorter, darker shadow for all pages */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.32); /* Shorter, darker shadow for all pages */
 }
 
 .tab-bar {
@@ -128,13 +128,17 @@ body {
   min-height: 0;
   background: #fff;
   margin-right: 24px;
-  margin-left: 24px;
   height: 100%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   z-index: 2;
   height: 100%;
+}
+
+/* Only mapview content gets left margin */
+.map-content {
+  margin-left: 24px;
 }
 
 .tab-btn {
