@@ -23,9 +23,6 @@
      <img src="images/logo.png" alt="" class="banner-logo" id="banner-logo-img" />
      <span id="branding-text" class="branding-text"></span>
    </div>
-   <div class="tab-bar">
-     <button id="search-tab-btn" class="tab-btn active" style="display: none;" aria-label="View the filter search page for the current dataset results">View Filter Search Page</button>
-   </div>
    <div class="main-layout">
      <aside class="sidebar" id="search-tab">
         <h2 class="filter-title">Filter</h2>
@@ -87,6 +84,9 @@
        <div class="pagination" id="paginationBot"></div>
      </main>
      <main class="content" id="map-tab" style="display:none;">
+       <div style="padding: 10px 0; display: flex; align-items: center; gap: 1em;">
+           <button id="search-tab-btn" class="tab-btn active" style="display: none;" aria-label="View the filter search page for the current dataset results">View Filter Search Page</button>
+       </div>
        <div class="help-text" style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-bottom: 15px;">
          Select the Rectangle Tool on the left, then draw around the areas on the map you wish to filter. The dataset list will update automatically.
        </div>
