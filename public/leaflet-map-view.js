@@ -110,9 +110,13 @@ function enableMapDrawing(map, onDrawCallback) {
     // When a shape is drawn, call the callback
     map.on('draw:created', function(e) {
         drawnItems.clearLayers(); // Only one filter at a time
-        drawnItems.addLayer(e.layer);
+        // Do not add e.layer to drawnItems or map
         if (onDrawCallback) {
             onDrawCallback(e.layer.toGeoJSON());
+        }
+        // Explicitly remove the drawn rectangle from the map if present
+        if (map.hasLayer(e.layer)) {
+            map.removeLayer(e.layer);
         }
     });
 }
