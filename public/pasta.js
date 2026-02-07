@@ -105,8 +105,8 @@ function titleHtml(title) {
 }
 function imgHtml(pkgid) {
    if (!PASTA_CONFIG.showThumbnails) return "";
-   const imgBase = pkgid.split(".").slice(0,2).join(".");
-   const imgSrc = `${PASTA_CONFIG.imgBasePath}${imgBase}.png`;
+   // Use the new dynamic thumbnail URL
+   const imgSrc = window.getThumbnailUrl ? window.getThumbnailUrl(pkgid) : '';
    // Add onerror to set parent class to 'no-image' if image fails to load
    return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');"></div>`;
 }

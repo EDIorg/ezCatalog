@@ -204,17 +204,32 @@ function reformatXMLDocument(xmlDoc) {
     return xmlDoc;
 }
 
+/**
+ * Construct a PASTA thumbnail URL from a packageId string (e.g., 'scope.identifier.revision')
+ * @param {string} packageId - The full packageId string (e.g., 'edi.123.4')
+ * @returns {string} The thumbnail URL
+ */
+function getThumbnailUrl(packageId) {
+    if (!packageId) return '';
+    const parts = packageId.split('.');
+    if (parts.length !== 3) return '';
+    const [scope, identifier, revision] = parts;
+    return `https://pasta.lternet.edu/package/thumbnail/eml/${scope}/${identifier}/${revision}`;
+}
+
 // Attach functions for browser or Node.js
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     fetchDataPackageIdentifiers,
     buildRidarePayload,
     postToRidareEndpoint,
-    reformatXMLDocument
+    reformatXMLDocument,
+    getThumbnailUrl
   };
 } else if (typeof window !== 'undefined') {
   window.fetchDataPackageIdentifiers = fetchDataPackageIdentifiers;
   window.buildRidarePayload = buildRidarePayload;
   window.postToRidareEndpoint = postToRidareEndpoint;
   window.reformatXMLDocument = reformatXMLDocument;
+  window.getThumbnailUrl = getThumbnailUrl;
 }
