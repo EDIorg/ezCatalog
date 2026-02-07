@@ -277,7 +277,7 @@ body {
 }
 .dataset-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center; /* Vertically center thumbnail and info */
   margin-bottom: 38px;
 }
 .dataset-info {
