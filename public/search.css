@@ -308,6 +308,9 @@ body {
   border-radius: 6px;
   background: #eee;
 }
+.dataset-thumb-container .dataset-thumb {
+  cursor: pointer;
+}
 @media (max-width: 600px) {
   .dataset-thumb-container {
     width: 160px;
