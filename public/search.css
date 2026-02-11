@@ -681,3 +681,82 @@ a:hover, .explore-link:hover, .pagination a:hover, .dataset-title a:hover {
   margin-left: auto;
   text-align: left;
 }
+
+/* === Thumbnail Overlay for Enlarged Dataset Images === */
+.thumb-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.75);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInOverlay 0.18s;
+}
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.thumb-overlay-content {
+  position: relative;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.25);
+  padding: 18px 18px 12px 18px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.thumb-overlay-img {
+  max-width: 80vw;
+  max-height: 70vh;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  background: #eee;
+  margin-bottom: 8px;
+}
+.thumb-overlay-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: #fff;
+  border: none;
+  font-size: 2.2em;
+  color: #333;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  line-height: 36px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  transition: background 0.15s;
+  z-index: 1;
+}
+.thumb-overlay-close:hover, .thumb-overlay-close:focus {
+  background: #f2f2f2;
+  color: #e94e77;
+  outline: none;
+}
+@media (max-width: 600px) {
+  .thumb-overlay-content {
+    max-width: 98vw;
+    max-height: 98vh;
+    padding: 8px 4px 8px 4px;
+  }
+  .thumb-overlay-img {
+    max-width: 95vw;
+    max-height: 60vh;
+  }
+  .thumb-overlay-close {
+    font-size: 1.6em;
+    width: 32px;
+    height: 32px;
+    top: 4px;
+    right: 4px;
+  }
+}

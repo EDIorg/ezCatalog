@@ -105,10 +105,9 @@ function titleHtml(title) {
 }
 function imgHtml(pkgid) {
    if (!PASTA_CONFIG.showThumbnails) return "";
-   // Use the new dynamic thumbnail URL
    const imgSrc = window.getThumbnailUrl ? window.getThumbnailUrl(pkgid) : '';
-   // Add onerror to set parent class to 'no-image' if image fails to load
-   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');"></div>`;
+   // Add click handler to enlarge image
+   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');" onclick="enlargeThumbnail('${imgSrc}')"></div>`;
 }
 function exploreLink(link, title) {
    return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer' aria-label='Explore data package: ${title} in the Environmental Data Initiative repository'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
@@ -1073,3 +1072,35 @@ function loadRelatedStories(callback) {
 loadRelatedStories(function() {
     initData();
 });
+
+// Overlay logic for enlarged thumbnails
+function enlargeThumbnail(imgSrc) {
+   // Remove any existing overlay
+   var existing = document.getElementById('thumb-overlay');
+   if (existing) existing.remove();
+   // Create overlay
+   var overlay = document.createElement('div');
+   overlay.id = 'thumb-overlay';
+   overlay.className = 'thumb-overlay';
+   overlay.innerHTML = `
+     <div class='thumb-overlay-content'>
+       <button class='thumb-overlay-close' aria-label='Close enlarged image' onclick='closeThumbOverlay()'>&times;</button>
+       <img src='${imgSrc}' alt='Enlarged dataset thumbnail' class='thumb-overlay-img' />
+     </div>
+   `;
+   document.body.appendChild(overlay);
+   // Trap focus on close button
+   var closeBtn = overlay.querySelector('.thumb-overlay-close');
+   if (closeBtn) closeBtn.focus();
+   // Close on ESC
+   overlay.addEventListener('keydown', function(e) {
+     if (e.key === 'Escape') closeThumbOverlay();
+   });
+   overlay.tabIndex = -1;
+   overlay.focus();
+}
+function closeThumbOverlay() {
+   var overlay = document.getElementById('thumb-overlay');
+   if (overlay) overlay.remove();
+}
+
