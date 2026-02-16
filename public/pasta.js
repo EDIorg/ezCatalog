@@ -676,6 +676,15 @@ function filterDocsByCommonNames(docs, selectedCommonNames) {
    });
 }
 
+// Simple HTML-escaping helper to safely render text inside HTML markup
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 // Patch successCallback to store all docs and update creator, keyword, projects, location, taxon, and common name facets
 handleSuccess = function(headers, response) {
@@ -718,10 +727,10 @@ function renderActiveFilters(selected) {
   if (!container) return;
   var tags = [];
   selected.creators.forEach(function(creator) {
-    tags.push(`<span class="filter-tag">${creator} <button class="remove-filter" data-type="creator" data-value="${encodeURIComponent(creator)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(creator)} <button class="remove-filter" data-type="creator" data-value="${encodeURIComponent(creator)}" title="Remove filter">×</button></span>`);
   });
   selected.keywords.forEach(function(keyword) {
-    tags.push(`<span class="filter-tag">${keyword} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(keyword)} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
   });
   selected.projects.forEach(function(project) {
     tags.push(`<span class="filter-tag">${project} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
