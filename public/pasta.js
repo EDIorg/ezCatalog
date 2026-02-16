@@ -676,6 +676,15 @@ function filterDocsByCommonNames(docs, selectedCommonNames) {
    });
 }
 
+// Simple HTML-escaping helper to safely render text inside HTML markup
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 // Patch successCallback to store all docs and update creator, keyword, projects, location, taxon, and common name facets
 handleSuccess = function(headers, response) {
@@ -718,24 +727,24 @@ function renderActiveFilters(selected) {
   if (!container) return;
   var tags = [];
   selected.creators.forEach(function(creator) {
-    tags.push(`<span class="filter-tag">${creator} <button class="remove-filter" data-type="creator" data-value="${encodeURIComponent(creator)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(creator)} <button class="remove-filter" data-type="creator" data-value="${encodeURIComponent(creator)}" title="Remove filter">×</button></span>`);
   });
   selected.keywords.forEach(function(keyword) {
-    tags.push(`<span class="filter-tag">${keyword} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(keyword)} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
   });
   selected.projects.forEach(function(project) {
-    tags.push(`<span class="filter-tag">${project} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(project)} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
   });
   selected.locations.forEach(function(location) {
-    tags.push(`<span class="filter-tag">${location} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(location)} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
   });
   // Add tags for scientific names
   selected.taxa.forEach(function(taxon) {
-    tags.push(`<span class="filter-tag">${taxon} <button class="remove-filter" data-type="taxa" data-value="${encodeURIComponent(taxon)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(taxon)} <button class="remove-filter" data-type="taxa" data-value="${encodeURIComponent(taxon)}" title="Remove filter">×</button></span>`);
   });
   // Add tags for common names
   selected.commonNames.forEach(function(commonName) {
-    tags.push(`<span class="filter-tag">${commonName} <button class="remove-filter" data-type="commonNames" data-value="${encodeURIComponent(commonName)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(commonName)} <button class="remove-filter" data-type="commonNames" data-value="${encodeURIComponent(commonName)}" title="Remove filter">×</button></span>`);
   });
   var clearBtn = (tags.length > 0)
     ? '<span id="clear-all-filters" class="clear-all-filters-link">Clear all filters</span>'
