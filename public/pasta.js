@@ -733,18 +733,18 @@ function renderActiveFilters(selected) {
     tags.push(`<span class="filter-tag">${escapeHtml(keyword)} <button class="remove-filter" data-type="keyword" data-value="${encodeURIComponent(keyword)}" title="Remove filter">×</button></span>`);
   });
   selected.projects.forEach(function(project) {
-    tags.push(`<span class="filter-tag">${project} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(project)} <button class="remove-filter" data-type="project" data-value="${encodeURIComponent(project)}" title="Remove filter">×</button></span>`);
   });
   selected.locations.forEach(function(location) {
-    tags.push(`<span class="filter-tag">${location} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(location)} <button class="remove-filter" data-type="location" data-value="${encodeURIComponent(location)}" title="Remove filter">×</button></span>`);
   });
   // Add tags for scientific names
   selected.taxa.forEach(function(taxon) {
-    tags.push(`<span class="filter-tag">${taxon} <button class="remove-filter" data-type="taxa" data-value="${encodeURIComponent(taxon)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(taxon)} <button class="remove-filter" data-type="taxa" data-value="${encodeURIComponent(taxon)}" title="Remove filter">×</button></span>`);
   });
   // Add tags for common names
   selected.commonNames.forEach(function(commonName) {
-    tags.push(`<span class="filter-tag">${commonName} <button class="remove-filter" data-type="commonNames" data-value="${encodeURIComponent(commonName)}" title="Remove filter">×</button></span>`);
+    tags.push(`<span class="filter-tag">${escapeHtml(commonName)} <button class="remove-filter" data-type="commonNames" data-value="${encodeURIComponent(commonName)}" title="Remove filter">×</button></span>`);
   });
   var clearBtn = (tags.length > 0)
     ? '<span id="clear-all-filters" class="clear-all-filters-link">Clear all filters</span>'
