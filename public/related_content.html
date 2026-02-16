@@ -80,10 +80,13 @@ function uCSV(url, success, error) {
         console.error('[DEBUG] Test uCSV error:', error);
       });
     }
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
     function getParameterByName(name, url) {
       if (!url) url = window.location.href;
-      name = name.replace(/[\[\]]/g, "\\$&");
-      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+      var escapedName = escapeRegExp(name);
+      var regex = new RegExp("[?&]" + escapedName + "(=([^&#]*)|&|#|$)"),
         results = regex.exec(url);
       if (!results) return null;
       if (!results[2]) return "";
