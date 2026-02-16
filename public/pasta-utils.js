@@ -1,0 +1,235 @@
+const PASTA_SERVER = "https://pasta.lternet.edu/package/search/eml?";
+async function fetchDataPackageIdentifiers(scope, filter = `&fq=scope:${scope}`) {
+    const url = `${PASTA_SERVER}fl=packageid&defType=edismax${filter}&q=*&rows=1000`;
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch data packages: ${response.status}`);
+    }
+    const xmlText = await response.text();
+    const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+    // Check for parsererror in the document
+    if (doc.getElementsByTagName('parsererror').length > 0) {
+        throw new Error('Malformed XML response');
+    }
+    const packageidNodes = doc.getElementsByTagName('packageid');
+    const pids = [];
+    for (let i = 0; i < packageidNodes.length; i++) {
+        const pid = packageidNodes[i].textContent.trim();
+        if (pid) pids.push(pid);
+    }
+    return pids;
+}
+
+/**
+ * Build the JSON payload for the Ridare endpoint.
+ * @param {string[]} pids - Array of package identifiers.
+ * @returns {object} Ridare payload JSON object.
+ */
+function buildRidarePayload(pids) {
+    return {
+        pid: pids,
+        query: [
+            { creators: "//creator" }, // <-- Refactored to get all creator nodes
+            { keywords: "//keywordSet/keyword" },
+            "//creator/individualName",
+            "//contact/individualName",
+            "//associatedParty/individualName",
+            { geographicCoverage: "//geographicCoverage" },
+            { projectTitle: "//project/title" },
+            { relatedProjectTitle: "//relatedProject" },
+            "//dataset/abstract",
+            "//taxonRankValue",
+            "//commonName",
+            "//dataset/title",
+            "//dataset/pubDate"
+        ]
+    };
+}
+
+/**
+ * Send a POST request to the Ridare endpoint with the constructed payload.
+ * @param {object} payload - JSON payload for Ridare.
+ * @param {string} [url] - Optional endpoint URL (default: 'https://ridare.edirepository.org/multi').
+ * @returns {Promise<string>} - XML response from Ridare as a string.
+ */
+async function postToRidareEndpoint(payload, url = 'https://ridare.edirepository.org/multi') {
+    const fetchImpl = typeof fetch !== 'undefined' ? fetch : require('node-fetch');
+    const response = await fetchImpl(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/xml'
+        },
+        body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+        throw new Error(`Ridare POST failed: ${response.status}`);
+    }
+    return await response.text();
+}
+
+/**
+ * Reformat an XML document according to custom rules.
+ * @param {Document} xmlDoc - The XML document to reformat.
+ * @returns {Document} Reformatted XML document.
+ */
+function reformatXMLDocument(xmlDoc) {
+    // Iterate over all <document> nodes in the parent <resultset>
+    const documents = xmlDoc.getElementsByTagName('document');
+    for (let i = 0; i < documents.length; i++) {
+        const doc = documents[i];
+        // --- Personnel extraction logic ---
+        const individualNameNodes = doc.getElementsByTagName('individualName');
+        let personnelNames = [];
+        for (let j = 0; j < individualNameNodes.length; j++) {
+            const indNode = individualNameNodes[j];
+            const surName = indNode.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+            const givenNameNodes = indNode.getElementsByTagName('givenName');
+            const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
+            const person = `${surName}, ${givenNames.join(' ')}`.trim();
+            if (person && person !== ',') personnelNames.push(person);
+        }
+        if (personnelNames.length) {
+            const personnelElem = xmlDoc.createElement('personnel');
+            personnelNames.forEach(name => {
+                const personElem = xmlDoc.createElement('person');
+                personElem.textContent = name;
+                personnelElem.appendChild(personElem);
+            });
+            doc.appendChild(personnelElem);
+        }
+        // --- Authors extraction logic (unchanged) ---
+        const creatorElems = Array.from(doc.getElementsByTagName('creator'));
+        let authorNames = [];
+        creatorElems.forEach(creatorElem => {
+            const individualNameElem = creatorElem.getElementsByTagName('individualName')[0];
+            if (individualNameElem) {
+                const surName = individualNameElem.getElementsByTagName('surName')[0]?.textContent.trim() || '';
+                const givenNameNodes = individualNameElem.getElementsByTagName('givenName');
+                const givenNames = Array.from(givenNameNodes).map(gn => gn.textContent.trim());
+                const person = `${surName}, ${givenNames.join(' ')}`.trim();
+                if (person && person !== ',') authorNames.push(person);
+            } else {
+                const orgNameElem = creatorElem.getElementsByTagName('organizationName')[0];
+                if (orgNameElem) {
+                    const org = orgNameElem.textContent.trim();
+                    if (org) authorNames.push(org);
+                }
+            }
+        });
+        if (authorNames.length) {
+            const authorsElem = xmlDoc.createElement('authors');
+            authorNames.forEach(name => {
+                const authorElem = xmlDoc.createElement('author');
+                authorElem.textContent = name;
+                authorsElem.appendChild(authorElem);
+            });
+            doc.appendChild(authorsElem);
+        }
+        // --- Project Titles transformation ---
+        let projectTitles = [];
+        // Gather <title> children from <projectTitle> elements
+        const projectTitleElems = Array.from(doc.getElementsByTagName('projectTitle'));
+        projectTitleElems.forEach(ptElem => {
+            const titleElems = Array.from(ptElem.getElementsByTagName('title'));
+            titleElems.forEach(titleElem => {
+                const titleText = titleElem.textContent.trim();
+                if (titleText) projectTitles.push(titleText);
+            });
+            if (ptElem.parentNode) {
+                ptElem.parentNode.removeChild(ptElem);
+            }
+        });
+        // Gather <title> children from <relatedProjectTitle> elements
+        const relatedProjectTitleElems = Array.from(doc.getElementsByTagName('relatedProjectTitle'));
+        relatedProjectTitleElems.forEach(rptElem => {
+            const titleElems = Array.from(rptElem.getElementsByTagName('title'));
+            titleElems.forEach(titleElem => {
+                const titleText = titleElem.textContent.trim();
+                if (titleText) projectTitles.push(titleText);
+            });
+            if (rptElem.parentNode) {
+                rptElem.parentNode.removeChild(rptElem);
+            }
+        });
+        if (projectTitles.length) {
+            const projectTitlesElem = xmlDoc.createElement('projectTitles');
+            projectTitles.forEach(title => {
+                const titleElem = xmlDoc.createElement('title');
+                titleElem.textContent = title;
+                projectTitlesElem.appendChild(titleElem);
+            });
+            doc.appendChild(projectTitlesElem);
+        }
+        // --- Abstract transformation ---
+        const abstractElems = Array.from(doc.getElementsByTagName('abstract'));
+        abstractElems.forEach(absElem => {
+            // Helper to recursively extract text from element and children
+            function extractText(node) {
+                let text = '';
+                node.childNodes.forEach(child => {
+                    if (child.nodeType === 3) { // TEXT_NODE
+                        text += child.textContent.trim() + ' ';
+                    } else if (child.nodeType === 1) { // ELEMENT_NODE
+                        if (child.tagName && child.tagName.toLowerCase() === 'para') {
+                            text += extractText(child).trim() + '\n\n';
+                        } else {
+                            text += extractText(child);
+                        }
+                    }
+                });
+                return text;
+            }
+            const abstractText = extractText(absElem).trim();
+            // Remove all children and set textContent to the flattened string
+            while (absElem.firstChild) {
+                absElem.removeChild(absElem.firstChild);
+            }
+            absElem.textContent = abstractText;
+        });
+        // --- Publication Year extraction ---
+        const pubDateNode = doc.getElementsByTagName('pubDate')[0];
+        let pub_year = '';
+        if (pubDateNode) {
+            const dateStr = pubDateNode.textContent.trim();
+            const yearMatch = dateStr.match(/\d{4}/);
+            pub_year = yearMatch ? yearMatch[0] : '';
+        }
+        if (pub_year) {
+            const pubYearElem = xmlDoc.createElement('pub_year');
+            pubYearElem.textContent = pub_year;
+            doc.appendChild(pubYearElem);
+        }
+    }
+    return xmlDoc;
+}
+
+/**
+ * Construct a PASTA thumbnail URL from a packageId string (e.g., 'scope.identifier.revision')
+ * @param {string} packageId - The full packageId string (e.g., 'edi.123.4')
+ * @returns {string} The thumbnail URL
+ */
+function getThumbnailUrl(packageId) {
+    if (!packageId) return '';
+    const parts = packageId.split('.');
+    if (parts.length !== 3) return '';
+    const [scope, identifier, revision] = parts;
+    return `https://pasta.lternet.edu/package/thumbnail/eml/${scope}/${identifier}/${revision}`;
+}
+
+// Attach functions for browser or Node.js
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    fetchDataPackageIdentifiers,
+    buildRidarePayload,
+    postToRidareEndpoint,
+    reformatXMLDocument,
+    getThumbnailUrl
+  };
+} else if (typeof window !== 'undefined') {
+  window.fetchDataPackageIdentifiers = fetchDataPackageIdentifiers;
+  window.buildRidarePayload = buildRidarePayload;
+  window.postToRidareEndpoint = postToRidareEndpoint;
+  window.reformatXMLDocument = reformatXMLDocument;
+  window.getThumbnailUrl = getThumbnailUrl;
+}
