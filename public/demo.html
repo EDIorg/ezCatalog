@@ -7,82 +7,173 @@
    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
       crossorigin="anonymous">
    <link href="search.css" rel="stylesheet" type="text/css">
-   <link href="auto-complete.css" rel="stylesheet" type="text/css">
-   <script src="cors.js"></script>
    <script src="pagination.js"></script>
-   <script src="auto-complete.min.js"></script>
-   <script src="ucsv-1.2.0.min.js"></script>
-   <script src="pasta_lookup.js"></script>
+   <script src="pasta-utils.js"></script>
    <script src="pasta.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+   <script src="eml-xml-to-geojson.js"></script>
+   <script src="leaflet-map-view.js"></script>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+   <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 </head>
 
 <body>
+   <div class="banner-bar">
+     <img src="images/logo.png" alt="" class="banner-logo" id="banner-logo-img" />
+     <span id="branding-text" class="branding-text"></span>
+   </div>
    <div class="main-layout">
-     <aside class="sidebar">
+     <aside class="sidebar" id="search-tab">
+        <h2 class="filter-title">Filter</h2>
         <form id="dataSearchForm" name="dataSearchForm">
               <!-- Only new faceted search fields remain -->
               <div id="active-filters"></div>
               <div id="advancedInputs" style="margin-top: 10px">
-                 <div class="input-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <span><i class="fas fa-tag"></i><label class="group-label" for="keyword">Keyword</label></span>
-<!--                      <button type="button" id="keyword-toggle-btn" aria-label="Toggle keyword dropdown" style="background:none;border:none;cursor:pointer;font-size:1.2em;outline:none;padding:0 4px;">-->
-<!--                        <span id="keyword-arrow">&#x25BC;</span>-->
-<!--                      </button>-->
+                 <div class="input-block" id="keyword-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
+                    <div style="display: flex; align-items: center;">
+                      <i class="fas fa-tag"></i><h3 class="group-label">Keyword</h3>
                     </div>
                     <div class="keyword-dropdown" id="keyword-dropdown" style="display:none; position:absolute; right:0; top:100%; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
                  </div>
-                 <div class="input-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <span><i class="fas fa-user"></i><label class="group-label" for="creator">Creator</label></span>
-<!--                      <button type="button" id="creator-toggle-btn" aria-label="Toggle creator dropdown" style="background:none;border:none;cursor:pointer;font-size:1.2em;outline:none;padding:0 4px;">-->
-<!--                        <span id="creator-arrow">&#x25BC;</span>-->
-<!--                      </button>-->
+                 <div class="input-block" id="creator-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
+                    <div style="display: flex; align-items: center;">
+                      <i class="fas fa-user"></i><h3 class="group-label">Personnel</h3>
                     </div>
                     <div class="creator-dropdown" id="creator-dropdown" style="display:none; position:absolute; right:0; top:100%; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
                  </div>
-                 <div class="input-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <span><i class="fas fa-globe"></i><label class="group-label" for="location">Location</label></span>
-<!--                      <button type="button" id="location-toggle-btn" aria-label="Toggle location dropdown" style="background:none;border:none;cursor:pointer;font-size:1.2em;outline:none;padding:0 4px;">-->
-<!--                        <span id="location-arrow">&#x25BC;</span>-->
-<!--                      </button>-->
+                 <div class="input-block" id="location-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
+                    <div style="display: flex; align-items: center;">
+                      <i class="fas fa-globe"></i><h3 class="group-label">Location</h3>
                     </div>
                     <div class="location-dropdown" id="location-dropdown" style="display:none; position:absolute; right:0; top:100%; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
                  </div>
-                 <div class="input-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <span><i class="fas fa-building"></i><label class="group-label" for="project">Project</label></span>
-<!--                      <button type="button" id="project-toggle-btn" aria-label="Toggle project dropdown" style="background:none;border:none;cursor:pointer;font-size:1.2em;outline:none;padding:0 4px;">-->
-<!--                        <span id="project-arrow">&#x25BC;</span>-->
-<!--                      </button>-->
+                 <div class="input-block" id="project-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative;">
+                    <div style="display: flex; align-items: center;">
+                      <i class="fas fa-building"></i><h3 class="group-label">Project</h3>
                     </div>
                     <div class="project-dropdown" id="project-dropdown" style="display:none; position:absolute; right:0; top:100%; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
+                 </div>
+                 <div class="input-block" id="taxon-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative; margin-bottom: 18px;">
+                    <div style="display: flex; align-items: center;">
+                      <i class="fas fa-leaf"></i><h3 class="group-label">Scientific Name</h3>
+                    </div>
+                    <div class="taxonRankValue-dropdown" id="taxonRankValue-dropdown" style="position:static; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
+                 </div>
+                 <div class="input-block" id="commonName-block" style="display: flex; flex-direction: column; align-items: stretch; position: relative; margin-bottom: 18px;">
+                    <div style="display: flex; align-items: center;">
+                      <i class="fas fa-comment-dots"></i><h3 class="group-label">Common Name</h3>
+                    </div>
+                    <div class="commonName-dropdown" id="commonName-dropdown" style="position:static; min-width:250px; max-width:400px; width:100%; z-index:20; background:#fff; border:1px solid #ccc; box-shadow:0 2px 8px rgba(0,0,0,0.18); padding:8px 0; max-height:220px; overflow-y:auto;"></div>
                  </div>
               </div>
            </form>
      </aside>
-     <main class="content">
+     <main class="content" id="search-content">
+       <h2 class="visually-hidden">Search results</h2>
        <div class="loading" id="loading-div">
          <i class="fas fa-spinner fa-pulse fa-3x fa-fw"></i>
          <span class="sr-only">Loading...</span>
        </div>
-       <div class="resultCount" id="resultCount"></div>
-       <div class="pagination" id="paginationTop"></div>
-       <div style="display:none" id="sortDiv">
-         <label for="visibleSort">Sort by</label>
-         <select name="sort" id="visibleSort">
-           <option value="score">Relevance</option>
-           <option value="pubdate">Most recently published</option>
-           <option value="enddate">Most recent data</option>
-           <option value="titles">Title (a-z)</option>
-           <option value="responsibleParties">Creator (a-z)</option>
-         </select>
+       <div style="display: flex; align-items: center; gap: 1em; margin-bottom: 0.5em;">
+         <div class="resultCount" id="resultCount"></div>
+         <button id="map-tab-btn" class="tab-btn" aria-label="View a map of the current search results">View Map of Search Results</button>
        </div>
+       <div class="pagination" id="paginationTop"></div>
        <div id="searchResults"></div>
        <div class="pagination" id="paginationBot"></div>
      </main>
+     <main class="content map-content" id="map-tab" style="display:none;">
+       <div style="padding: 10px 0; display: flex; align-items: center; gap: 1em;">
+           <button id="search-tab-btn" class="tab-btn active" style="display: none;" aria-label="View the filter search page for the current dataset results">View Filter Search Page</button>
+       </div>
+       <div class="help-text" style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ddd; margin-bottom: 15px;">
+         Select the Rectangle Tool on the left, then draw around the areas on the map you wish to filter. The dataset list will update automatically.
+       </div>
+       <div id="map-container" style="width:100%;height:800px;" role="region" aria-label="Interactive map showing the geographic extent and origin points of datasets in this catalog."></div>
+     </main>
    </div>
+   <script>
+   // Tab switching logic
+   // Updated to toggle visibility of buttons
+   document.addEventListener('DOMContentLoaded', function() {
+     var searchTabBtn = document.getElementById('search-tab-btn');
+     var mapTabBtn = document.getElementById('map-tab-btn');
+     var searchTab = document.getElementById('search-tab');
+     var searchContent = document.getElementById('search-content');
+     var mapTab = document.getElementById('map-tab');
+     var mapContainer = document.getElementById('map-container');
+     var mapInitialized = false;
+     var tabBar = document.querySelector('.tab-bar');
+
+     searchTabBtn.addEventListener('click', function() {
+       searchTabBtn.classList.add('active');
+       mapTabBtn.classList.remove('active');
+       searchTab.style.display = '';
+       searchContent.style.display = '';
+       mapTab.style.display = 'none';
+       searchTabBtn.style.display = 'none';
+       mapTabBtn.style.display = '';
+       // Hide tab-bar on main filter page
+       if (tabBar) tabBar.style.display = 'none';
+     });
+
+     mapTabBtn.addEventListener('click', function() {
+       searchTabBtn.classList.remove('active');
+       mapTabBtn.classList.add('active');
+       searchTab.style.display = 'none';
+       searchContent.style.display = 'none';
+       mapTab.style.display = '';
+       mapTabBtn.style.display = 'none';
+       searchTabBtn.style.display = '';
+       // Show tab-bar on mapview page
+       if (tabBar) tabBar.style.display = '';
+       if (!mapInitialized) {
+         if (typeof initMap === 'function') {
+           initMap('map-container');
+           mapInitialized = true;
+           window.leafletMap = map || window.map;
+         }
+       }
+       // Call onMapTabActivated to enable drawing and logging
+       if (typeof onMapTabActivated === 'function') {
+         onMapTabActivated();
+       }
+       // Trigger facet filter and map update when map tab is opened
+       if (typeof processFacetChange === 'function') {
+         processFacetChange();
+       }
+       setTimeout(function() {
+         if (window.leafletMap && typeof window.leafletMap.invalidateSize === 'function') {
+           window.leafletMap.invalidateSize();
+         } else if (window.map && typeof window.map.invalidateSize === 'function') {
+           window.map.invalidateSize();
+         }
+       }, 300);
+     });
+
+     // On initial load, hide tab-bar (main filter page is default)
+     if (tabBar) tabBar.style.display = 'none';
+   });
+   </script>
+   <script>
+  // Ensure the "Go to Map" button visibility is controlled by PASTA_CONFIG
+  document.addEventListener('DOMContentLoaded', function() {
+    const mapTabBtn = document.getElementById('map-tab-btn');
+    if (typeof PASTA_CONFIG !== 'undefined' && PASTA_CONFIG.hideMapView && mapTabBtn) {
+      mapTabBtn.style.display = 'none';
+    }
+  });
+</script>
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+     // Set logo alt text from PASTA_CONFIG if available
+     var logoImg = document.getElementById('banner-logo-img');
+     if (logoImg && typeof getLogoAltText === 'function') {
+       logoImg.alt = getLogoAltText();
+     }
+   });
+   </script>
 </body>
 
 
