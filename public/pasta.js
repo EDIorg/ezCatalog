@@ -277,10 +277,20 @@ function renderFacetDropdown(items, selected, counts, className, searchTerm, dro
   const filteredItems = items.filter(item =>
     item.toLowerCase().includes((searchTerm || '').toLowerCase())
   );
+  // Escape user-controlled search term for safe insertion into HTML attribute
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  const safeSearchTerm = escapeHtml(searchTerm || '');
   // Search box with icon, rectangular borders
   const searchBox = `
     <div class="facet-search-bar" style="position:sticky;top:0;z-index:1;background:#f7f8fa;">
-      <input type="text" class="facet-search" placeholder="Select..." value="${searchTerm || ''}"
+      <input type="text" class="facet-search" placeholder="Select..." value="${safeSearchTerm}"
         style="width:95%;padding:7px 10px;border:1.5px solid #c2c7d0;border-radius:0;background:#f7f8fa;box-shadow:0 1px 2px rgba(0,0,0,0.03);font-size:1em;transition:border 0.2s;outline:none;"
         data-dropdown-id="${dropdownId}"
         onfocus="this.style.borderColor='#4a90e2'" onblur="this.style.borderColor='#c2c7d0'"
