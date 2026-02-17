@@ -27,7 +27,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add ./public/pasta.js
-          git add ./harvester/pasta_harvester.mjs
           git add .README.md
           git diff-index --quiet HEAD || git commit -m "Configure ezCatalog"
       # Pushes the changes to the repository
