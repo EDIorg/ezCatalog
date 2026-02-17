@@ -85,7 +85,8 @@ const PASTA_CONFIG = {
  */
 function getParameterByName(name, url) {
    url = url || window.location.href;
-   name = name.replace(/[\[\]]/g, "\\$&");
+   // Escape all RegExp metacharacters, including backslash, in the parameter name
+   name = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
    const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
    const results = regex.exec(url);
    if (!results) return null;
