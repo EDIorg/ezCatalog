@@ -23,7 +23,8 @@ function makePageLink(currentUrl, currentStart, start, linkText) {
          tagStart = '<a class="active" href="';
       }
    }
-   var link = tagStart + uri + '">' + linkText + '</a>';
+   var safeUri = escapeAttributeUrl(uri);
+   var link = tagStart + safeUri + '">' + linkText + '</a>';
    return link;
 }
 
@@ -79,6 +80,14 @@ function escapeHtml(unsafe) {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+}
+
+
+function escapeAttributeUrl(url) {
+   // Encode the URL for safe use inside an HTML attribute value.
+   // encodeURI keeps valid URL characters but percent-encodes others;
+   // we additionally encode quotes to prevent breaking out of the attribute.
+   return encodeURI(url).replace(/"/g, "%22").replace(/'/g, "%27");
 }
 
 
