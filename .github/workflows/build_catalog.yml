@@ -3,8 +3,6 @@
 name: Build catalog
 
 on:
-  push:
-    branches: main
   workflow_dispatch:
 
 jobs:
@@ -12,12 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      # Uses Python to construct the query and parameterize JavaScripts
-      - name: Setup Python 3.8
-        uses: actions/setup-python@v3
+        uses: actions/checkout@v4
         with:
-          python-version: "3.8"
+          fetch-depth: 0
+      # Uses Python to construct the query and parameterize JavaScripts
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
       - name: Construct query and add to JavaScript
         run: |
           python main.py
@@ -34,5 +34,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
-          
+          branch: ${{ github.ref_name }}
