@@ -1089,13 +1089,6 @@ function loadRelatedStories(callback) {
         });
 }
 
-// Preload related stories and then initialize the catalog
-if (typeof module === 'undefined' || !module.exports) {
-    loadRelatedStories(function() {
-        initData();
-    });
-}
-
 // Overlay logic for enlarged thumbnails
 function enlargeThumbnail(imgSrc) {
    // Remove any existing overlay
