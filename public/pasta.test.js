@@ -105,3 +105,61 @@ describe('UI/Event Logic', () => {
     boxes.forEach(box => expect(box.checked).toBe(false));
   });
 });
+
+describe('Catalog initialization', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div class="banner-bar"></div>
+      <div id="loading-div"></div>
+      <div id="searchResults"></div>
+      <div id="resultCount"></div>
+      <span id="branding-text"></span>
+      <div id="active-filters"></div>
+      <div id="creator-dropdown"></div>
+      <div id="keyword-dropdown"></div>
+      <div id="project-dropdown"></div>
+      <div id="location-dropdown"></div>
+      <div id="taxonRankValue-dropdown"></div>
+      <div id="commonName-dropdown"></div>
+      <div id="creator-block"></div>
+      <div id="keyword-block"></div>
+      <div id="project-block"></div>
+      <div id="location-block"></div>
+      <div id="taxon-block"></div>
+      <div id="commonName-block"></div>
+    `;
+    global.showResultCount = jest.fn();
+    global.renderResults = jest.fn();
+    global.fetch = jest.fn((url) => {
+      if (url === 'related_content.csv') {
+        return Promise.resolve({
+          ok: true,
+          text: async () => 'package_id,story\ncos-spu.1,Story\n'
+        });
+      }
+      if (String(url).includes('package/search/eml')) {
+        return Promise.resolve({
+          ok: true,
+          text: async () => `<?xml version="1.0"?><resultset><packageid>cos-spu.1.1</packageid></resultset>`
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        text: async () => `<?xml version="1.0"?><resultset></resultset>`
+      });
+    });
+  });
+
+  afterEach(() => {
+    delete global.fetch;
+    delete global.showResultCount;
+    delete global.renderResults;
+  });
+
+  it('fetches related stories once on DOMContentLoaded', async () => {
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await Promise.resolve();
+    const relatedFetches = global.fetch.mock.calls.filter(([url]) => url === 'related_content.csv');
+    expect(relatedFetches).toHaveLength(1);
+  });
+});
