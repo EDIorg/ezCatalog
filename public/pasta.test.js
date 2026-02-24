@@ -1,7 +1,19 @@
 // pasta.test.js
 // Jest test scaffolding for pasta.js
 
-const { fetchDataPackageIdentifiers } = require('./pasta');
+jest.mock('./leaflet-map-view', () => ({
+  renderMapData: jest.fn(),
+  initMap: jest.fn(),
+  enableMapDrawing: jest.fn()
+}));
+
+jest.mock('./geojson-to-xml', () => ({
+  geojsonToMapFilterXML: jest.fn()
+}));
+
+jest.mock('./eml-xml-to-geojson', () => jest.fn());
+
+const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents } = require('./pasta');
 
 describe('fetchDataPackageIdentifiers', () => {
   it('should fetch identifiers for a valid scope', async () => {
@@ -36,44 +48,60 @@ describe('fetchDataPackageIdentifiers', () => {
       ok: true,
       text: async () => `<resultset><packageid>cos-spu.10.1<packageid>cos-spu.12.1</resultset>` // missing closing tag for first packageid
     });
-    await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow();
+    await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow('Malformed XML response');
     expect(global.fetch).toHaveBeenCalled();
   });
 });
 
-// UI/Event logic test scaffolding
-// Use jsdom to simulate DOM for event handler tests
-
 describe('UI/Event Logic', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <button id="clear-all-filters"></button>
+      <div id="active-filters"></div>
+      <div id="creator-dropdown"></div>
+      <div id="keyword-dropdown"></div>
+      <div id="project-dropdown"></div>
+      <div id="location-dropdown"></div>
+      <div id="taxonRankValue-dropdown"></div>
+      <div id="commonName-dropdown"></div>
+      <div id="creator-block"></div>
+      <div id="keyword-block"></div>
+      <div id="project-block"></div>
+      <div id="location-block"></div>
+      <div id="taxon-block"></div>
+      <div id="commonName-block"></div>
+      <div id="searchResults"></div>
+      <div id="resultCount"></div>
       <span id="branding-text"></span>
+      <span id="clear-all-filters"></span>
+      <input type="checkbox" class="creator-checkbox" value="Alice" checked />
+      <input type="checkbox" class="keyword-checkbox" value="water" checked />
+      <input type="checkbox" class="project-checkbox" value="project" checked />
+      <input type="checkbox" class="location-checkbox" value="Seattle" checked />
+      <input type="checkbox" class="taxon-checkbox" value="Salmo" checked />
+      <input type="checkbox" class="commonname-checkbox" value="Salmon" checked />
     `;
+    global.showResultCount = jest.fn();
+    global.showPageLinks = jest.fn();
+    global.renderResults = jest.fn();
   });
 
-  it('should set branding text when called directly', () => {
-    require('./pasta');
-    const { setBrandingText } = require('./pasta');
-    setBrandingText();
-    expect(document.getElementById('branding-text').textContent).toBe('Seattle Public Utilities Data Catalog');
+  afterEach(() => {
+    delete global.showResultCount;
+    delete global.showPageLinks;
+    delete global.renderResults;
   });
 
-  // Add more tests for event handlers and DOM updates as needed
-});
-
-describe('UI: setBrandingText', () => {
-  beforeEach(() => {
-    document.body.innerHTML = `<span id="branding-text"></span>`;
-  });
   it('sets the branding text in the DOM', () => {
-    const { setBrandingText } = require('./pasta');
     setBrandingText();
-    expect(document.getElementById('branding-text').textContent).toBe('Seattle Public Utilities Data Catalog');
+    const heading = document.querySelector('#branding-text h1');
+    expect(heading).not.toBeNull();
+    expect(heading.textContent).toBe('Seattle Public Utilities Data Catalog');
+  });
+
+  it('clears all filters when clear-all-filters is clicked', () => {
+    bindFilterEvents();
+    document.getElementById('clear-all-filters').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const boxes = document.querySelectorAll('input[type="checkbox"]');
+    boxes.forEach(box => expect(box.checked).toBe(false));
   });
 });
-
-// Instructions:
-// - Mock network requests for fetchDataPackageIdentifiers.
-// - Expand UI tests to cover event handlers and DOM updates.
-// - Use Jest and jsdom for DOM-related tests.

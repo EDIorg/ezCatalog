@@ -1,5 +1,7 @@
 const { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint} = require('./pasta-utils');
 
+const runRealRequests = process.env.RUN_REAL_REQUESTS === 'true';
+
 // Helper for mock fetch responses
 function mockFetchResponse(xml, ok = true, status = 200) {
     fetch.mockResolvedValue({ ok, status, text: async () => xml });
@@ -34,7 +36,9 @@ describe('fetchDataPackageIdentifiers', () => {
     });
 });
 
-describe('fetchDataPackageIdentifiers (real request)', () => {
+const describeRealRequests = runRealRequests ? describe : describe.skip;
+
+describeRealRequests('fetchDataPackageIdentifiers (real request)', () => {
     it('fetches real pids from the PASTA endpoint', async () => {
         global.fetch = require('node-fetch');
         const pids = await fetchDataPackageIdentifiers('cos-spu');
@@ -108,7 +112,7 @@ describe('postToRidareEndpoint', () => {
     });
 });
 
-describe('postToRidareEndpoint (real request)', () => {
+describeRealRequests('postToRidareEndpoint (real request)', () => {
     it('sends real POST request and receives XML', async () => {
         global.fetch = require('node-fetch');
         const payload = { pid: ['cos-spu.13.3'], query: ['//creator/individualName'] };
