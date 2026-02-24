@@ -1059,7 +1059,8 @@ if (typeof module !== 'undefined' && module.exports) {
         postToRidareEndpoint,
         reformatXMLDocument,
         initData,
-        setBrandingText
+        setBrandingText,
+        bindFilterEvents
     };
 }
 
@@ -1089,9 +1090,11 @@ function loadRelatedStories(callback) {
 }
 
 // Preload related stories and then initialize the catalog
-loadRelatedStories(function() {
-    initData();
-});
+if (typeof module === 'undefined' || !module.exports) {
+    loadRelatedStories(function() {
+        initData();
+    });
+}
 
 // Overlay logic for enlarged thumbnails
 function enlargeThumbnail(imgSrc) {
@@ -1123,4 +1126,3 @@ function closeThumbOverlay() {
    var overlay = document.getElementById('thumb-overlay');
    if (overlay) overlay.remove();
 }
-

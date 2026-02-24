@@ -122,3 +122,11 @@ function showResultCount(query, total, limitPerPage, currentStartIndex, domEleme
    }
    element.innerHTML = found + forQuery + showing;
 }
+
+if (typeof module !== "undefined" && module.exports) {
+   module.exports = {
+      updateQueryStringParameter,
+      showPageLinks,
+      showResultCount
+   };
+}
