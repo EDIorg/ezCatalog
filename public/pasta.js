@@ -237,8 +237,8 @@ function updateElementHtml(elId, innerHtml) {
       el.innerHTML = innerHtml;
 }
 
-// Function to call if CORS request is successful
-function handleSuccess(headers, response) {
+// Handler for CORS responses with <document> nodes
+function handleDocumentSuccess(xmlDoc) {
    function makeCsvLink(count) {
       if (!count) return "";
       var html = '<a href="" onclick="return downloadCsv(' + count + ');">' +
@@ -247,8 +247,6 @@ function handleSuccess(headers, response) {
    }
 
    // Write results to page
-   var parser = new DOMParser();
-   var xmlDoc = parser.parseFromString(response, "text/xml");
    var docs = xmlDoc.getElementsByTagName("document");
    buildCitationsFromCite(docs);
    var count = parseInt(xmlDoc.getElementsByTagName("resultset")[0].getAttribute("numFound"));
@@ -268,6 +266,17 @@ function handleSuccess(headers, response) {
    var query = getParameterByName("q");
    // Moved showResultCount here to ensure it runs after all CITE calls are complete
    showResultCount(query, count, limit, currentStart, PASTA_CONFIG["countElementId"]);
+}
+
+// Function to call if CORS request is successful
+function handleSuccess(headers, response) {
+   var parser = new DOMParser();
+   var xmlDoc = parser.parseFromString(response, "text/xml");
+   if (xmlDoc.getElementsByTagName("doc").length) {
+      handleDocSuccess(xmlDoc);
+      return;
+   }
+   handleDocumentSuccess(xmlDoc);
 }
 
 // Function to call if CORS request fails
@@ -685,10 +694,8 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-// Patch successCallback to store all docs and update creator, keyword, projects, location, taxon, and common name facets
-handleSuccess = function(headers, response) {
-   var parser = new DOMParser();
-   var xmlDoc = parser.parseFromString(response, "text/xml");
+// Handler for CORS responses with <doc> nodes to update facets
+function handleDocSuccess(xmlDoc) {
    var docs = Array.from(xmlDoc.getElementsByTagName("doc"));
    var selectedCreators = getSelectedCreators();
    var selectedKeywords = getSelectedKeywords();
@@ -718,7 +725,7 @@ handleSuccess = function(headers, response) {
      taxa: selectedTaxa,
      commonNames: selectedCommonNames
    });
-};
+}
 
 // Update renderActiveFilters to include tags for selected scientific and common names
 function renderActiveFilters(selected) {
@@ -1060,7 +1067,8 @@ if (typeof module !== 'undefined' && module.exports) {
         setBrandingText,
         bindFilterEvents,
         buildHtml,
-        renderFacetDropdown
+        renderFacetDropdown,
+        handleSuccess
     };
 }
 

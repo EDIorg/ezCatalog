@@ -13,7 +13,7 @@ jest.mock('./geojson-to-xml', () => ({
 
 jest.mock('./eml-xml-to-geojson', () => jest.fn());
 
-const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents, buildHtml, renderFacetDropdown } = require('./pasta');
+const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents, buildHtml, renderFacetDropdown, handleSuccess } = require('./pasta');
 
 describe('fetchDataPackageIdentifiers', () => {
   it('should fetch identifiers for a valid scope', async () => {
@@ -132,6 +132,56 @@ describe('HTML escaping', () => {
     const html = renderFacetDropdown(items, [], counts, 'keyword-checkbox', '', 'keyword-dropdown');
     expect(html).toContain('&lt;b&gt;bad&lt;/b&gt;');
     expect(html).toContain('value="&lt;b&gt;bad&lt;/b&gt;"');
+  });
+});
+
+describe('handleSuccess response routing', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div id="searchResults"></div>
+      <div id="resultCount"></div>
+      <div id="active-filters"></div>
+      <div id="creator-dropdown"></div>
+      <div id="keyword-dropdown"></div>
+      <div id="project-dropdown"></div>
+      <div id="location-dropdown"></div>
+      <div id="taxonRankValue-dropdown"></div>
+      <div id="commonName-dropdown"></div>
+      <div id="creator-block"></div>
+      <div id="keyword-block"></div>
+      <div id="project-block"></div>
+      <div id="location-block"></div>
+      <div id="taxon-block"></div>
+      <div id="commonName-block"></div>
+    `;
+    global.showResultCount = jest.fn();
+    global.renderResults = jest.fn();
+  });
+
+  afterEach(() => {
+    delete global.showResultCount;
+    delete global.renderResults;
+  });
+
+  it('routes <doc> responses to the facet handler', () => {
+    const response = `<?xml version="1.0"?><resultset><doc><keyword>water</keyword></doc></resultset>`;
+    handleSuccess({}, response);
+    expect(global.renderResults).toHaveBeenCalled();
+  });
+
+  it('routes <document> responses to the citation handler', () => {
+    const response = `<?xml version="1.0"?>
+      <resultset numFound="1">
+        <document>
+          <packageid>edi.1.1</packageid>
+          <title>Test Dataset</title>
+          <authors><author>Tester</author></authors>
+          <abstract>Sample</abstract>
+        </document>
+      </resultset>`;
+    handleSuccess({}, response);
+    expect(global.renderResults).not.toHaveBeenCalled();
+    expect(document.getElementById('searchResults').innerHTML).toContain('Test Dataset');
   });
 });
 
