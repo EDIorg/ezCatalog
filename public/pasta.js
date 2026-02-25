@@ -96,22 +96,26 @@ function getParameterByName(name, url) {
 
 // --- HTML fragment helpers ---
 function authorHtml(authors, date) {
-   return `<div class='dataset-author'>${authors}${date}</div>`;
+   return `<div class='dataset-author'>${escapeHtml(authors)}${escapeHtml(date)}</div>`;
 }
 function abstractHtml(abstract) {
-   return `<div class='dataset-abstract'>${abstract}</div>`;
+   return `<div class='dataset-abstract'>${escapeHtml(abstract)}</div>`;
 }
 function titleHtml(title) {
-   return `<div class='dataset-title'><h3>${title}</h3></div>`;
+   return `<div class='dataset-title'><h3>${escapeHtml(title)}</h3></div>`;
 }
 function imgHtml(pkgid) {
    if (!PASTA_CONFIG.showThumbnails) return "";
    const imgSrc = window.getThumbnailUrl ? window.getThumbnailUrl(pkgid) : '';
+   const safeImgSrc = escapeHtml(imgSrc);
+   const encodedImgSrc = encodeURIComponent(imgSrc || '');
    // Add click handler to enlarge image
-   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${imgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');" onclick="enlargeThumbnail('${imgSrc}')"></div>`;
+   return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${safeImgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');" onclick="enlargeThumbnail(decodeURIComponent('${encodedImgSrc}'))"></div>`;
 }
 function exploreLink(link, title) {
-   return `<a class='explore-link' href='${link}' target='_blank' rel='noopener noreferrer' aria-label='Explore data package: ${title} in the Environmental Data Initiative repository'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+   const safeLink = escapeHtml(link);
+   const safeTitle = escapeHtml(title);
+   return `<a class='explore-link' href='${safeLink}' target='_blank' rel='noopener noreferrer' aria-label='Explore data package: ${safeTitle} in the Environmental Data Initiative repository'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 function relatedStoriesLink(pkgid, title) {
    if (!PASTA_CONFIG.showUserStoriesLink) return "";
@@ -123,8 +127,10 @@ function relatedStoriesLink(pkgid, title) {
 
    if (!existsInCsv) return "";
 
+   const encodedPkgid = encodeURIComponent(pkgidNoRev);
    const encodedTitle = encodeURIComponent(title);
-   return `<a class='explore-link' href='related_content.html?package_id=${pkgidNoRev}&title=${encodedTitle}' style='margin-left:18px;' aria-label='View related content for data package: ${title}'>Related Content <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+   const safeTitle = escapeHtml(title);
+   return `<a class='explore-link' href='related_content.html?package_id=${encodedPkgid}&title=${encodedTitle}' style='margin-left:18px;' aria-label='View related content for data package: ${safeTitle}'>Related Content <i class='fas fa-book-open' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 
 /**
@@ -278,15 +284,6 @@ function renderFacetDropdown(items, selected, counts, className, searchTerm, dro
   const filteredItems = items.filter(item =>
     item.toLowerCase().includes((searchTerm || '').toLowerCase())
   );
-  // Escape user-controlled search term for safe insertion into HTML attribute
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
   const safeSearchTerm = escapeHtml(searchTerm || '');
   // Search box with icon, rectangular borders
   const searchBox = `
@@ -302,8 +299,9 @@ function renderFacetDropdown(items, selected, counts, className, searchTerm, dro
   const checkboxes = filteredItems.map(function(item) {
     const checked = selected.includes(item) ? 'checked' : '';
     const count = counts[item] || 0;
+    const safeItem = escapeHtml(item);
     return `<label style="display:flex;align-items:center;padding:2px 12px 2px 8px;cursor:pointer;font-size:0.98em;">
-      <input type="checkbox" class="${className}" value="${item.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" ${checked} style="margin-right:8px;">${item} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
+      <input type="checkbox" class="${className}" value="${safeItem}" ${checked} style="margin-right:8px;">${safeItem} <span style='color:#888;font-size:0.95em;margin-left:6px;'">(${count})</span>
     </label>`;
   }).join('');
   return searchBox + checkboxes;
@@ -1060,7 +1058,9 @@ if (typeof module !== 'undefined' && module.exports) {
         reformatXMLDocument,
         initData,
         setBrandingText,
-        bindFilterEvents
+        bindFilterEvents,
+        buildHtml,
+        renderFacetDropdown
     };
 }
 
@@ -1098,10 +1098,11 @@ function enlargeThumbnail(imgSrc) {
    var overlay = document.createElement('div');
    overlay.id = 'thumb-overlay';
    overlay.className = 'thumb-overlay';
+   var safeImgSrc = escapeHtml(imgSrc);
    overlay.innerHTML = `
      <div class='thumb-overlay-content'>
        <button class='thumb-overlay-close' aria-label='Close enlarged image' onclick='closeThumbOverlay()'>&times;</button>
-       <img src='${imgSrc}' alt='Enlarged dataset thumbnail' class='thumb-overlay-img' />
+       <img src='${safeImgSrc}' alt='Enlarged dataset thumbnail' class='thumb-overlay-img' />
      </div>
    `;
    document.body.appendChild(overlay);

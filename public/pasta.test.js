@@ -13,7 +13,7 @@ jest.mock('./geojson-to-xml', () => ({
 
 jest.mock('./eml-xml-to-geojson', () => jest.fn());
 
-const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents } = require('./pasta');
+const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents, buildHtml, renderFacetDropdown } = require('./pasta');
 
 describe('fetchDataPackageIdentifiers', () => {
   it('should fetch identifiers for a valid scope', async () => {
@@ -103,6 +103,35 @@ describe('UI/Event Logic', () => {
     document.getElementById('clear-all-filters').dispatchEvent(new MouseEvent('click', { bubbles: true }));
     const boxes = document.querySelectorAll('input[type="checkbox"]');
     boxes.forEach(box => expect(box.checked).toBe(false));
+  });
+});
+
+describe('HTML escaping', () => {
+  it('escapes metadata content in buildHtml', () => {
+    window.relatedStories = [];
+    const citations = {
+      0: {
+        pid: 'pkg.1.1',
+        title: '<script>alert(1)</script>',
+        authors: 'Evil & Co',
+        pub_year: '2020',
+        doi: ''
+      }
+    };
+    const html = buildHtml(citations, ['An <b>abstract</b> & more']);
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(html).toContain('Evil &amp; Co');
+    expect(html).toContain('An &lt;b&gt;abstract&lt;/b&gt; &amp; more');
+    expect(html).not.toContain('<script>alert(1)</script>');
+  });
+
+  it('escapes facet values in renderFacetDropdown', () => {
+    const items = ['<b>bad</b>'];
+    const counts = {};
+    counts['<b>bad</b>'] = 2;
+    const html = renderFacetDropdown(items, [], counts, 'keyword-checkbox', '', 'keyword-dropdown');
+    expect(html).toContain('&lt;b&gt;bad&lt;/b&gt;');
+    expect(html).toContain('value="&lt;b&gt;bad&lt;/b&gt;"');
   });
 });
 
