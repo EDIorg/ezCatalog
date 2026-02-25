@@ -77,6 +77,11 @@ const PASTA_CONFIG = {
    // ----------------------------------------------------------------------------------------------------------------
 };
 
+const PASTA_STATE = {
+   relatedStories: [],
+   geojson: null
+};
+
 /**
  * Get URL arguments by name
  * @param {string} name
@@ -121,7 +126,7 @@ function relatedStoriesLink(pkgid, title) {
    if (!PASTA_CONFIG.showUserStoriesLink) return "";
 
    // Check if the dataset exists in related_stories.csv
-   const relatedStories = window.relatedStories || [];
+   const relatedStories = PASTA_STATE.relatedStories || [];
    const pkgidNoRev = pkgid.split('.').slice(0,2).join('.');
    const existsInCsv = relatedStories.includes(pkgidNoRev);
 
@@ -842,7 +847,7 @@ function processFacetChange() {
       tempXmlDoc.documentElement.appendChild(doc.cloneNode(true));
     });
     var geojson = emlXmlToGeoJSON(tempXmlDoc);
-    window.geojson = geojson; // Expose for debugging
+    PASTA_STATE.geojson = geojson;
     renderMapData(geojson);
   }
 }
@@ -851,10 +856,10 @@ function processFacetChange() {
 function onMapTabActivated() {
     enableMapDrawing(window.leafletMap, function(drawnGeojson) {
         var featuresInShape = [];
-        if (window.geojson && window.geojson.features) {
+        if (PASTA_STATE.geojson && PASTA_STATE.geojson.features) {
             var drawnLayer = L.geoJSON(drawnGeojson);
             var drawnBounds = drawnLayer.getBounds();
-            window.geojson.features.forEach(function(feature) {
+            PASTA_STATE.geojson.features.forEach(function(feature) {
                 var featureLayer = L.geoJSON(feature);
                 var featureBounds = featureLayer.getBounds();
                 if (drawnBounds.contains(featureBounds)) {
@@ -1068,7 +1073,8 @@ if (typeof module !== 'undefined' && module.exports) {
         bindFilterEvents,
         buildHtml,
         renderFacetDropdown,
-        handleSuccess
+        handleSuccess,
+        pastaState: PASTA_STATE
     };
 }
 
@@ -1088,7 +1094,7 @@ function loadRelatedStories(callback) {
                     }
                 }
             });
-            window.relatedStories = Array.from(relatedStories); // Store as array in global scope
+            PASTA_STATE.relatedStories = Array.from(relatedStories);
             if (callback) callback();
         })
         .catch(error => {

@@ -13,7 +13,7 @@ jest.mock('./geojson-to-xml', () => ({
 
 jest.mock('./eml-xml-to-geojson', () => jest.fn());
 
-const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents, buildHtml, renderFacetDropdown, handleSuccess } = require('./pasta');
+const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents, buildHtml, renderFacetDropdown, handleSuccess, pastaState } = require('./pasta');
 
 describe('fetchDataPackageIdentifiers', () => {
   it('should fetch identifiers for a valid scope', async () => {
@@ -108,7 +108,7 @@ describe('UI/Event Logic', () => {
 
 describe('HTML escaping', () => {
   it('escapes metadata content in buildHtml', () => {
-    window.relatedStories = [];
+    pastaState.relatedStories = [];
     const citations = {
       0: {
         pid: 'pkg.1.1',
@@ -123,6 +123,22 @@ describe('HTML escaping', () => {
     expect(html).toContain('Evil &amp; Co');
     expect(html).toContain('An &lt;b&gt;abstract&lt;/b&gt; &amp; more');
     expect(html).not.toContain('<script>alert(1)</script>');
+  });
+
+  it('uses related stories state to render related content links', () => {
+    pastaState.relatedStories = ['pkg.1'];
+    const citations = {
+      0: {
+        pid: 'pkg.1.1',
+        title: 'Related Dataset',
+        authors: 'Tester',
+        pub_year: '2020',
+        doi: ''
+      }
+    };
+    const html = buildHtml(citations, ['Abstract']);
+    expect(html).toContain('related_content.html?package_id=pkg.1');
+    pastaState.relatedStories = [];
   });
 
   it('escapes facet values in renderFacetDropdown', () => {
