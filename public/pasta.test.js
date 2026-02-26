@@ -106,6 +106,102 @@ describe('UI/Event Logic', () => {
   });
 });
 
+describe('Facet filtering workflows', () => {
+  const xssPayload = '<script>alert(1)</script>';
+  const facetResponse = `<?xml version="1.0"?>
+    <resultset>
+      <doc>
+        <personnel><person>Alice</person></personnel>
+        <keyword>Water</keyword>
+        <projectTitles><title>Project A</title></projectTitles>
+        <geographicCoverage><geographicDescription>Seattle</geographicDescription></geographicCoverage>
+        <taxonRankValue>Salmo</taxonRankValue>
+        <commonName>Salmon</commonName>
+      </doc>
+      <doc>
+        <personnel><person>Bob</person></personnel>
+        <keyword>Soil</keyword>
+        <projectTitles><title>Project B</title></projectTitles>
+        <geographicCoverage><geographicDescription>Portland</geographicDescription></geographicCoverage>
+        <taxonRankValue>Oncorhynchus</taxonRankValue>
+        <commonName>Trout</commonName>
+      </doc>
+    </resultset>`;
+  const unsafeKeywordResponse = `<?xml version="1.0"?>
+    <resultset>
+      <doc>
+        <keyword>${xssPayload}</keyword>
+      </doc>
+    </resultset>`;
+
+  beforeEach(() => {
+    document.body.innerHTML = `
+      <div id="active-filters"></div>
+      <div id="creator-dropdown"><input type="checkbox" class="creator-checkbox" value="Alice" checked /></div>
+      <div id="keyword-dropdown"><input type="checkbox" class="keyword-checkbox" value="Water" checked /></div>
+      <div id="project-dropdown"><input type="checkbox" class="project-checkbox" value="Project A" checked /></div>
+      <div id="location-dropdown"><input type="checkbox" class="location-checkbox" value="Seattle" checked /></div>
+      <div id="taxonRankValue-dropdown"><input type="checkbox" class="taxon-checkbox" value="Salmo" checked /></div>
+      <div id="commonName-dropdown"><input type="checkbox" class="commonname-checkbox" value="Salmon" checked /></div>
+      <div id="creator-block"></div>
+      <div id="keyword-block"></div>
+      <div id="project-block"></div>
+      <div id="location-block"></div>
+      <div id="taxon-block"></div>
+      <div id="commonName-block"></div>
+    `;
+    global.renderResults = jest.fn();
+    global.showResultCount = jest.fn();
+  });
+
+  afterEach(() => {
+    delete global.renderResults;
+    delete global.showResultCount;
+  });
+
+  it('filters docs based on selected facets', () => {
+    handleSuccess({}, facetResponse);
+    expect(global.renderResults).toHaveBeenCalled();
+    const filteredDocs = global.renderResults.mock.calls[0][0];
+    expect(filteredDocs).toHaveLength(1);
+    expect(filteredDocs[0].getElementsByTagName('keyword')[0].textContent).toBe('Water');
+  });
+
+  it('renders active filter tags with a clear-all link', () => {
+    handleSuccess({}, facetResponse);
+    const activeFilters = document.getElementById('active-filters');
+    expect(activeFilters.innerHTML).toContain('Alice');
+    expect(activeFilters.innerHTML).toContain('data-type="creator"');
+    expect(activeFilters.innerHTML).toContain('clear-all-filters');
+  });
+
+  it('clears all filters from the active filter link', () => {
+    handleSuccess({}, facetResponse);
+    bindFilterEvents();
+    const clearAllLink = document.getElementById('clear-all-filters');
+    expect(clearAllLink).not.toBeNull();
+    clearAllLink.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.querySelectorAll('input[type="checkbox"]').forEach(box => {
+      expect(box.checked).toBe(false);
+    });
+  });
+
+  it('escapes active filter values when rendering tags', () => {
+    const keywordDropdown = document.getElementById('keyword-dropdown');
+    keywordDropdown.innerHTML = '';
+    const keywordInput = document.createElement('input');
+    keywordInput.type = 'checkbox';
+    keywordInput.className = 'keyword-checkbox';
+    keywordInput.value = xssPayload;
+    keywordInput.checked = true;
+    keywordDropdown.appendChild(keywordInput);
+    handleSuccess({}, unsafeKeywordResponse);
+    const activeFilters = document.getElementById('active-filters');
+    expect(activeFilters.innerHTML).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(activeFilters.innerHTML).not.toContain('<script>alert(1)</script>');
+  });
+});
+
 describe('HTML escaping', () => {
   it('escapes metadata content in buildHtml', () => {
     pastaState.relatedStories = [];
@@ -148,6 +244,16 @@ describe('HTML escaping', () => {
     const html = renderFacetDropdown(items, [], counts, 'keyword-checkbox', '', 'keyword-dropdown');
     expect(html).toContain('&lt;b&gt;bad&lt;/b&gt;');
     expect(html).toContain('value="&lt;b&gt;bad&lt;/b&gt;"');
+  });
+
+  it('filters facet dropdown items by the search term', () => {
+    const items = ['Alpha', 'Beta'];
+    const counts = { Alpha: 1, Beta: 1 };
+    const html = renderFacetDropdown(items, [], counts, 'keyword-checkbox', 'ALP', 'keyword-dropdown');
+    expect(html).toContain('Alpha');
+    expect(html).not.toContain('Beta');
+    const lowercaseHtml = renderFacetDropdown(items, [], counts, 'keyword-checkbox', 'alp', 'keyword-dropdown');
+    expect(lowercaseHtml).toContain('Alpha');
   });
 });
 
