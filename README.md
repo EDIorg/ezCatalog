@@ -87,6 +87,14 @@ npm test
 
 ```
 
+To run tests with real PASTA API requests:
+
+```
+
+RUN_REAL_REQUESTS=true npm test
+
+```
+
 Test files should be named with `.test.js` and placed alongside the code they test (e.g., `public/sample.test.js`).
 
 For more information, see the [Jest documentation](https://jestjs.io/docs/getting-started).
