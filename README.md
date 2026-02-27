@@ -40,6 +40,19 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
 
 ```
 
+### build_catalog workflow details
+
+#### What the build does
+Runs `main.py` to update `public/pasta.js` and this README based on your `PASTA_CONFIG` settings, then commits those changes to your branch.
+
+#### Expected outputs
+- A new commit on your custom branch that updates `public/pasta.js` and `README.md`.
+- The GitHub Pages site refreshes to reflect the updated catalog once the workflow completes.
+
+#### How to validate
+- Confirm the **Build catalog** workflow run completed successfully in GitHub Actions.
+- Open the live catalog page and verify the data and facets match your configuration.
+
 ### Keeping Your Catalog Updated
 
 To pull in the latest features or fixes from the main ezCatalog repository:
