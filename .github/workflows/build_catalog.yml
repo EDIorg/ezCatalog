@@ -2,6 +2,9 @@
 
 name: Build catalog
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
 
