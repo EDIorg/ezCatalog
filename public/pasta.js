@@ -36,6 +36,7 @@ if (typeof require !== 'undefined') {
 
 const PASTA_CONFIG = {
    // User configurable options --------------------------------------------------------------------------------
+   "apiKey": "", // EDI API Access Key for authenticated requests to pasta.lternet.edu
    "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "brandingText": "Seattle Public Utilities Data Catalog",
    "logoAltText": "The City of Seattle Logo. The logo is a stylized, circular emblem featuring the profile of Chief Seattle (Si'ahl), the Duwamish and Suquamish leader for whom the city is named.", //
@@ -77,6 +78,10 @@ const PASTA_CONFIG = {
    // ----------------------------------------------------------------------------------------------------------------
 };
 
+if (typeof module !== 'undefined' && module.exports) {
+  global.PASTA_CONFIG = PASTA_CONFIG;
+}
+
 const PASTA_STATE = {
    relatedStories: [],
    geojson: null
@@ -111,7 +116,7 @@ function titleHtml(title) {
 }
 function imgHtml(pkgid) {
    if (!PASTA_CONFIG.showThumbnails) return "";
-   const imgSrc = window.getThumbnailUrl ? window.getThumbnailUrl(pkgid) : '';
+   const imgSrc = window.getThumbnailUrl ? window.getThumbnailUrl(pkgid, PASTA_CONFIG.apiKey) : '';
    const safeImgSrc = escapeHtml(imgSrc);
    const encodedImgSrc = encodeURIComponent(imgSrc || '');
    // Add click handler to enlarge image
@@ -928,7 +933,8 @@ function initDropdown(toggleId, dropdownId, arrowId) {
 async function fetchPackageIds() {
   const scope = PASTA_CONFIG.scope || 'edi';
   const filter = PASTA_CONFIG.filter || '';
-  return await fetchDataPackageIdentifiers(scope, filter);
+  const apiKey = PASTA_CONFIG.apiKey || '';
+  return await fetchDataPackageIdentifiers(scope, filter, apiKey);
 }
 
 async function buildAndPostRidarePayload(pids) {

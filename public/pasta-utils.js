@@ -1,6 +1,10 @@
 const PASTA_SERVER = "https://pasta.lternet.edu/package/search/eml?";
-async function fetchDataPackageIdentifiers(scope, filter = `&fq=scope:${scope}`) {
-    const url = `${PASTA_SERVER}fl=packageid&defType=edismax${filter}&q=*&rows=1000`;
+async function fetchDataPackageIdentifiers(scope, filter = `&fq=scope:${scope}`, apiKey) {
+    let url = `${PASTA_SERVER}fl=packageid&defType=edismax${filter}&q=*&rows=1000`;
+    const key = apiKey || (typeof PASTA_CONFIG !== 'undefined' && PASTA_CONFIG.apiKey);
+    if (key) {
+        url += `&key=${encodeURIComponent(key)}`;
+    }
     const response = await fetch(url);
     if (!response.ok) {
         throw new Error(`Failed to fetch data packages: ${response.status}`);
@@ -209,12 +213,17 @@ function reformatXMLDocument(xmlDoc) {
  * @param {string} packageId - The full packageId string (e.g., 'edi.123.4')
  * @returns {string} The thumbnail URL
  */
-function getThumbnailUrl(packageId) {
+function getThumbnailUrl(packageId, apiKey) {
     if (!packageId) return '';
     const parts = packageId.split('.');
     if (parts.length !== 3) return '';
     const [scope, identifier, revision] = parts;
-    return `https://pasta.lternet.edu/package/thumbnail/eml/${scope}/${identifier}/${revision}`;
+    let url = `https://pasta.lternet.edu/package/thumbnail/eml/${scope}/${identifier}/${revision}`;
+    const key = apiKey || (typeof PASTA_CONFIG !== 'undefined' && PASTA_CONFIG.apiKey);
+    if (key) {
+        url += `?key=${encodeURIComponent(key)}`;
+    }
+    return url;
 }
 
 // Attach functions for browser or Node.js

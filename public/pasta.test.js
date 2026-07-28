@@ -51,6 +51,21 @@ describe('fetchDataPackageIdentifiers', () => {
     await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow('Malformed XML response');
     expect(global.fetch).toHaveBeenCalled();
   });
+
+  it('should include the apiKey parameter if PASTA_CONFIG.apiKey is set', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: async () => `<?xml version="1.0"?><resultset><packageid>cos-spu.10.1</packageid></resultset>`
+    });
+    const originalApiKey = PASTA_CONFIG.apiKey;
+    PASTA_CONFIG.apiKey = 'test-key-pasta-js';
+    try {
+      await fetchDataPackageIdentifiers('cos-spu');
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('&key=test-key-pasta-js'));
+    } finally {
+      PASTA_CONFIG.apiKey = originalApiKey;
+    }
+  });
 });
 
 describe('UI/Event Logic', () => {

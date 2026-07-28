@@ -1,4 +1,4 @@
-const { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint} = require('./pasta-utils');
+const { fetchDataPackageIdentifiers, buildRidarePayload, postToRidareEndpoint, getThumbnailUrl } = require('./pasta-utils');
 
 const runRealRequests = process.env.RUN_REAL_REQUESTS === 'true';
 
@@ -33,6 +33,20 @@ describe('fetchDataPackageIdentifiers', () => {
     it('throws error on fetch failure', async () => {
         mockFetchResponse('', false, 500);
         await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow('Failed to fetch data packages: 500');
+    });
+    it('appends apiKey parameter if passed as argument', async () => {
+        const xmlResponse = `<?xml version="1.0"?><resultset></resultset>`;
+        mockFetchResponse(xmlResponse);
+        await fetchDataPackageIdentifiers('cos-spu', '&fq=scope:cos-spu', 'test-key-123');
+        expect(fetch).toHaveBeenCalledWith(expect.stringContaining('&key=test-key-123'));
+    });
+    it('appends apiKey parameter from global PASTA_CONFIG if defined', async () => {
+        const xmlResponse = `<?xml version="1.0"?><resultset></resultset>`;
+        mockFetchResponse(xmlResponse);
+        global.PASTA_CONFIG = { apiKey: 'global-test-key' };
+        await fetchDataPackageIdentifiers('cos-spu');
+        expect(fetch).toHaveBeenCalledWith(expect.stringContaining('&key=global-test-key'));
+        delete global.PASTA_CONFIG;
     });
 });
 
@@ -146,5 +160,26 @@ describe('Integration: fetchDataPackageIdentifiers + buildRidarePayload + postTo
         const result = await postToRidareEndpoint(payload, 'https://ridare.edirepository.org/multi');
         expect(result).toBe(postXmlResponse);
         expect(fetch).toHaveBeenCalledTimes(2);
+    });
+});
+
+describe('getThumbnailUrl', () => {
+    it('returns empty string for invalid packageId', () => {
+        expect(getThumbnailUrl('')).toBe('');
+        expect(getThumbnailUrl('invalid-pid')).toBe('');
+    });
+    it('returns standard URL when no apiKey is present', () => {
+        const url = getThumbnailUrl('edi.123.4');
+        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4');
+    });
+    it('appends apiKey when passed as parameter', () => {
+        const url = getThumbnailUrl('edi.123.4', 'my-secret-key');
+        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4?key=my-secret-key');
+    });
+    it('appends apiKey from global PASTA_CONFIG when present', () => {
+        global.PASTA_CONFIG = { apiKey: 'another-secret-key' };
+        const url = getThumbnailUrl('edi.123.4');
+        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4?key=another-secret-key');
+        delete global.PASTA_CONFIG;
     });
 });
