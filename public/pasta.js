@@ -123,9 +123,9 @@ function imgHtml(pkgid) {
    return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${safeImgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');" onclick="enlargeThumbnail(decodeURIComponent('${encodedImgSrc}'))"></div>`;
 }
 function exploreLink(link, title) {
-   const safeLink = escapeHtml(link);
+   const b64Link = typeof btoa !== 'undefined' ? btoa(link) : Buffer.from(link).toString('base64');
    const safeTitle = escapeHtml(title);
-   return `<a class='explore-link' href='${safeLink}' target='_blank' rel='noopener noreferrer' aria-label='Explore data package: ${safeTitle} in the Environmental Data Initiative repository'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+   return `<a class='explore-link' role='button' tabindex='0' onclick="window.open(atob('${b64Link}'), '_blank', 'noopener,noreferrer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.open(atob('${b64Link}'), '_blank', 'noopener,noreferrer')}" aria-label="Explore data package: ${safeTitle} in the Environmental Data Initiative repository" style="cursor: pointer;">Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 function relatedStoriesLink(pkgid, title) {
    if (!PASTA_CONFIG.showUserStoriesLink) return "";
@@ -1080,6 +1080,7 @@ if (typeof module !== 'undefined' && module.exports) {
         buildHtml,
         renderFacetDropdown,
         handleSuccess,
+        exploreLink,
         pastaState: PASTA_STATE
     };
 }
