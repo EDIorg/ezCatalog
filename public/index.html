@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PASTA Search - Verification</title>
+  
+  <!-- Cloudflare Turnstile API -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #ffffff;
+      padding: 2.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .banner-logo {
+      max-width: 150px;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+    .status-msg {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #0066cc;
+      min-height: 1.2em;
+    }
+    .error-msg {
+      color: #d93025;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <img src="images/logo.png" alt="PASTA Logo" class="banner-logo" onerror="this.style.display='none'">
+    <h1>PASTA Data Search</h1>
+    <p>Please complete the quick security check to access the search catalog.</p>
+
+    <!-- Turnstile Widget Container -->
+    <!-- Replace data-sitekey with your real Turnstile Sitekey in production -->
+    <div 
+      class="cf-turnstile" 
+      data-sitekey="0x4AAAAAAEMVtUZ8tsBR_0VK"
+      data-callback="onTurnstileSuccess"
+      data-expired-callback="onTurnstileExpired"
+      data-theme="light">
+    </div>
+
+    <div id="statusMessage" class="status-msg"></div>
+  </div>
+
+  <script>
+    async function onTurnstileSuccess(token) {
+      const statusDiv = document.getElementById("statusMessage");
+      statusDiv.className = "status-msg";
+      statusDiv.innerText = "Verifying session...";
+
+      try {
+        const response = await fetch("https://pasta-d.lternet.edu/turnstile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Turnstile-Token": token
+          },
+          // CRITICAL: Tells the browser to accept and store the 'edi-token' cookie set by FastAPI
+          credentials: "include",
+          referrerPolicy: "no-referrer-when-downgrade",
+          body: JSON.stringify({})
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.detail || `Verification failed (${response.status})`);
+        }
+
+        statusDiv.innerText = "Verification successful! Redirecting...";
+
+	setTimeout(() => {
+          window.location.href = "demo.html";
+        }, 300);
+
+        // Redirect to demo.html upon successful verification
+        window.location.href = "demo.html";
+        
+      } catch (error) {
+        console.error("Authentication Error:", error);
+        statusDiv.className = "status-msg error-msg";
+        statusDiv.innerText = error.message || "Security check failed. Please try again.";
+        
+        // Reset the Turnstile widget so the user can retry
+        if (window.turnstile) {
+          turnstile.reset();
+        }
+      }
+    }
+
+    function onTurnstileExpired() {
+      const statusDiv = document.getElementById("statusMessage");
+      statusDiv.className = "status-msg error-msg";
+      statusDiv.innerText = "Verification challenge expired. Please retry.";
+      if (window.turnstile) {
+        turnstile.reset();
+      }
+    }
+  </script>
+</body>
+</html>
