@@ -61,7 +61,10 @@ describe('fetchDataPackageIdentifiers', () => {
     PASTA_CONFIG.apiKey = 'test-key-pasta-js';
     try {
       await fetchDataPackageIdentifiers('cos-spu');
-      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('&key=test-key-pasta-js'));
+      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('&key=test-key-pasta-js'), {
+        method: "GET",
+        credentials: "include"
+      });
     } finally {
       PASTA_CONFIG.apiKey = originalApiKey;
     }
