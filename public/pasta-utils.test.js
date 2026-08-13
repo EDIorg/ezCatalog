@@ -176,16 +176,16 @@ describe('getThumbnailUrl', () => {
     });
     it('returns standard URL when no apiKey is present', () => {
         const url = getThumbnailUrl('edi.123.4');
-        expect(url).toBe('https://pasta-d.lternet.edu/package/thumbnail/eml/edi/123/4');
+        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4');
     });
     it('appends apiKey when passed as parameter', () => {
         const url = getThumbnailUrl('edi.123.4', 'my-secret-key');
-        expect(url).toBe('https://pasta-d.lternet.edu/package/thumbnail/eml/edi/123/4?key=my-secret-key');
+        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4?key=my-secret-key');
     });
     it('appends apiKey from global PASTA_CONFIG when present', () => {
         global.PASTA_CONFIG = { apiKey: 'another-secret-key' };
         const url = getThumbnailUrl('edi.123.4');
-        expect(url).toBe('https://pasta-d.lternet.edu/package/thumbnail/eml/edi/123/4?key=another-secret-key');
+        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4?key=another-secret-key');
         delete global.PASTA_CONFIG;
     });
 });
