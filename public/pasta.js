@@ -36,7 +36,6 @@ if (typeof require !== 'undefined') {
 
 const PASTA_CONFIG = {
    // User configurable options --------------------------------------------------------------------------------
-   "apiKey": "", // EDI API Access Key for authenticated requests to pasta.lternet.edu
    "filter": '&fq=scope:cos-spu', // Filter results on a unique keyword of a research group
    "brandingText": "Seattle Public Utilities Data Catalog",
    "logoAltText": "The City of Seattle Logo. The logo is a stylized, circular emblem featuring the profile of Chief Seattle (Si'ahl), the Duwamish and Suquamish leader for whom the city is named.", //
@@ -78,9 +77,7 @@ const PASTA_CONFIG = {
    // ----------------------------------------------------------------------------------------------------------------
 };
 
-if (typeof module !== 'undefined' && module.exports) {
-  global.PASTA_CONFIG = PASTA_CONFIG;
-}
+
 
 const PASTA_STATE = {
    relatedStories: [],
@@ -116,16 +113,16 @@ function titleHtml(title) {
 }
 function imgHtml(pkgid) {
    if (!PASTA_CONFIG.showThumbnails) return "";
-   const imgSrc = window.getThumbnailUrl ? window.getThumbnailUrl(pkgid, PASTA_CONFIG.apiKey) : '';
+   const imgSrc = window.getThumbnailUrl ? window.getThumbnailUrl(pkgid) : '';
    const safeImgSrc = escapeHtml(imgSrc);
    const encodedImgSrc = encodeURIComponent(imgSrc || '');
    // Add click handler to enlarge image
    return `<div class='dataset-thumb-container'><img class='dataset-thumb' src='${safeImgSrc}' alt='' onerror="this.style.display='none';this.parentNode.classList.add('no-image');" onclick="enlargeThumbnail(decodeURIComponent('${encodedImgSrc}'))"></div>`;
 }
 function exploreLink(link, title) {
-   const b64Link = typeof btoa !== 'undefined' ? btoa(link) : Buffer.from(link).toString('base64');
+   const safeLink = escapeHtml(link);
    const safeTitle = escapeHtml(title);
-   return `<a class='explore-link' role='button' tabindex='0' onclick="window.open(atob('${b64Link}'), '_blank', 'noopener,noreferrer')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.open(atob('${b64Link}'), '_blank', 'noopener,noreferrer')}" aria-label="Explore data package: ${safeTitle} in the Environmental Data Initiative repository" style="cursor: pointer;">Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
+   return `<a class='explore-link' href='${safeLink}' target='_blank' rel='noopener noreferrer' aria-label='Explore data package: ${safeTitle} in the Environmental Data Initiative repository'>Explore Data <i class='fas fa-external-link-alt' style='margin-left:6px;font-size:0.98em;vertical-align:middle;'></i></a>`;
 }
 function relatedStoriesLink(pkgid, title) {
    if (!PASTA_CONFIG.showUserStoriesLink) return "";
@@ -933,8 +930,7 @@ function initDropdown(toggleId, dropdownId, arrowId) {
 async function fetchPackageIds() {
   const scope = PASTA_CONFIG.scope || 'edi';
   const filter = PASTA_CONFIG.filter || '';
-  const apiKey = PASTA_CONFIG.apiKey || '';
-  return await fetchDataPackageIdentifiers(scope, filter, apiKey);
+  return await fetchDataPackageIdentifiers(scope, filter);
 }
 
 async function buildAndPostRidarePayload(pids) {
@@ -1080,7 +1076,6 @@ if (typeof module !== 'undefined' && module.exports) {
         buildHtml,
         renderFacetDropdown,
         handleSuccess,
-        exploreLink,
         pastaState: PASTA_STATE
     };
 }

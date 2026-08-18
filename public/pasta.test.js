@@ -13,7 +13,7 @@ jest.mock('./geojson-to-xml', () => ({
 
 jest.mock('./eml-xml-to-geojson', () => jest.fn());
 
-const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents, buildHtml, renderFacetDropdown, handleSuccess, pastaState, exploreLink } = require('./pasta');
+const { fetchDataPackageIdentifiers, setBrandingText, bindFilterEvents, buildHtml, renderFacetDropdown, handleSuccess, pastaState } = require('./pasta');
 
 describe('fetchDataPackageIdentifiers', () => {
   it('should fetch identifiers for a valid scope', async () => {
@@ -50,24 +50,6 @@ describe('fetchDataPackageIdentifiers', () => {
     });
     await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow('Malformed XML response');
     expect(global.fetch).toHaveBeenCalled();
-  });
-
-  it('should include the apiKey parameter if PASTA_CONFIG.apiKey is set', async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: true,
-      text: async () => `<?xml version="1.0"?><resultset><packageid>cos-spu.10.1</packageid></resultset>`
-    });
-    const originalApiKey = PASTA_CONFIG.apiKey;
-    PASTA_CONFIG.apiKey = 'test-key-pasta-js';
-    try {
-      await fetchDataPackageIdentifiers('cos-spu');
-      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('&key=test-key-pasta-js'), {
-        method: "GET",
-        credentials: "include"
-      });
-    } finally {
-      PASTA_CONFIG.apiKey = originalApiKey;
-    }
   });
 });
 
@@ -380,36 +362,5 @@ describe('Catalog initialization', () => {
     await Promise.resolve();
     const relatedFetches = global.fetch.mock.calls.filter(([url]) => url === 'related_content.csv');
     expect(relatedFetches).toHaveLength(1);
-  });
-});
-
-describe('exploreLink obfuscation', () => {
-  it('should not contain the raw/direct URL', () => {
-    const rawUrl = 'https://pasta.lternet.edu/package/eml/scope/123/1';
-    const html = exploreLink(rawUrl, 'Dataset Title');
-    expect(html).not.toContain(rawUrl);
-    expect(html).not.toContain('href="https://pasta.lternet.edu');
-  });
-
-  it('should contain the Base64 encoded URL', () => {
-    const rawUrl = 'https://pasta.lternet.edu/package/eml/scope/123/1';
-    const b64Url = Buffer.from(rawUrl).toString('base64');
-    const html = exploreLink(rawUrl, 'Dataset Title');
-    expect(html).toContain(b64Url);
-  });
-
-  it('should use an onclick action with window.open and atob', () => {
-    const rawUrl = 'https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1.1';
-    const html = exploreLink(rawUrl, 'Dataset Title');
-    expect(html).toContain('onclick="window.open(atob(');
-    expect(html).toContain("role='button'");
-    expect(html).toContain("tabindex='0'");
-    expect(html).toContain('style="cursor: pointer;"');
-  });
-
-  it('should include keydown handler for keyboard accessibility', () => {
-    const rawUrl = 'https://portal.edirepository.org/nis/mapbrowse?packageid=edi.1.1';
-    const html = exploreLink(rawUrl, 'Dataset Title');
-    expect(html).toContain('onkeydown="if(event.key===\'Enter\'||event.key===\' \')');
   });
 });

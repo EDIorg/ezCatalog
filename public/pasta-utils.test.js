@@ -34,26 +34,6 @@ describe('fetchDataPackageIdentifiers', () => {
         mockFetchResponse('', false, 500);
         await expect(fetchDataPackageIdentifiers('cos-spu')).rejects.toThrow('Failed to fetch data packages: 500');
     });
-    it('appends apiKey parameter if passed as argument', async () => {
-        const xmlResponse = `<?xml version="1.0"?><resultset></resultset>`;
-        mockFetchResponse(xmlResponse);
-        await fetchDataPackageIdentifiers('cos-spu', '&fq=scope:cos-spu', 'test-key-123');
-        expect(fetch).toHaveBeenCalledWith(expect.stringContaining('&key=test-key-123'), {
-            method: "GET",
-            credentials: "include"
-        });
-    });
-    it('appends apiKey parameter from global PASTA_CONFIG if defined', async () => {
-        const xmlResponse = `<?xml version="1.0"?><resultset></resultset>`;
-        mockFetchResponse(xmlResponse);
-        global.PASTA_CONFIG = { apiKey: 'global-test-key' };
-        await fetchDataPackageIdentifiers('cos-spu');
-        expect(fetch).toHaveBeenCalledWith(expect.stringContaining('&key=global-test-key'), {
-            method: "GET",
-            credentials: "include"
-        });
-        delete global.PASTA_CONFIG;
-    });
 });
 
 const describeRealRequests = runRealRequests ? describe : describe.skip;
@@ -174,18 +154,8 @@ describe('getThumbnailUrl', () => {
         expect(getThumbnailUrl('')).toBe('');
         expect(getThumbnailUrl('invalid-pid')).toBe('');
     });
-    it('returns standard URL when no apiKey is present', () => {
+    it('returns standard URL for valid packageId', () => {
         const url = getThumbnailUrl('edi.123.4');
         expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4');
-    });
-    it('appends apiKey when passed as parameter', () => {
-        const url = getThumbnailUrl('edi.123.4', 'my-secret-key');
-        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4?key=my-secret-key');
-    });
-    it('appends apiKey from global PASTA_CONFIG when present', () => {
-        global.PASTA_CONFIG = { apiKey: 'another-secret-key' };
-        const url = getThumbnailUrl('edi.123.4');
-        expect(url).toBe('https://pasta.lternet.edu/package/thumbnail/eml/edi/123/4?key=another-secret-key');
-        delete global.PASTA_CONFIG;
     });
 });
