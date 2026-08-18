@@ -20,8 +20,8 @@ def configure_catalog():
         txt = f.read()
         [owner, repository] = os.getenv('GITHUB_REPOSITORY').split('/')
         # Replace the old demo page with the new one
-        new_demo_page = f"https://{owner}.github.io/{repository}/public/demo.html"
-        txt = re.sub(re.escape("https://EDIorg.github.io/ezCatalog/public/demo.html"), new_demo_page, txt)
+        new_demo_page = f"https://{owner}.github.io/{repository}/public/index.html"
+        txt = re.sub(re.escape("https://EDIorg.github.io/ezCatalog/public/index.html"), new_demo_page, txt)
         # Replace the old build_catalog.yml URL with the new one
         new_url = f"https://github.com/{owner}/{repository}/blob/master/.github/workflows/build_catalog.yml"
         txt = re.sub(re.escape("https://github.com/EDIorg/ezCatalog/blob/master/.github/workflows/build_catalog.yml"), new_url, txt)
