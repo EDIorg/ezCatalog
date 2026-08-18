@@ -30,18 +30,13 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
    };
    ```
 
-6. **Configure your EDI API Access Key (Mandatory starting Thursday, July 30, 2026)**:
-   All unauthenticated REST API requests to `pasta.lternet.edu` will fail after this date. To ensure your catalog searches and images continue loading properly:
-   - **Obtain an API Key**: Learn about and obtain an API Access Key by following the instructions at [Working with API Access Keys](https://edirepository.org/resources/iam#working-with-api-access-keys).
-   - **Set the Key**: Open `/public/pasta.js` and edit the `"apiKey"` property inside the `PASTA_CONFIG` object with your key:
-
-     ```javascript
-     const PASTA_CONFIG = {
-        "apiKey": "YOUR_EDI_API_ACCESS_KEY", // Replace with your actual EDI API Access Key
-        "filter": '&fq=scope:cos-spu',
-        ...
-     };
-     ```
+6. **Configure Authentication with the EDI Repository Gatekeeper**:
+   All unauthenticated REST API requests to `pasta.lternet.edu` require authentication. ezCatalog uses Cloudflare Turnstile and the EDI Repository Gatekeeper to protect your API access key from being publicly exposed in client-side code.
+   - **Obtain an API Access Key**: Log into your account (or create a free account) at [EDI Sign In](https://auth.edirepository.org/auth/ui/signin), then navigate to the [Access Keys](https://auth.edirepository.org/auth/ui/key) page to create an API access key.
+   - **Register Your Key and Catalog URL**: Email [support@edirepository.org](mailto:support@edirepository.org) with:
+     1. Your EDI API Access Key
+     2. The URL where your catalog is located (e.g., `https://<your-username>.github.io/<your-repo>/public/index.html` or the website URL where the catalog is embedded).
+   - **How it works**: EDI adds your key and catalog URL to the database. Once a user completes the Turnstile security check on `index.html`, the EDI Repository Gatekeeper automatically appends the corresponding key to requests made from your catalog.
 
 7. Review the additional configuration options in the `PASTA_CONFIG` block near the top of `/public/pasta.js` (for example `showBanner`, `hideMapView`, `facetVisibility`, `showAbstracts`, and `abstractLimit`).
 8. Use GitHub **Actions** to build your catalog with the [build_catalog](https://github.com/EDIorg/ezCatalog/blob/master/.github/workflows/build_catalog.yml) workflow. Go to **Actions** and under **Workflows** select **Build catalog**, select the branch to run it on (this should be your custom branch), then **Run workflow**. Wait for the workflow to complete, then click the **Live demo** page to see your catalog (it may take a few minutes to update). Subsequent pushes to your fork will automatically rerun the `build_catalog` workflow.  
@@ -49,7 +44,7 @@ Researchers and organizations publishing data in the [EDI Repository](https://po
 
 ```
 
-<iframe loading="lazy" src="https://EDIorg.github.io/ezCatalog/public/demo.html" scrolling="no" allow="fullscreen" width="100%" height="2700px"></iframe>
+<iframe loading="lazy" src="https://EDIorg.github.io/ezCatalog/public/index.html" scrolling="no" allow="fullscreen" width="100%" height="2700px"></iframe>
 
 ```
 
